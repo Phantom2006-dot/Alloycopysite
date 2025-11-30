@@ -11,12 +11,12 @@ const filmsList = [
 ]
 
 const filmNews = [
-  { id: 1, source: "Deadline", date: "May 2, 2025", title: "Luke Wilson & Heather Graham To Star In Rom-Com 'Getting Rid Of Matthew' From 'Purple Hearts' & 'Gossip Girl' Outfit Bauhaus; Architect Launching For Cannes" },
+  { id: 1, source: "Deadline", date: "May 2, 2025", title: "Luke Wilson & Heather Graham To Star In Rom-Com 'Getting Rid Of Matthew' From 'Purple Hearts' & 'Gossip Girl' Outfit BAUHAUS; Architect Launching For Cannes" },
   { id: 2, source: "Deadline", date: "February 5, 2025", title: "Rupert Holmes' 'Escape (The Pina Colada Song)' Getting Rom-Com Feature Treatment" },
-  { id: 3, source: "Deadline", date: "December 17, 2024", title: "Tatmania's John Hoberg & Kat Likkel Tapped To Script 'Christmas Forever: Part Animated Feature From Bauhaus Production" },
-  { id: 4, source: "Deadline", date: "October 15, 2024", title: "'Pride' Movie, Modern Take On Jane Austen, In Works At Netflix From Higher Ground & Bauhaus" },
-  { id: 5, source: "Deadline", date: "March 28, 2024", title: "Bauhaus Production Moves Into Animation With Feature Film 'Christmas Forever: Escape to the North Pole'" },
-  { id: 6, source: "Deadline", date: "November 19, 2024", title: "Bestselling Rom-Com 'In A Holidaze' For Netflix & Bauhaus Production" },
+  { id: 3, source: "Deadline", date: "December 17, 2024", title: "Tatmania's John Hoberg & Kat Likkel Tapped To Script 'Christmas Forever: Part Animated Feature From BAUHAUS" },
+  { id: 4, source: "Deadline", date: "October 15, 2024", title: "'Pride' Movie, Modern Take On Jane Austen, In Works At Netflix From Higher Ground & BAUHAUS" },
+  { id: 5, source: "Deadline", date: "March 28, 2024", title: "BAUHAUS Moves Into Animation With Feature Film 'Christmas Forever: Escape to the North Pole'" },
+  { id: 6, source: "Deadline", date: "November 19, 2024", title: "Bestselling Rom-Com 'In A Holidaze' For Netflix & BAUHAUS" },
 ]
 
 export default function Films() {
@@ -24,7 +24,7 @@ export default function Films() {
   const [isAnimating, setIsAnimating] = useState(false)
 
   useEffect(() => {
-    document.title = 'Film | BAUHAUS Production'
+    document.title = 'Film | BAUHAUS'
   }, [])
 
   const goToNext = useCallback(() => {
@@ -132,7 +132,7 @@ export default function Films() {
       </section>
 
       <section className="py-16">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-xl font-serif text-white text-center mb-12">
             Recent News
           </h2>

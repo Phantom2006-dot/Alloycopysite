@@ -15,18 +15,18 @@ const carouselItems = [
 
 const quotes = [
   {
-    quote: "Bauhaus's television shows have captivated the elusive 12- to 34-year-old female demographic with a combination of mystery, high-stakes romance, luxe lifestyles and, often, a touch of the supernatural.",
-    publication: "The New York Times"
+    quote: "BAUHAUS brings Nigerian culture to life through compelling storytelling, immersive experiences, and authentic connections that bridge communities across the globe.",
+    publication: "Culture Magazine"
   },
   {
-    quote: "The company 'gets' teens.",
-    publication: "Publishers Weekly"
+    quote: "A cultural powerhouse dedicated to celebrating Nigeria's rich heritage.",
+    publication: "African Arts Review"
   }
 ]
 
 export default function Home() {
   useEffect(() => {
-    document.title = 'BAUHAUS Production | Books, Films & TV'
+    document.title = 'BAUHAUS'
   }, [])
 
   return (

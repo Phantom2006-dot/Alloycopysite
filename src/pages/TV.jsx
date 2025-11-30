@@ -16,7 +16,7 @@ const tvNews = [
   { id: 3, source: "Vulture", date: "April 25, 2025", title: "'You' Series-Finale Recap: The Once and Future Lonely Boy" },
   { id: 4, source: "The Hollywood Reporter", date: "March 10, 2025", title: "'You' Season 5 Official Trailer Sees Penn Badgley Risking It All in the Killer Finale" },
   { id: 5, source: "Deadline", date: "January 30, 2025", title: "'You' Season 5 Teaser: Joe Is Trapped in A Cage in Final Season — Watch" },
-  { id: 6, source: "Deadline", date: "March 6, 2024", title: "'The Davenports' Based on YA Novel in Works for Television at Amazon Video From Bauhaus Production" },
+  { id: 6, source: "Deadline", date: "March 6, 2024", title: "'The Davenports' Based on YA Novel in Works for Television at Amazon Video From BAUHAUS" },
 ]
 
 export default function TV() {
@@ -24,7 +24,7 @@ export default function TV() {
   const [isAnimating, setIsAnimating] = useState(false)
 
   useEffect(() => {
-    document.title = 'Television Series | BAUHAUS Production'
+    document.title = 'Television Series | BAUHAUS'
   }, [])
 
   const goToNext = useCallback(() => {
@@ -132,7 +132,7 @@ export default function TV() {
       </section>
 
       <section className="py-16">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-xl font-serif text-white text-center mb-12">
             Recent News
           </h2>

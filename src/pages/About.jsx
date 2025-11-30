@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 
 export default function About() {
   useEffect(() => {
-    document.title = 'About Us | BAUHAUS Production'
+    document.title = 'About Us | BAUHAUS'
   }, [])
 
   return (
@@ -14,7 +14,7 @@ export default function About() {
           </h1>
           
           <p className="text-xl md:text-2xl lg:text-3xl text-gray-200 font-serif italic leading-relaxed text-center mb-12">
-            Bauhaus Production, a Warner Bros. Discovery Company, develops and produces the best commercial books, television, and films that speak to the journey of self-discovery and coming of age at any age.
+            BAUHAUS is a Nigerian cultural company dedicated to celebrating and sharing the richness of Nigerian heritage through books, films, documentaries, publishing, and tourism.
           </p>
           
           <div className="flex justify-center mb-16">
@@ -25,12 +25,32 @@ export default function About() {
             What We Do
           </h2>
           
-          <div className="text-gray-300 text-sm leading-relaxed space-y-6 max-w-3xl mx-auto">
+          <div className="text-gray-300 text-sm leading-relaxed space-y-6 max-w-3xl mx-auto text-center">
             <p>
-              Bauhaus Production, a Warner Bros. Discovery Company, is a creative think tank and full-service editorial partner that develops and produces original books, television series, and feature films. The company generates unique commercial entertainment franchises and collaborates with authors, leading publishers, streaming platforms, television networks, and movie studios to deliver its properties to the world.
+              BAUHAUS operates across multiple verticals to bring Nigerian culture to the world. We develop and produce original books, television series, documentaries, and feature films that showcase the depth and diversity of Nigerian storytelling.
             </p>
             <p>
-              More than eighty of Bauhaus Production's books have reached the <em className="font-serif">New York Times</em> Best Sellers list, including most recently <em className="font-serif">Everything We Never Said</em> by Sloan Harlow, <em className="font-serif">Liar's Beach</em> by Katie Cotugno, <em className="font-serif">The Davenports</em> by Krystal Marquis, the American Royals series by Katharine McGee, <em className="font-serif">You</em> by Caroline Kepnes, <em className="font-serif">The Wife Upstairs</em> by Rachel Hawkins, <em className="font-serif">Tokyo Ever After</em> and <em className="font-serif">Tokyo Dreaming</em> by Emiko Jean, and <em className="font-serif">Everything, Everything</em>, <em className="font-serif">The Sun is also a Star</em>, and <em className="font-serif">Instructions for Dancing</em> by Nicola Yoon. Bestselling franchises The Sisterhood of the Traveling Pants, Gossip Girl, The Vampire Diaries, and Pretty Little Liars have sold tens of millions of copies worldwide.
+              Our publishing division works with emerging and established Nigerian authors to bring their stories to global audiences. We provide editorial expertise, production support, and distribution partnerships to ensure every story reaches its full potential.
+            </p>
+            <p>
+              Through our tourism division, we create immersive travel experiences that take visitors to the heart of Nigerian culture. From the vibrant streets of Lagos to the historical sites of Ile-Ife, we curate journeys that educate, inspire, and connect travelers with authentic Nigerian experiences.
+            </p>
+          </div>
+          
+          <div className="flex justify-center my-16">
+            <div className="w-32 h-0.5 bg-white"></div>
+          </div>
+          
+          <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-white text-center mb-10">
+            Our Vision
+          </h2>
+          
+          <div className="text-gray-300 text-sm leading-relaxed space-y-6 max-w-3xl mx-auto text-center">
+            <p>
+              We envision a world where Nigerian stories, culture, and destinations are celebrated globally. Through our work in books, films, publishing, and tourism, we aim to be the premier gateway to Nigerian cultural experiences.
+            </p>
+            <p>
+              Our mission is to discover, develop, and deliver compelling Nigerian content that resonates with audiences worldwide while creating meaningful connections between Nigeria and the global community.
             </p>
           </div>
           
