@@ -1,0 +1,106 @@
+import { useState, useEffect, useCallback } from 'react'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
+
+export default function HeroCarousel({ items = [], autoPlay = true, interval = 5000 }) {
+  const [currentIndex, setCurrentIndex] = useState(0)
+  const [isAnimating, setIsAnimating] = useState(false)
+
+  const goToNext = useCallback(() => {
+    if (isAnimating || items.length === 0) return
+    setIsAnimating(true)
+    setCurrentIndex((prev) => (prev + 1) % items.length)
+    setTimeout(() => setIsAnimating(false), 500)
+  }, [isAnimating, items.length])
+
+  const goToPrev = useCallback(() => {
+    if (isAnimating || items.length === 0) return
+    setIsAnimating(true)
+    setCurrentIndex((prev) => (prev - 1 + items.length) % items.length)
+    setTimeout(() => setIsAnimating(false), 500)
+  }, [isAnimating, items.length])
+
+  useEffect(() => {
+    if (!autoPlay || items.length <= 1) return
+    const timer = setInterval(goToNext, interval)
+    return () => clearInterval(timer)
+  }, [autoPlay, interval, goToNext, items.length])
+
+  if (items.length === 0) return null
+
+  const getVisibleItems = () => {
+    const result = []
+    for (let i = -2; i <= 2; i++) {
+      const index = (currentIndex + i + items.length) % items.length
+      result.push({ ...items[index], offset: i })
+    }
+    return result
+  }
+
+  return (
+    <div className="relative w-full h-[70vh] overflow-hidden bg-black">
+      <div className="absolute inset-0 flex items-center justify-center">
+        {getVisibleItems().map((item, idx) => {
+          const offset = item.offset
+          const isCenter = offset === 0
+          const scale = isCenter ? 1 : 0.7
+          const opacity = isCenter ? 1 : 0.5
+          const translateX = offset * 280
+
+          return (
+            <div
+              key={`${item.id}-${idx}`}
+              className="absolute transition-all duration-500 ease-out"
+              style={{
+                transform: `translateX(${translateX}px) scale(${scale})`,
+                opacity,
+                zIndex: 10 - Math.abs(offset),
+              }}
+            >
+              <div className="w-64 h-96 bg-gray-900 rounded-lg overflow-hidden shadow-2xl">
+                <img
+                  src={item.image}
+                  alt={item.title}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            </div>
+          )
+        })}
+      </div>
+
+      <button
+        onClick={goToPrev}
+        className="absolute left-4 top-1/2 -translate-y-1/2 z-20 p-2 bg-black/50 rounded-full text-white hover:bg-black/70 transition-colors"
+        aria-label="Previous slide"
+      >
+        <ChevronLeft className="h-6 w-6" />
+      </button>
+      <button
+        onClick={goToNext}
+        className="absolute right-4 top-1/2 -translate-y-1/2 z-20 p-2 bg-black/50 rounded-full text-white hover:bg-black/70 transition-colors"
+        aria-label="Next slide"
+      >
+        <ChevronRight className="h-6 w-6" />
+      </button>
+
+      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex space-x-2">
+        {items.map((_, idx) => (
+          <button
+            key={idx}
+            onClick={() => {
+              if (!isAnimating) {
+                setIsAnimating(true)
+                setCurrentIndex(idx)
+                setTimeout(() => setIsAnimating(false), 500)
+              }
+            }}
+            className={`w-2 h-2 rounded-full transition-all duration-300 ${
+              idx === currentIndex ? 'bg-white w-6' : 'bg-gray-600 hover:bg-gray-400'
+            }`}
+            aria-label={`Go to slide ${idx + 1}`}
+          />
+        ))}
+      </div>
+    </div>
+  )
+}

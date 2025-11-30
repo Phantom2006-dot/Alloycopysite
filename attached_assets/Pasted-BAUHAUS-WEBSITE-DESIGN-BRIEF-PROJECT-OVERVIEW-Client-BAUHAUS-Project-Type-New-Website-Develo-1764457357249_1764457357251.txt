@@ -1,0 +1,305 @@
+BAUHAUS WEBSITE DESIGN BRIEF 
+PROJECT OVERVIEW 
+Client: BAUHAUS 
+Project Type: New Website Development 
+Industry: Books, Films, Publishing & Tourism 
+Target Audience: Readers, filmmakers, tourists, content creators interested in Nigerian culture 
+and destinations 
+DESIGN REFERENCE 
+Benchmark Website: alloyentertainment.com 
+Design Style Required: 
+● Clean, minimalist design 
+● Professional, corporate feel 
+● Simple, intuitive navigation 
+● Plenty of white space 
+● Mobile-responsive (essential) 
+● Fast loading times 
+WEBSITE STRUCTURE 
+Primary Navigation Menu 
+1. Home 
+2. About Us 
+3. Books 
+4. Films & Documentaries 
+5. Publishing 
+6. Tourism (Dropdown/Mega Menu) 
+7. Events 
+8. Blog 
+9. Contact Us 
+DETAILED PAGE REQUIREMENTS 
+1. HOME PAGE 
+Purpose: Landing page that introduces BAUHAUS and directs visitors to key sections 
+Required Elements: 
+● Hero section with compelling headline and tagline 
+● Brief company introduction 
+● Featured content sections (latest books, films, blog posts) 
+● Call-to-action buttons 
+● Footer with contact information and social media links 
+2. ABOUT US PAGE 
+Purpose: Tell the BAUHAUS story, mission, and vision 
+Required Content Sections: 
+● Company overview and mission statement 
+● What we do (Books, Films, Publishing, Tourism) 
+● Our vision and values 
+● Team section (if applicable) with photos and bios 
+● Company achievements/milestones 
+3. BOOKS PAGE 
+Purpose: Showcase BAUHAUS book catalog and projects 
+Required Features: 
+● Book gallery/grid layout 
+● Each book should display: 
+○ Cover image 
+○ Title and author 
+○ Brief description 
+○ Purchase/Learn More button 
+● Filter/sort options (optional but recommended) 
+● Links to purchase platforms (Amazon, bookstores, etc.) 
+4. FILMS & DOCUMENTARIES PAGE 
+Purpose: Display film and documentary projects 
+Required Features: 
+● Video showcase/portfolio layout 
+● For each project: 
+○ Poster/thumbnail image 
+○ Title and brief synopsis 
+○ Embedded video trailer (if available) 
+○ "Where to Watch" information 
+○ Release date/status 
+● Filter by type (Films/Documentaries) 
+5. PUBLISHING PAGE 
+Purpose: Information about BAHUHAS publishing services 
+Required Content: 
+● Overview of publishing services offered 
+● Submission guidelines for authors 
+● Publishing process explanation 
+● Success stories/published titles 
+● Contact information for submissions 
+● Downloadable submission forms (optional) 
+6. TOURISM SECTION 
+Purpose: Comprehensive travel guides for Nigerian destinations 
+Navigation: Dropdown/Mega Menu with sub-pages 
+Tourism Sub-Pages: 
+a) Visit Lagos 
+● Badagry attractions and history 
+● Lekki (beaches, conservation center, toll gate area) 
+● Other interesting places to visit 
+● Nightlife guide 
+● Safety concerns and tips 
+● Uber/transportation information 
+● Best times to visit 
+● Photo gallery 
+b) Visit Abuja 
+● Major attractions 
+● Things to do 
+● Best times to visit 
+● Safety and transportation 
+● Photo gallery 
+c) Visit Akwa Ibom (Uyo) 
+● Attractions and activities 
+● Cultural sites 
+● Best times to visit 
+● Transportation and safety 
+● Photo gallery 
+d) Visit Osun (Ile-Ife) 
+● Historical and cultural sites 
+● Attractions 
+● Best times to visit 
+● Transportation and safety 
+● Photo gallery 
+e) Visit Ogun (Epe) 
+● Attractions and activities 
+● Things to do 
+● Best times to visit 
+● Transportation and safety 
+● Photo gallery 
+Required Features for ALL Tourism Pages: 
+● High-quality photos/image galleries 
+● Interactive map (optional but recommended) 
+● Downloadable travel guides (PDF - optional) 
+● Practical information sections: 
+○ Best time to visit 
+○ How to get there 
+○ Safety tips 
+○ Local transportation (Uber, taxis, etc.) 
+○ Accommodation recommendations 
+○ Food and dining 
+○ Emergency contacts 
+7. EVENTS PAGE 
+Purpose: Showcase upcoming and past BAUHAUS events 
+Event Locations: 
+● Colorado, USA 
+● Northampton, UK 
+● Lagos, Nigeria 
+Required Features: 
+● Events calendar or timeline layout 
+● For each event: 
+○ Event name (e.g., "Book Launch") 
+○ Date and time 
+○ Location with address 
+○ Event description 
+○ Registration/RSVP button (if applicable) 
+○ Event photos/videos (for past events) 
+● Filter by location or date 
+● "Upcoming Events" and "Past Events" sections 
+8. BLOG PAGE 
+Purpose: News, articles, and updates from BAUHAUS 
+Required Features: 
+● Blog post listing (grid or list view) 
+● Each post preview should show: 
+○ Featured image 
+○ Title 
+○ Excerpt/summary 
+○ Date published 
+○ Author (optional) 
+○ "Read More" button 
+● Categories/tags for organization 
+● Search functionality 
+● Pagination 
+● Individual blog post pages with: 
+○ Full content 
+○ Social share buttons 
+○ Related posts section 
+○ Comment section (optional) 
+Blog Management: 
+● Easy-to-use Content Management System (CMS) 
+● Ability to add/edit/delete posts without technical knowledge 
+● Image upload capability 
+● SEO fields (meta descriptions, keywords) 
+9. CONTACT US PAGE 
+Purpose: Provide contact information and inquiry form 
+Required Elements: 
+UK Office: 
+● Address: 4 Notre Dame Mews, Northampton, NN1 2BG 
+● Phone: +44 1604 434082 
+● Email: info@bauhausproduction.com 
+Nigeria Office: 
+● Address: 41 Coker Road, Ilupeju, Lagos 
+● Phone: +234 703 889 2961 
+● Email: akinalaka@bauhaus-education.co.uk 
+Additional Elements: 
+● Embedded Google Maps for both office locations 
+● Office hours  
+● Social media links 
+TECHNICAL REQUIREMENTS 
+Must-Have Features: 
+1. Fully responsive design (mobile, tablet, desktop) 
+2. Fast loading speed (optimized images, clean code) 
+3. SEO-optimized (meta tags, alt text, proper heading structure) 
+4. Cross-browser compatibility (Chrome, Firefox, Safari, Edge) 
+5. SSL certificate (HTTPS security) 
+6. Contact form with spam protection 
+7. Blog with CMS (WordPress, or similar) 
+8. Social media integration 
+9. Newsletter signup (optional but recommended) 
+10. Analytics integration (Google Analytics) 
+Hosting & Domain: 
+● Domain registration 
+● Hosting solution with good uptime and support 
+● Email hosting for company email addresses 
+Content Mangement System (CMS): 
+● Easy-to-use backend for non-technical users 
+● Ability to update content without developer assistance 
+● Training/documentation provided 
+DESIGN SPECIFICATIONS 
+Color Scheme: 
+● To be provided on request 
+● Professional, clean palette 
+● Good contrast for readability 
+Typography: 
+● Modern, readable fonts 
+● Clear hierarchy (headings, body text, captions) 
+● Consistent font usage across site 
+Logo & Branding: 
+● Client to provide logo files  
+● Brand guidelines to be followed 
+Images & Media: 
+● Client will provide: 
+○ Book covers 
+○ Film posters/trailers 
+○ Tourism destination photos 
+○ Event photos 
+○ Team photos  
+○ Developer to optimize all images for web 
+● Stock photos may be needed for placeholder content 
+FOOTER REQUIREMENTS 
+Footer to appear on all pages with: 
+● Quick links to main pages 
+● Contact information (both offices) 
+● Social media icons/links 
+● Newsletter signup (optional) 
+● Copyright notice: © 2025 Bauhaus. All rights reserved. 
+● Privacy Policy link 
+● Terms & Conditions link 
+TIMELINE & DELIVERABLES 
+Phase 1: Planning & Design 
+● Sitemap approval 
+● Wireframes for key pages 
+● Design mockups (2 concepts) 
+● Revisions and final design approval 
+Phase 2: Development 
+● Homepage development 
+● Interior pages development 
+● Blog setup and CMS integration 
+● Mobile responsive implementation 
+Phase 3: Content & Testing 
+● Content upload and formatting 
+● Cross-browser testing 
+● Mobile device testing 
+● Speed optimization 
+● SEO implementation 
+Phase 4: Launch 
+● Final client review 
+● Training on CMS/backend 
+● Domain and hosting setup 
+● Website launch 
+● Post-launch support period 
+Estimated Timeline: Suggest your best timeline 
+BUDGET 
+Please provide quote including: 
+● Design and development 
+● CMS setup and training 
+● 3 year hosting and domain 
+● Number of revisions included 
+● Post-launch support period 
+● Ongoing maintenance options 
+CLIENT RESPONSIBILITIES 
+Client will provide: 
+● All written content for pages 
+● Images and videos 
+● Logo and branding materials (if available) 
+● Contact information and office details 
+● Book covers, film posters, event details 
+● Timely feedback on designs and development 
+● Access to hosting/domain accounts (if applicable) 
+DEVELOPER RESPONSIBILITIES 
+Developer will provide: 
+● Complete website design and development 
+● Mobile-responsive implementation 
+● CMS setup and integration 
+● SEO optimization 
+● Speed optimization 
+● Cross-browser testing 
+● Training on website management 
+● months post-launch support 
+● Documentation/user guide 
+QUESTIONS FOR DEVELOPER 
+Please include in your proposal: 
+1. Portfolio: Examples of similar websites you've built 
+2. Timeline: How long will this project take? 
+3. Cost: Itemized quote with payment schedule 
+4. Technology: What platform/CMS do you recommend? (WordPress, custom, etc.) 
+5. Hosting: What hosting solution do you recommend? 
+6. Support: What post-launch support do you offer? 
+7. Maintenance: Do you offer ongoing maintenance packages? 
+8. Revisions: How many design revisions are included? 
+9. Training: What training will you provide? 
+10. Ownership: Will we own all source files and content? 
+REFERENCE WEBSITE 
+Primary Design Reference: alloyentertainment.com 
+What we like about this site: 
+● Clean, minimalist design 
+● Simple navigation structure 
+● Professional appearance 
+● Easy to navigate 
+● Fast loading 
+● Clear content hierarchy 
+Note: We want the same clean aesthetic and structure as Alloy Entertainment, but customized 
+with our BAHUHAS branding and content. 
