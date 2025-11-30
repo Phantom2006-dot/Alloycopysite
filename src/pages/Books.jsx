@@ -5,24 +5,45 @@ import { books, categories } from '../data/books'
 export default function Books() {
   const [activeCategory, setActiveCategory] = useState('All')
   const [currentIndex, setCurrentIndex] = useState(0)
+  const [isAnimating, setIsAnimating] = useState(false)
 
   useEffect(() => {
     document.title = 'Books | BAUHAUS Production'
   }, [])
 
-  const featuredBooks = books.filter(b => b.featured).slice(0, 5)
+  const featuredBooks = books.filter(b => b.featured).slice(0, 6)
   
   const filteredBooks = books.filter(book => {
     return activeCategory === 'All' || book.category === activeCategory
   })
 
   const goToNext = useCallback(() => {
+    if (isAnimating || featuredBooks.length === 0) return
+    setIsAnimating(true)
     setCurrentIndex((prev) => (prev + 1) % featuredBooks.length)
-  }, [featuredBooks.length])
+    setTimeout(() => setIsAnimating(false), 500)
+  }, [isAnimating, featuredBooks.length])
 
   const goToPrev = useCallback(() => {
+    if (isAnimating || featuredBooks.length === 0) return
+    setIsAnimating(true)
     setCurrentIndex((prev) => (prev - 1 + featuredBooks.length) % featuredBooks.length)
-  }, [featuredBooks.length])
+    setTimeout(() => setIsAnimating(false), 500)
+  }, [isAnimating, featuredBooks.length])
+
+  useEffect(() => {
+    const timer = setInterval(goToNext, 2000)
+    return () => clearInterval(timer)
+  }, [goToNext])
+
+  const getVisibleItems = () => {
+    const result = []
+    for (let i = -2; i <= 2; i++) {
+      const index = (currentIndex + i + featuredBooks.length) % featuredBooks.length
+      result.push({ ...featuredBooks[index], offset: i })
+    }
+    return result
+  }
 
   return (
     <div className="pt-20 bg-black min-h-screen">
@@ -37,36 +58,70 @@ export default function Books() {
 
       <section className="py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="relative">
-            <div className="flex overflow-x-auto pb-4 gap-4 scrollbar-hide justify-center">
-              {featuredBooks.map((book, idx) => (
-                <div 
-                  key={book.id} 
-                  className="flex-shrink-0 w-36 md:w-44"
-                >
-                  <img 
-                    src={book.cover} 
-                    alt={book.title}
-                    className="w-full h-52 md:h-64 object-cover shadow-lg hover:scale-105 transition-transform duration-300"
-                  />
-                </div>
-              ))}
+          <div className="relative h-[50vh] overflow-hidden">
+            <div className="absolute inset-0 flex items-center justify-center">
+              {getVisibleItems().map((item, idx) => {
+                const offset = item.offset
+                const isCenter = offset === 0
+                const scale = isCenter ? 1 : 0.75
+                const opacity = isCenter ? 1 : 0.6
+                const translateX = offset * 300
+
+                return (
+                  <div
+                    key={`${item.id}-${idx}`}
+                    className="absolute transition-all duration-500 ease-out"
+                    style={{
+                      transform: `translateX(${translateX}px) scale(${scale})`,
+                      opacity,
+                      zIndex: 10 - Math.abs(offset),
+                    }}
+                  >
+                    <div className="w-56 md:w-64 h-80 md:h-96 bg-gray-900 overflow-hidden shadow-2xl">
+                      <img
+                        src={item.cover}
+                        alt={item.title}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  </div>
+                )
+              })}
             </div>
-            
+
             <button
               onClick={goToPrev}
-              className="absolute left-0 top-1/2 -translate-y-1/2 p-2 text-white/60 hover:text-white transition-colors"
-              aria-label="Previous"
+              className="absolute left-4 top-1/2 -translate-y-1/2 z-20 p-3 text-white/60 hover:text-white transition-colors"
+              aria-label="Previous slide"
             >
-              <ChevronLeft className="h-6 w-6" />
+              <ChevronLeft className="h-8 w-8" />
             </button>
             <button
               onClick={goToNext}
-              className="absolute right-0 top-1/2 -translate-y-1/2 p-2 text-white/60 hover:text-white transition-colors"
-              aria-label="Next"
+              className="absolute right-4 top-1/2 -translate-y-1/2 z-20 p-3 text-white/60 hover:text-white transition-colors"
+              aria-label="Next slide"
             >
-              <ChevronRight className="h-6 w-6" />
+              <ChevronRight className="h-8 w-8" />
             </button>
+
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex space-x-2">
+              {featuredBooks.map((_, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => {
+                    if (!isAnimating) {
+                      setIsAnimating(true)
+                      setCurrentIndex(idx)
+                      setTimeout(() => setIsAnimating(false), 500)
+                    }
+                  }}
+                  className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                    idx === currentIndex ? 'bg-white' : 'bg-gray-600 hover:bg-gray-400'
+                  }`}
+                  aria-label={`Go to slide ${idx + 1}`}
+                />
+              ))}
+            </div>
           </div>
         </div>
       </section>

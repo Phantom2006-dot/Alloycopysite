@@ -21,26 +21,38 @@ const filmNews = [
 
 export default function Films() {
   const [currentIndex, setCurrentIndex] = useState(0)
+  const [isAnimating, setIsAnimating] = useState(false)
 
   useEffect(() => {
     document.title = 'Film | BAUHAUS Production'
   }, [])
 
   const goToNext = useCallback(() => {
+    if (isAnimating || filmsList.length === 0) return
+    setIsAnimating(true)
     setCurrentIndex((prev) => (prev + 1) % filmsList.length)
-  }, [])
+    setTimeout(() => setIsAnimating(false), 500)
+  }, [isAnimating])
 
   const goToPrev = useCallback(() => {
+    if (isAnimating || filmsList.length === 0) return
+    setIsAnimating(true)
     setCurrentIndex((prev) => (prev - 1 + filmsList.length) % filmsList.length)
-  }, [])
+    setTimeout(() => setIsAnimating(false), 500)
+  }, [isAnimating])
 
-  const getVisibleFilms = () => {
-    const films = []
+  useEffect(() => {
+    const timer = setInterval(goToNext, 2000)
+    return () => clearInterval(timer)
+  }, [goToNext])
+
+  const getVisibleItems = () => {
+    const result = []
     for (let i = -2; i <= 2; i++) {
       const index = (currentIndex + i + filmsList.length) % filmsList.length
-      films.push({ ...filmsList[index], offset: i })
+      result.push({ ...filmsList[index], offset: i })
     }
-    return films
+    return result
   }
 
   return (
@@ -51,54 +63,70 @@ export default function Films() {
             Film
           </h1>
           
-          <div className="relative">
-            <div className="flex justify-center items-center gap-3 overflow-hidden py-4">
-              {getVisibleFilms().map((film) => {
-                const isCenter = film.offset === 0
+          <div className="relative h-[50vh] overflow-hidden">
+            <div className="absolute inset-0 flex items-center justify-center">
+              {getVisibleItems().map((item, idx) => {
+                const offset = item.offset
+                const isCenter = offset === 0
+                const scale = isCenter ? 1 : 0.75
+                const opacity = isCenter ? 1 : 0.6
+                const translateX = offset * 300
+
                 return (
-                  <div 
-                    key={`${film.id}-${film.offset}`} 
-                    className={`flex-shrink-0 transition-all duration-500 ${
-                      isCenter ? 'w-36 md:w-44 z-10' : 'w-28 md:w-36 opacity-60'
-                    }`}
+                  <div
+                    key={`${item.id}-${idx}`}
+                    className="absolute transition-all duration-500 ease-out"
+                    style={{
+                      transform: `translateX(${translateX}px) scale(${scale})`,
+                      opacity,
+                      zIndex: 10 - Math.abs(offset),
+                    }}
                   >
-                    <img 
-                      src={film.image} 
-                      alt={film.title}
-                      className="w-full h-44 md:h-56 object-cover"
-                    />
+                    <div className="w-56 md:w-64 h-80 md:h-96 bg-gray-900 overflow-hidden shadow-2xl">
+                      <img
+                        src={item.image}
+                        alt={item.title}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
                   </div>
                 )
               })}
             </div>
-            
-            <div className="flex justify-center gap-2 mt-4">
+
+            <button
+              onClick={goToPrev}
+              className="absolute left-4 top-1/2 -translate-y-1/2 z-20 p-3 text-white/60 hover:text-white transition-colors"
+              aria-label="Previous slide"
+            >
+              <ChevronLeft className="h-8 w-8" />
+            </button>
+            <button
+              onClick={goToNext}
+              className="absolute right-4 top-1/2 -translate-y-1/2 z-20 p-3 text-white/60 hover:text-white transition-colors"
+              aria-label="Next slide"
+            >
+              <ChevronRight className="h-8 w-8" />
+            </button>
+
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex space-x-2">
               {filmsList.map((_, idx) => (
                 <button
                   key={idx}
-                  onClick={() => setCurrentIndex(idx)}
-                  className={`w-2 h-2 rounded-full transition-colors ${
+                  onClick={() => {
+                    if (!isAnimating) {
+                      setIsAnimating(true)
+                      setCurrentIndex(idx)
+                      setTimeout(() => setIsAnimating(false), 500)
+                    }
+                  }}
+                  className={`w-2 h-2 rounded-full transition-all duration-300 ${
                     idx === currentIndex ? 'bg-white' : 'bg-gray-600 hover:bg-gray-400'
                   }`}
                   aria-label={`Go to slide ${idx + 1}`}
                 />
               ))}
             </div>
-            
-            <button
-              onClick={goToPrev}
-              className="absolute left-0 top-1/2 -translate-y-1/2 p-2 text-white/60 hover:text-white transition-colors"
-              aria-label="Previous"
-            >
-              <ChevronLeft className="h-6 w-6" />
-            </button>
-            <button
-              onClick={goToNext}
-              className="absolute right-0 top-1/2 -translate-y-1/2 p-2 text-white/60 hover:text-white transition-colors"
-              aria-label="Next"
-            >
-              <ChevronRight className="h-6 w-6" />
-            </button>
           </div>
         </div>
       </section>

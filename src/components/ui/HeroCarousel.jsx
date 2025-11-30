@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 
-export default function HeroCarousel({ items = [], autoPlay = true, interval = 5000 }) {
+export default function HeroCarousel({ items = [], autoPlay = true, interval = 2000 }) {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isAnimating, setIsAnimating] = useState(false)
 
