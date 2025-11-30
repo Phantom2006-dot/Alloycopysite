@@ -1,20 +1,19 @@
-export default function QuoteBanner({ quote, author, publication }) {
+export default function QuoteBanner({ quotes = [] }) {
   return (
-    <section className="py-20 bg-black">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <blockquote className="text-xl md:text-2xl lg:text-3xl text-gray-200 font-light italic leading-relaxed mb-6" style={{ fontFamily: "'Playfair Display', serif" }}>
-          "{quote}"
-        </blockquote>
-        {author && (
-          <div className="flex flex-col items-center">
-            <span className="text-white font-medium">{author}</span>
-            {publication && (
-              <span className="text-gray-500 italic" style={{ fontFamily: "'Playfair Display', serif" }}>
-                —{publication}
-              </span>
+    <section className="py-16 bg-black">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        {quotes.map((item, index) => (
+          <div key={index} className="mb-8 last:mb-0">
+            <blockquote className="text-lg md:text-xl text-gray-300 font-serif italic leading-relaxed mb-3">
+              "{item.quote}"
+            </blockquote>
+            {item.publication && (
+              <cite className="text-gray-400 font-serif italic text-base not-italic">
+                —{item.publication}
+              </cite>
             )}
           </div>
-        )}
+        ))}
       </div>
     </section>
   )

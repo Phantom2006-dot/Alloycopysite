@@ -1,58 +1,31 @@
-import { useState, useEffect } from 'react'
-import SectionWrapper from '../components/ui/SectionWrapper'
-import SectionTitle from '../components/ui/SectionTitle'
-import CTAButton from '../components/ui/CTAButton'
+import { useEffect } from 'react'
 
 const inquiryTypes = [
-  { type: "Subrights Inquiries", email: "subrights@bauhausproduction.com", contact: "Rights Team" },
-  { type: "Film + TV Inquiries", email: "filmtv@bauhausproduction.com", contact: "Production Team" },
-  { type: "Press Inquiries", email: "press@bauhausproduction.com", contact: "Media Relations" },
-  { type: "Publishing Inquiries", email: "submissions@bauhausproduction.com", contact: "Editorial Team" },
-  { type: "Tourism Inquiries", email: "tourism@bauhausproduction.com", contact: "Travel Team" },
+  { type: "Subrights Inquiries", contact: "Romy Golan", email: "subrights@bauhausproduction.com" },
+  { type: "Film + TV Inquiries", contact: "Sarah Kim Campbell", email: "filmtv@bauhausproduction.com" },
+  { type: "Press Inquiries", contact: "Michael Donkis", email: "press@bauhausproduction.com" },
 ]
 
 export default function Contact() {
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    subject: '',
-    message: '',
-    honeypot: ''
-  })
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [submitted, setSubmitted] = useState(false)
-
   useEffect(() => {
-    document.title = 'Contact | BAUHAUS'
+    document.title = 'Contact | BAUHAUS Production'
   }, [])
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value })
-  }
-
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    if (formData.honeypot) return
-    
-    setIsSubmitting(true)
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    setSubmitted(true)
-    setIsSubmitting(false)
-  }
-
   return (
-    <div className="pt-20">
-      <SectionWrapper>
-        <SectionTitle title="Contact" />
-
-        <div className="max-w-4xl mx-auto">
-          <div className="grid md:grid-cols-2 gap-8 mb-16">
-            {inquiryTypes.slice(0, 4).map((inquiry, index) => (
-              <div key={index} className="text-center">
-                <h3 className="text-white font-semibold mb-2">{inquiry.type}</h3>
+    <div className="pt-20 bg-black min-h-screen">
+      <section className="py-16">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h1 className="text-sm font-semibold uppercase tracking-[0.2em] text-white text-center mb-16">
+            Contact
+          </h1>
+          
+          <div className="space-y-10 text-center mb-16">
+            {inquiryTypes.map((inquiry, index) => (
+              <div key={index}>
+                <h3 className="text-white font-semibold text-sm mb-1">{inquiry.type}</h3>
                 <a 
                   href={`mailto:${inquiry.email}`}
-                  className="text-gray-400 hover:text-amber-500 transition-colors underline"
+                  className="text-gray-400 hover:text-white transition-colors underline text-sm"
                 >
                   {inquiry.contact}
                 </a>
@@ -60,213 +33,69 @@ export default function Contact() {
             ))}
           </div>
 
-          <div className="grid md:grid-cols-2 gap-12 mb-16">
-            <div className="text-center">
-              <h3 className="text-white font-semibold uppercase tracking-wider mb-4">UK Office</h3>
-              <div className="space-y-2 text-gray-400">
-                <p>4 Notre Dame Mews</p>
-                <p>Northampton, NN1 2BG</p>
-                <p className="mt-4">
-                  <a href="tel:+441604434082" className="hover:text-white transition-colors">
-                    +44 1604 434082
-                  </a>
-                </p>
-                <p>
-                  <a href="mailto:info@bauhausproduction.com" className="hover:text-white transition-colors">
-                    info@bauhausproduction.com
-                  </a>
-                </p>
-              </div>
-            </div>
-
-            <div className="text-center">
-              <h3 className="text-white font-semibold uppercase tracking-wider mb-4">Nigeria Office</h3>
-              <div className="space-y-2 text-gray-400">
-                <p>41 Coker Road</p>
-                <p>Ilupeju, Lagos</p>
-                <p className="mt-4">
-                  <a href="tel:+2347038892961" className="hover:text-white transition-colors">
-                    +234 703 889 2961
-                  </a>
-                </p>
-                <p>
-                  <a href="mailto:akinalaka@bauhaus-education.co.uk" className="hover:text-white transition-colors">
-                    akinalaka@bauhaus-education.co.uk
-                  </a>
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-8 mb-16">
-            <div className="aspect-video bg-gray-900 rounded-lg overflow-hidden">
-              <iframe
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2442.5!2d-0.9!3d52.24!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNTLCsDE0JzI0LjAiTiAwwrA1NCcwMC4wIlc!5e0!3m2!1sen!2suk!4v1234567890"
-                width="100%"
-                height="100%"
-                style={{ border: 0 }}
-                allowFullScreen=""
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-                title="UK Office Location"
-              ></iframe>
-            </div>
-            <div className="aspect-video bg-gray-900 rounded-lg overflow-hidden">
-              <iframe
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3963.5!2d3.36!3d6.55!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNsKwMzMnMDAuMCJOIDPCsDIxJzM2LjAiRQ!5e0!3m2!1sen!2sng!4v1234567890"
-                width="100%"
-                height="100%"
-                style={{ border: 0 }}
-                allowFullScreen=""
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-                title="Nigeria Office Location"
-              ></iframe>
-            </div>
-          </div>
-        </div>
-      </SectionWrapper>
-
-      <SectionWrapper background="dark">
-        <SectionTitle title="The Collaborative - Book Submissions" />
-        <div className="max-w-4xl mx-auto">
-          <h3 className="text-2xl text-white text-center mb-8" style={{ fontFamily: "'Playfair Display', serif" }}>
-            Looking to work with BAUHAUS?
-          </h3>
-          
-          <div className="grid md:grid-cols-2 gap-8 text-gray-300 text-sm leading-relaxed mb-8">
+          <div className="grid md:grid-cols-2 gap-12 text-center mb-20">
             <div>
-              <p className="mb-4">
-                Traditionally, BAUHAUS has developed its properties internally, originating concepts in-house and guiding the development process with writers. Now there's another way to work with us on manuscripts you've already completed or self-published: The Collaborative.
-              </p>
-              <p className="mb-4">
-                Our Collaborative program is a great opportunity for authors to submit complete manuscripts and work with BAUHAUS as partners to shape the novel—reconceptualizing, reframing, or deepening the existing content—and find a publishing home for the book.
-              </p>
-              <p className="mb-4">
-                In this program, authors not only benefit from BAUHAUS's editorial expertise but also have the support of our TV and film producing teams. BAUHAUS requires the rights to produce each property in TV, film, and all media. In turn, authors will share in profits.
-              </p>
+              <h3 className="text-white font-semibold uppercase tracking-wider text-xs mb-4">New York</h3>
+              <div className="text-gray-400 text-sm space-y-1">
+                <p>30 Hudson Yards</p>
+                <p>New York, NY 10001</p>
+              </div>
             </div>
             <div>
-              <p className="mb-4">
-                <strong className="text-white">What We're Looking For:</strong> We aim to acquire complete manuscripts with an emphasis on upmarket fiction for adults, including book club fiction, Mystery Thriller and Suspense, and select genre properties, and all categories in young adult. We're excited about fresh, new voices and strong, unique concepts.
-              </p>
-              <p className="mb-4">
-                <strong className="text-white">Submission Guidelines:</strong> We evaluate fiction manuscripts only—no scripts, please. If you don't have an agent, please send us a query email with a brief overview of your book, a short description of your writing background, and the first five pages of your manuscript.
-              </p>
-              <p>
-                BAUHAUS is constantly developing new concepts in-house. Given the nature of the IP business, we may already have independently developed or may in the future develop a project with ideas or themes that are similar to your submitted material.
-              </p>
+              <h3 className="text-white font-semibold uppercase tracking-wider text-xs mb-4">Burbank</h3>
+              <div className="text-gray-400 text-sm space-y-1">
+                <p>4000 Warner Blvd</p>
+                <p>Burbank, CA 91522</p>
+              </div>
             </div>
           </div>
 
-          <div className="bg-gray-900 border border-gray-800 rounded-lg p-8 text-center">
-            <p className="text-gray-300 mb-4">Please submit by e-mail to</p>
-            <a 
-              href="mailto:thecollaborative@bauhausproduction.com" 
-              className="text-white text-lg font-semibold hover:text-amber-500 transition-colors"
-            >
-              thecollaborative@bauhausproduction.com
-            </a>
+          <div className="border-t border-gray-800 pt-16">
+            <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-white text-center mb-8">
+              The Collaborative - Book Submissions
+            </h2>
+            
+            <h3 className="text-2xl md:text-3xl text-white text-center mb-10 font-serif">
+              Looking to work with Bauhaus Production?
+            </h3>
+            
+            <div className="grid md:grid-cols-2 gap-8 text-gray-300 text-sm leading-relaxed mb-12">
+              <div className="space-y-4">
+                <p>
+                  Traditionally, Bauhaus Production has developed its properties internally, originating concepts in-house and guiding the development process with writers. Now there's another way to work with us on manuscripts you've already completed or self-published: The Collaborative.
+                </p>
+                <p>
+                  Our Collaborative program is a great opportunity for authors to submit complete manuscripts and work with Bauhaus Production as partners to shape the novel—reconceptualizing, reframing, or deepening the existing content—and find a publishing home for the book.
+                </p>
+                <p>
+                  In this program, authors not only benefit from Bauhaus Production's editorial expertise but also have the support of our TV and film producing teams, each with a major studio behind them. As part of Warner Bros. Discovery, Bauhaus Production requires the rights to produce each property in TV, film, and all media. In turn, authors will share in profits.
+                </p>
+                <p>
+                  What We're Looking For: We aim to acquire complete manuscripts with an emphasis on upmarket fiction for adults, including book club fiction, Mystery Thriller and Suspense, and select genre properties, and all categories in young adult. We're excited about fresh, new voices and strong, unique concepts.
+                </p>
+              </div>
+              <div className="space-y-4">
+                <p>
+                  Submission Guidelines: We evaluate fiction manuscripts only—no scripts, please. If you don't have an agent, please send us a query email with a brief overview of your book, a short description of your writing background, and the first five pages of your manuscript. Please note if the manuscript has previously been submitted to publishing houses. And, agents, feel free to get in touch on behalf of your clients. We cannot accept submissions from legal minors. We'll be in touch as soon as possible if we'd like to pursue your work. If you don't hear from us within three months, it means it's not the best fit at this time. Thank you for considering Bauhaus Production as a place to send your work!
+                </p>
+                <p>
+                  Bauhaus Production is constantly developing new concepts in-house. Given the nature of the IP business, may already have independently developed or may in the future develop a project with ideas or themes that are similar to your submitted material. In submitting material to Bauhaus, you acknowledge that you will have no claim therein. Bauhaus will require a signed submission release prior to review of any writing material not being sent by an agent.
+                </p>
+              </div>
+            </div>
+
+            <div className="border border-gray-700 p-8 text-center max-w-xl mx-auto">
+              <p className="text-gray-300 text-sm mb-2">Please submit by e-mail to</p>
+              <a 
+                href="mailto:thecollaborative@bauhausproduction.com" 
+                className="text-white font-medium hover:underline"
+              >
+                thecollaborative@bauhausproduction.com
+              </a>
+            </div>
           </div>
         </div>
-      </SectionWrapper>
-
-      <SectionWrapper>
-        <SectionTitle 
-          title="Send Us a Message" 
-          subtitle="We'd love to hear from you"
-        />
-        <div className="max-w-2xl mx-auto">
-          {submitted ? (
-            <div className="text-center py-12">
-              <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-3xl">✓</span>
-              </div>
-              <h3 className="text-xl font-semibold text-white mb-2">Message Sent!</h3>
-              <p className="text-gray-400">Thank you for reaching out. We'll get back to you soon.</p>
-            </div>
-          ) : (
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <input 
-                type="text" 
-                name="honeypot" 
-                value={formData.honeypot}
-                onChange={handleChange}
-                className="hidden"
-                tabIndex="-1"
-                autoComplete="off"
-              />
-              
-              <div className="grid md:grid-cols-2 gap-6">
-                <div>
-                  <label htmlFor="name" className="block text-gray-400 text-sm mb-2">
-                    Name *
-                  </label>
-                  <input
-                    type="text"
-                    id="name"
-                    name="name"
-                    required
-                    value={formData.name}
-                    onChange={handleChange}
-                    className="w-full bg-gray-900 border border-gray-700 text-white px-4 py-3 rounded focus:outline-none focus:border-white transition-colors"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="email" className="block text-gray-400 text-sm mb-2">
-                    Email *
-                  </label>
-                  <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    required
-                    value={formData.email}
-                    onChange={handleChange}
-                    className="w-full bg-gray-900 border border-gray-700 text-white px-4 py-3 rounded focus:outline-none focus:border-white transition-colors"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label htmlFor="subject" className="block text-gray-400 text-sm mb-2">
-                  Subject *
-                </label>
-                <input
-                  type="text"
-                  id="subject"
-                  name="subject"
-                  required
-                  value={formData.subject}
-                  onChange={handleChange}
-                  className="w-full bg-gray-900 border border-gray-700 text-white px-4 py-3 rounded focus:outline-none focus:border-white transition-colors"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="message" className="block text-gray-400 text-sm mb-2">
-                  Message *
-                </label>
-                <textarea
-                  id="message"
-                  name="message"
-                  required
-                  rows="6"
-                  value={formData.message}
-                  onChange={handleChange}
-                  className="w-full bg-gray-900 border border-gray-700 text-white px-4 py-3 rounded focus:outline-none focus:border-white transition-colors resize-none"
-                ></textarea>
-              </div>
-
-              <div className="text-center">
-                <CTAButton type="submit" disabled={isSubmitting}>
-                  {isSubmitting ? 'Sending...' : 'Send Message'}
-                </CTAButton>
-              </div>
-            </form>
-          )}
-        </div>
-      </SectionWrapper>
+      </section>
     </div>
   )
 }

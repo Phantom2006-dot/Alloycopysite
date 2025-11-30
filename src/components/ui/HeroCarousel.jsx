@@ -37,14 +37,14 @@ export default function HeroCarousel({ items = [], autoPlay = true, interval = 5
   }
 
   return (
-    <div className="relative w-full h-[70vh] overflow-hidden bg-black">
+    <div className="relative w-full h-[65vh] overflow-hidden bg-black pt-20">
       <div className="absolute inset-0 flex items-center justify-center">
         {getVisibleItems().map((item, idx) => {
           const offset = item.offset
           const isCenter = offset === 0
-          const scale = isCenter ? 1 : 0.7
-          const opacity = isCenter ? 1 : 0.5
-          const translateX = offset * 280
+          const scale = isCenter ? 1 : 0.75
+          const opacity = isCenter ? 1 : 0.6
+          const translateX = offset * 300
 
           return (
             <div
@@ -56,7 +56,7 @@ export default function HeroCarousel({ items = [], autoPlay = true, interval = 5
                 zIndex: 10 - Math.abs(offset),
               }}
             >
-              <div className="w-64 h-96 bg-gray-900 rounded-lg overflow-hidden shadow-2xl">
+              <div className="w-56 md:w-64 h-80 md:h-96 bg-gray-900 overflow-hidden shadow-2xl">
                 <img
                   src={item.image}
                   alt={item.title}
@@ -70,20 +70,20 @@ export default function HeroCarousel({ items = [], autoPlay = true, interval = 5
 
       <button
         onClick={goToPrev}
-        className="absolute left-4 top-1/2 -translate-y-1/2 z-20 p-2 bg-black/50 rounded-full text-white hover:bg-black/70 transition-colors"
+        className="absolute left-4 top-1/2 -translate-y-1/2 z-20 p-3 text-white/60 hover:text-white transition-colors"
         aria-label="Previous slide"
       >
-        <ChevronLeft className="h-6 w-6" />
+        <ChevronLeft className="h-8 w-8" />
       </button>
       <button
         onClick={goToNext}
-        className="absolute right-4 top-1/2 -translate-y-1/2 z-20 p-2 bg-black/50 rounded-full text-white hover:bg-black/70 transition-colors"
+        className="absolute right-4 top-1/2 -translate-y-1/2 z-20 p-3 text-white/60 hover:text-white transition-colors"
         aria-label="Next slide"
       >
-        <ChevronRight className="h-6 w-6" />
+        <ChevronRight className="h-8 w-8" />
       </button>
 
-      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex space-x-2">
+      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex space-x-2">
         {items.map((_, idx) => (
           <button
             key={idx}
@@ -95,7 +95,7 @@ export default function HeroCarousel({ items = [], autoPlay = true, interval = 5
               }
             }}
             className={`w-2 h-2 rounded-full transition-all duration-300 ${
-              idx === currentIndex ? 'bg-white w-6' : 'bg-gray-600 hover:bg-gray-400'
+              idx === currentIndex ? 'bg-white' : 'bg-gray-600 hover:bg-gray-400'
             }`}
             aria-label={`Go to slide ${idx + 1}`}
           />
