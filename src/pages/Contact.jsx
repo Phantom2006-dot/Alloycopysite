@@ -14,17 +14,17 @@ export default function Contact() {
   }, [])
 
   return (
-    <div className="pt-20 bg-black min-h-screen">
-      <section className="relative py-20 md:py-28">
+    <div className="pt-28 lg:pt-32 bg-black min-h-screen">
+      <section className="relative py-16 md:py-20">
         <div className="absolute inset-0 bg-gradient-to-b from-neutral-900/30 to-black pointer-events-none" />
         
-        <div className="relative max-w-6xl mx-auto px-6 lg:px-8">
+        <div className="relative max-w-6xl mx-auto px-8 lg:px-12">
           <div className="text-center mb-16">
-            <span className="inline-block text-[11px] font-medium uppercase tracking-[0.2em] text-gray-400 mb-4">
+            <span className="inline-block text-[11px] font-medium uppercase tracking-[0.25em] text-gray-400 mb-6">
               Get In Touch
             </span>
-            <h1 className="text-3xl md:text-4xl lg:text-5xl text-white font-serif">
-              Contact Us
+            <h1 className="text-4xl md:text-5xl text-white font-serif tracking-wide">
+              contact
             </h1>
           </div>
           

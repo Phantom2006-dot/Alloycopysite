@@ -3,16 +3,7 @@ import { Link, NavLink, useLocation } from 'react-router-dom'
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const [isScrolled, setIsScrolled] = useState(false)
   const location = useLocation()
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20)
-    }
-    window.addEventListener('scroll', handleScroll)
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
 
   useEffect(() => {
     setIsMenuOpen(false)
@@ -30,10 +21,10 @@ export default function Header() {
   }, [isMenuOpen])
 
   const navLinkClass = ({ isActive }) =>
-    `relative text-[13px] font-medium tracking-[0.08em] uppercase transition-all duration-300 py-2 ${
+    `relative text-[13px] font-medium tracking-[0.1em] uppercase transition-all duration-300 py-2 ${
       isActive 
         ? 'text-white after:absolute after:bottom-0 after:left-0 after:w-full after:h-[2px] after:bg-white' 
-        : 'text-gray-400 hover:text-white'
+        : 'text-gray-300 hover:text-white'
     }`
 
   const mobileNavLinkClass = ({ isActive }) =>
@@ -43,16 +34,10 @@ export default function Header() {
 
   return (
     <>
-      <header
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-          isScrolled 
-            ? 'bg-black/95 backdrop-blur-md shadow-lg' 
-            : 'bg-transparent'
-        }`}
-      >
-        <nav className="max-w-7xl mx-auto px-6 lg:px-8">
+      <header className="fixed top-0 left-0 right-0 z-50 bg-black">
+        <nav className="max-w-7xl mx-auto px-8 lg:px-12">
           <div className="flex items-center justify-between h-20 lg:h-24">
-            <div className="hidden lg:flex items-center space-x-12">
+            <div className="hidden lg:flex items-center gap-16">
               <NavLink to="/" className={navLinkClass}>Home</NavLink>
               <NavLink to="/books" className={navLinkClass}>Books</NavLink>
               <NavLink to="/tv" className={navLinkClass}>TV</NavLink>
@@ -76,7 +61,7 @@ export default function Header() {
               </div>
             </Link>
 
-            <div className="hidden lg:flex items-center space-x-12">
+            <div className="hidden lg:flex items-center gap-16">
               <NavLink to="/about" className={navLinkClass}>About Us</NavLink>
               <NavLink to="/team" className={navLinkClass}>Team</NavLink>
               <NavLink to="/contact" className={navLinkClass}>Contact</NavLink>

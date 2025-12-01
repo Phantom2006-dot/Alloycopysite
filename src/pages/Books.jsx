@@ -60,15 +60,15 @@ export default function Books() {
   }
 
   return (
-    <div className="pt-20 bg-black min-h-screen">
-      <section className="relative py-16 md:py-20">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <span className="inline-block text-[11px] font-medium uppercase tracking-[0.2em] text-gray-400 mb-4">
+    <div className="pt-28 lg:pt-32 bg-black min-h-screen">
+      <section className="relative py-12 md:py-16">
+        <div className="max-w-7xl mx-auto px-8 lg:px-12">
+          <div className="text-center mb-16">
+            <span className="inline-block text-[11px] font-medium uppercase tracking-[0.25em] text-gray-400 mb-6">
               2025 Releases
             </span>
-            <h1 className="text-3xl md:text-4xl text-white font-serif">
-              Books
+            <h1 className="text-4xl md:text-5xl text-white font-serif tracking-wide">
+              books
             </h1>
           </div>
 

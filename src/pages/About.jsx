@@ -6,18 +6,21 @@ export default function About() {
   }, [])
 
   return (
-    <div className="pt-20 bg-black min-h-screen">
-      <section className="relative py-20 md:py-28">
+    <div className="pt-28 lg:pt-32 bg-black min-h-screen">
+      <section className="relative py-16 md:py-20">
         <div className="absolute inset-0 bg-gradient-to-b from-neutral-900/50 to-black pointer-events-none" />
         
-        <div className="relative max-w-6xl mx-auto px-6 lg:px-8">
+        <div className="relative max-w-6xl mx-auto px-8 lg:px-12">
           <div className="text-center mb-16">
-            <span className="inline-block text-[11px] font-medium uppercase tracking-[0.2em] text-gray-400 mb-4">
+            <span className="inline-block text-[11px] font-medium uppercase tracking-[0.25em] text-gray-400 mb-6">
               Who We Are
             </span>
-            <h1 className="text-3xl md:text-4xl lg:text-5xl text-white font-serif italic leading-tight max-w-4xl mx-auto">
-              BAUHAUS is a Nigerian cultural company dedicated to celebrating and sharing the richness of Nigerian heritage
+            <h1 className="text-4xl md:text-5xl text-white font-serif tracking-wide mb-8">
+              about us
             </h1>
+            <p className="text-lg md:text-xl text-gray-300 font-serif italic leading-relaxed max-w-4xl mx-auto">
+              BAUHAUS is a Nigerian cultural company dedicated to celebrating and sharing the richness of Nigerian heritage
+            </p>
           </div>
           
           <div className="flex justify-center mb-20">

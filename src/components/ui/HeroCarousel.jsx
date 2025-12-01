@@ -51,7 +51,7 @@ export default function HeroCarousel({ items = [], autoPlay = true, interval = 1
   }
 
   return (
-    <div className="relative w-full min-h-[70vh] overflow-hidden bg-gradient-to-b from-black via-black to-neutral-950 pt-24 pb-8">
+    <div className="relative w-full min-h-[70vh] overflow-hidden bg-gradient-to-b from-black via-black to-neutral-950 pt-28 lg:pt-32 pb-8">
       <div className="absolute inset-0 flex items-center justify-center">
         {getVisibleItems().map((item, idx) => {
           const offset = item.offset
