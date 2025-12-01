@@ -1,8 +1,6 @@
 import { useEffect } from 'react'
 import HeroCarousel from '../components/ui/HeroCarousel'
 import QuoteBanner from '../components/ui/QuoteBanner'
-import { books } from '../data/books'
-import { films } from '../data/films'
 
 const carouselItems = [
   { id: 1, title: "The Wife Upstairs", image: "https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=400&h=600&fit=crop" },
@@ -31,7 +29,7 @@ export default function Home() {
 
   return (
     <>
-      <HeroCarousel items={carouselItems} />
+      <HeroCarousel items={carouselItems} interval={1000} />
       <QuoteBanner quotes={quotes} />
     </>
   )

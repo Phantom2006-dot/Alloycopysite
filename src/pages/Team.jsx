@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { Users, Award, Globe, Heart } from 'lucide-react'
 
 const teamMembers = [
   {
@@ -14,6 +15,29 @@ const teamMembers = [
   }
 ]
 
+const values = [
+  {
+    icon: Heart,
+    title: "Passion",
+    description: "Deep love for Nigerian culture and storytelling"
+  },
+  {
+    icon: Award,
+    title: "Excellence",
+    description: "Commitment to producing world-class content"
+  },
+  {
+    icon: Globe,
+    title: "Global Reach",
+    description: "Bridging Nigeria with audiences worldwide"
+  },
+  {
+    icon: Users,
+    title: "Collaboration",
+    description: "Working together across borders and disciplines"
+  }
+]
+
 export default function Team() {
   useEffect(() => {
     document.title = 'Our Team | BAUHAUS'
@@ -21,28 +45,56 @@ export default function Team() {
 
   return (
     <div className="pt-20 bg-black min-h-screen">
-      <section className="py-16">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h1 className="text-sm font-semibold uppercase tracking-[0.2em] text-white text-center mb-16">
-            Our Team
-          </h1>
+      <section className="relative py-20 md:py-28">
+        <div className="absolute inset-0 bg-gradient-to-b from-neutral-900/30 to-black pointer-events-none" />
+        
+        <div className="relative max-w-6xl mx-auto px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <span className="inline-block text-[11px] font-medium uppercase tracking-[0.2em] text-gray-400 mb-4">
+              The People Behind BAUHAUS
+            </span>
+            <h1 className="text-3xl md:text-4xl lg:text-5xl text-white font-serif">
+              Our Team
+            </h1>
+          </div>
           
           {teamMembers.map((member, index) => (
-            <div key={index} className="mb-16 text-center">
-              <h2 className="text-xl font-semibold text-white mb-2">
-                {member.name}
-              </h2>
-              <p className="text-gray-400 font-serif italic mb-8">
-                {member.title}
-              </p>
+            <div key={index} className="max-w-4xl mx-auto mb-20">
+              <div className="text-center mb-10">
+                <h2 className="text-2xl md:text-3xl font-serif text-white mb-3">
+                  {member.name}
+                </h2>
+                <p className="text-gray-400 font-serif italic text-lg">
+                  {member.title}
+                </p>
+              </div>
               
-              <div className="text-gray-300 text-sm leading-relaxed space-y-4 text-center">
+              <div className="flex justify-center mb-10">
+                <div className="w-24 h-px bg-gradient-to-r from-transparent via-white to-transparent" />
+              </div>
+              
+              <div className="text-gray-300 text-base leading-relaxed space-y-6 text-center">
                 {member.bio.map((paragraph, pIndex) => (
                   <p key={pIndex}>{paragraph}</p>
                 ))}
               </div>
             </div>
           ))}
+          
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-16">
+            {values.map((value, index) => (
+              <div 
+                key={index}
+                className="bg-neutral-900/50 backdrop-blur-sm border border-neutral-800 rounded-lg p-8 text-center hover:border-neutral-600 transition-all duration-300"
+              >
+                <div className="w-14 h-14 mx-auto mb-6 rounded-full bg-neutral-800 flex items-center justify-center">
+                  <value.icon className="h-6 w-6 text-white" />
+                </div>
+                <h3 className="text-white font-medium text-lg mb-2">{value.title}</h3>
+                <p className="text-gray-400 text-sm">{value.description}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
     </div>

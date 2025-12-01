@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { ChevronLeft, ChevronRight, ExternalLink } from 'lucide-react'
 
 const filmsList = [
   { id: 1, title: "Clique", image: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=400&h=600&fit=crop" },
@@ -22,27 +22,37 @@ const filmNews = [
 export default function Films() {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isAnimating, setIsAnimating] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
 
   useEffect(() => {
     document.title = 'Film | BAUHAUS'
+  }, [])
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
   }, [])
 
   const goToNext = useCallback(() => {
     if (isAnimating || filmsList.length === 0) return
     setIsAnimating(true)
     setCurrentIndex((prev) => (prev + 1) % filmsList.length)
-    setTimeout(() => setIsAnimating(false), 500)
+    setTimeout(() => setIsAnimating(false), 400)
   }, [isAnimating])
 
   const goToPrev = useCallback(() => {
     if (isAnimating || filmsList.length === 0) return
     setIsAnimating(true)
     setCurrentIndex((prev) => (prev - 1 + filmsList.length) % filmsList.length)
-    setTimeout(() => setIsAnimating(false), 500)
+    setTimeout(() => setIsAnimating(false), 400)
   }, [isAnimating])
 
   useEffect(() => {
-    const timer = setInterval(goToNext, 2000)
+    const timer = setInterval(goToNext, 1000)
     return () => clearInterval(timer)
   }, [goToNext])
 
@@ -55,22 +65,32 @@ export default function Films() {
     return result
   }
 
+  const getTranslateX = (offset) => {
+    return offset * (isMobile ? 180 : 280)
+  }
+
   return (
     <div className="pt-20 bg-black min-h-screen">
-      <section className="py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h1 className="text-sm font-semibold uppercase tracking-[0.2em] text-white text-center mb-12">
-            Film
-          </h1>
+      <section className="relative py-16 md:py-20">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <span className="inline-block text-[11px] font-medium uppercase tracking-[0.2em] text-gray-400 mb-4">
+              Our Productions
+            </span>
+            <h1 className="text-3xl md:text-4xl text-white font-serif">
+              Film
+            </h1>
+          </div>
           
-          <div className="relative h-[50vh] overflow-hidden">
+          <div className="relative min-h-[55vh] overflow-hidden">
             <div className="absolute inset-0 flex items-center justify-center">
               {getVisibleItems().map((item, idx) => {
                 const offset = item.offset
                 const isCenter = offset === 0
-                const scale = isCenter ? 1 : 0.75
-                const opacity = isCenter ? 1 : 0.6
-                const translateX = offset * 300
+                const absOffset = Math.abs(offset)
+                const scale = isCenter ? 1 : 0.7 - (absOffset * 0.05)
+                const opacity = isCenter ? 1 : 0.5 - (absOffset * 0.1)
+                const translateX = getTranslateX(offset)
 
                 return (
                   <div
@@ -78,16 +98,25 @@ export default function Films() {
                     className="absolute transition-all duration-500 ease-out"
                     style={{
                       transform: `translateX(${translateX}px) scale(${scale})`,
-                      opacity,
-                      zIndex: 10 - Math.abs(offset),
+                      opacity: Math.max(opacity, 0.2),
+                      zIndex: 10 - absOffset,
                     }}
                   >
-                    <div className="w-56 md:w-64 h-80 md:h-96 bg-gray-900 overflow-hidden shadow-2xl">
+                    <div 
+                      className={`relative overflow-hidden shadow-2xl transition-all duration-500 ${
+                        isCenter 
+                          ? 'w-52 sm:w-60 md:w-72 h-72 sm:h-80 md:h-96 ring-1 ring-white/20' 
+                          : 'w-44 sm:w-52 md:w-60 h-60 sm:h-72 md:h-80'
+                      }`}
+                    >
                       <img
                         src={item.image}
                         alt={item.title}
                         className="w-full h-full object-cover"
                       />
+                      {isCenter && (
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+                      )}
                     </div>
                   </div>
                 )
@@ -96,20 +125,20 @@ export default function Films() {
 
             <button
               onClick={goToPrev}
-              className="absolute left-4 top-1/2 -translate-y-1/2 z-20 p-3 text-white/60 hover:text-white transition-colors"
+              className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 z-20 p-2 md:p-3 rounded-full bg-black/30 backdrop-blur-sm border border-white/10 text-white/70 hover:text-white hover:bg-black/50 hover:border-white/30 transition-all duration-300"
               aria-label="Previous slide"
             >
-              <ChevronLeft className="h-8 w-8" />
+              <ChevronLeft className="h-5 w-5 md:h-6 md:w-6" />
             </button>
             <button
               onClick={goToNext}
-              className="absolute right-4 top-1/2 -translate-y-1/2 z-20 p-3 text-white/60 hover:text-white transition-colors"
+              className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 z-20 p-2 md:p-3 rounded-full bg-black/30 backdrop-blur-sm border border-white/10 text-white/70 hover:text-white hover:bg-black/50 hover:border-white/30 transition-all duration-300"
               aria-label="Next slide"
             >
-              <ChevronRight className="h-8 w-8" />
+              <ChevronRight className="h-5 w-5 md:h-6 md:w-6" />
             </button>
 
-            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex space-x-2">
+            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex items-center space-x-3">
               {filmsList.map((_, idx) => (
                 <button
                   key={idx}
@@ -117,11 +146,13 @@ export default function Films() {
                     if (!isAnimating) {
                       setIsAnimating(true)
                       setCurrentIndex(idx)
-                      setTimeout(() => setIsAnimating(false), 500)
+                      setTimeout(() => setIsAnimating(false), 400)
                     }
                   }}
-                  className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                    idx === currentIndex ? 'bg-white' : 'bg-gray-600 hover:bg-gray-400'
+                  className={`transition-all duration-300 ${
+                    idx === currentIndex 
+                      ? 'w-6 h-1.5 bg-white rounded-full' 
+                      : 'w-1.5 h-1.5 bg-gray-500 rounded-full hover:bg-gray-400'
                   }`}
                   aria-label={`Go to slide ${idx + 1}`}
                 />
@@ -131,25 +162,39 @@ export default function Films() {
         </div>
       </section>
 
-      <section className="py-16">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-xl font-serif text-white text-center mb-12">
-            Recent News
-          </h2>
+      <section className="py-16 md:py-20 bg-gradient-to-b from-black to-neutral-950">
+        <div className="max-w-4xl mx-auto px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <span className="inline-block text-[11px] font-medium uppercase tracking-[0.2em] text-gray-400 mb-4">
+              Latest Updates
+            </span>
+            <h2 className="text-2xl md:text-3xl text-white font-serif">
+              Recent News
+            </h2>
+          </div>
           
           <div className="space-y-4">
             {filmNews.map((news) => (
               <a
                 key={news.id}
                 href="#"
-                className="block border border-gray-700 hover:border-gray-500 transition-colors p-4 text-center"
+                className="group block bg-neutral-900/50 backdrop-blur-sm border border-neutral-800 rounded-lg p-6 hover:border-neutral-600 hover:bg-neutral-900/80 transition-all duration-300"
               >
-                <p className="text-white font-semibold text-sm mb-2">
-                  {news.source} ({news.date})
-                </p>
-                <p className="text-gray-400 text-sm">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
+                  <span className="text-white font-medium text-sm">
+                    {news.source}
+                  </span>
+                  <span className="text-gray-500 text-xs">
+                    {news.date}
+                  </span>
+                </div>
+                <p className="text-gray-400 text-sm leading-relaxed group-hover:text-gray-300 transition-colors">
                   {news.title}
                 </p>
+                <div className="mt-4 flex items-center gap-2 text-gray-500 text-xs group-hover:text-white transition-colors">
+                  <span>Read More</span>
+                  <ExternalLink className="h-3 w-3" />
+                </div>
               </a>
             ))}
           </div>
