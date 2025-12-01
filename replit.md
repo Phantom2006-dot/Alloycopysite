@@ -10,6 +10,27 @@ The project is a clean, minimalist marketing website built with React and Vite, 
 
 Preferred communication style: Simple, everyday language.
 
+## Recent Changes (December 2025)
+
+### Design Overhaul
+- **Header/Navbar**: Redesigned with clean, professional navigation like Alloy Entertainment
+  - Animated hamburger menu for mobile with smooth transitions
+  - Transparent to solid background on scroll
+  - Professional uppercase typography with letter-spacing
+- **HeroCarousel**: 1-second auto-slide interval with responsive layout
+- **QuoteBanner**: Centered quotes with decorative quote marks and dividers
+- **Footer**: Clean 4-column layout with logo, quick links, and office locations
+- **About Page**: Two-column layout with gradient backgrounds and Vision/Mission cards
+- **Contact Page**: Professional inquiry cards, office location cards, publishing submission section
+- **TV/Films/Books Pages**: Improved carousels with centered content and news sections
+- **Team Page**: Values cards with icons highlighting company culture
+
+### Technical Improvements
+- Fixed SSR compatibility by using `useState` + `useEffect` for responsive breakpoints
+- Added CSS animations (fadeIn, slideIn) for smooth interactions
+- Enhanced responsiveness across all screen sizes
+- Improved typography with better font rendering
+
 ## System Architecture
 
 ### Frontend Architecture
@@ -22,8 +43,9 @@ Preferred communication style: Simple, everyday language.
 **Styling Approach**
 - Tailwind CSS 4.1.17 with Vite plugin for utility-first styling
 - Custom CSS theme variables for consistent design tokens (colors, fonts)
-- Dark theme with white/gold accent color scheme (black background, white text, gold accents)
+- Dark theme with white accent color scheme (black/neutral-950 background, white text)
 - Google Fonts integration: Inter (sans-serif) and Playfair Display (serif)
+- Gradient backgrounds and glassmorphism effects for modern look
 
 **Component Structure**
 - Path aliasing configured: `@/` maps to `src/`, `@assets/` maps to `attached_assets/`
@@ -34,20 +56,19 @@ Preferred communication style: Simple, everyday language.
 - Minimalist, professional aesthetic with ample white space
 - Mobile-first responsive design
 - Smooth scroll behavior and optimized font rendering
+- Animated transitions and hover effects
 
 ### Page Architecture
 
 The website follows a traditional multi-page structure:
 
-1. **Home** - Landing page with hero section, featured content, CTAs
-2. **About Us** - Company mission, vision, team, achievements
-3. **Books** - Gallery/grid layout showcasing book catalog
-4. **Films & Documentaries** - Showcase of film projects and documentaries
-5. **Publishing** - Publishing services information
-6. **Tourism** - Mega menu/dropdown featuring Nigerian destinations (Lagos, Abuja, etc.)
-7. **Events** - Upcoming and past events (book launches, screenings, festivals)
-8. **Blog** - Content articles on travel, literature, film
-9. **Contact Us** - Contact information and inquiry form
+1. **Home** - Hero carousel with quotes section
+2. **About Us** - Company mission, vision with two-column layout
+3. **Books** - Carousel + filterable book grid by category
+4. **TV** - Carousel + recent news section
+5. **Films** - Carousel + recent news section
+6. **Team** - Leadership info with values cards
+7. **Contact Us** - Inquiry cards, office locations, publishing submissions
 
 ### Data Management
 
