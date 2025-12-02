@@ -4,11 +4,13 @@ import Footer from './Footer'
 
 export default function Layout() {
   return (
-    <div className="min-h-screen flex flex-col bg-black">
+    // This div should span full width
+    <div className="min-h-screen flex flex-col bg-black w-full">
       <Header />
-      <main className="flex-1">
-        {/* Add this container wrapper with responsive padding */}
-        <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
+      {/* Main content area with proper centering */}
+      <main className="flex-1 w-full">
+        {/* This container centers content and adds responsive padding */}
+        <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
           <Outlet />
         </div>
       </main>
