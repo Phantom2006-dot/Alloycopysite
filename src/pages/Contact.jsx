@@ -38,7 +38,7 @@ export default function Contact() {
   }, [])
 
   return (
-    <div className="pt-24 md:pt-28 lg:pt-32 bg-black min-h-screen">
+    <div className="pt-32 md:pt-36 lg:pt-40 bg-black min-h-screen">
       {/* Hero Section */}
       <section className="relative py-12 md:py-16 lg:py-20 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-amber-900/5 via-black/40 to-black pointer-events-none" />
