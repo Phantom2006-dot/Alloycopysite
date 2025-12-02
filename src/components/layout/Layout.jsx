@@ -7,7 +7,10 @@ export default function Layout() {
     <div className="min-h-screen flex flex-col bg-black">
       <Header />
       <main className="flex-1">
-        <Outlet />
+        {/* Add this container wrapper with responsive padding */}
+        <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
+          <Outlet />
+        </div>
       </main>
       <Footer />
     </div>
