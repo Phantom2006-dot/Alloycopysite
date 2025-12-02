@@ -59,7 +59,7 @@ export default function Contact() {
             </div>
           </div>
 
-          {/* Inquiry Cards Grid */}
+          {/* Inquiry Cards Grid - Borderless Design */}
           <div className="mb-16 md:mb-20 lg:mb-24">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
               {inquiryTypes.map((inquiry, index) => (
@@ -69,7 +69,7 @@ export default function Contact() {
                   className="group relative"
                 >
                   <div className="absolute -inset-0.5 bg-gradient-to-r from-amber-500/20 to-transparent rounded-xl blur opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  <div className="relative bg-neutral-900/40 backdrop-blur-sm border border-neutral-800/50 rounded-xl p-6 md:p-8 hover:border-amber-500/30 transition-all duration-300 h-full flex flex-col">
+                  <div className="relative bg-neutral-900/30 backdrop-blur-sm rounded-xl p-6 md:p-8 hover:bg-neutral-900/50 transition-all duration-300 h-full flex flex-col group-hover:shadow-2xl group-hover:shadow-amber-900/20">
                     <div className="w-12 h-12 rounded-full bg-amber-500/10 flex items-center justify-center mb-4 md:mb-6 group-hover:bg-amber-500/20 transition-colors duration-300">
                       <div className="text-amber-500">
                         {inquiry.icon}
@@ -84,7 +84,7 @@ export default function Contact() {
                       {inquiry.description}
                     </p>
                     
-                    <div className="pt-4 mt-auto border-t border-neutral-800/50 group-hover:border-amber-500/20 transition-colors duration-300">
+                    <div className="pt-4 mt-auto">
                       <p className="text-amber-500 text-sm font-medium mb-1">
                         {inquiry.contact}
                       </p>
@@ -98,7 +98,7 @@ export default function Contact() {
             </div>
           </div>
 
-          {/* Offices Section */}
+          {/* Offices Section - Borderless Design */}
           <div className="mb-16 md:mb-20 lg:mb-24">
             <div className="text-center mb-10 md:mb-12">
               <span className="inline-block text-xs font-semibold uppercase tracking-[0.2em] text-gray-400 mb-4">
@@ -112,8 +112,8 @@ export default function Contact() {
             <div className="grid md:grid-cols-2 gap-8 lg:gap-10">
               {/* UK Office */}
               <div className="group relative">
-                <div className="absolute -inset-0.5 bg-gradient-to-r from-amber-500/10 to-blue-500/10 rounded-xl blur opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                <div className="relative bg-gradient-to-br from-neutral-900/40 to-neutral-900/20 backdrop-blur-sm border border-neutral-800/50 rounded-xl p-8 md:p-10 hover:border-amber-500/20 transition-all duration-300">
+                <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500/10 to-blue-600/10 rounded-xl blur opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <div className="relative bg-gradient-to-br from-neutral-900/30 to-neutral-900/10 backdrop-blur-sm rounded-xl p-8 md:p-10 hover:bg-neutral-900/40 transition-all duration-300">
                   <div className="flex items-start gap-4 mb-8">
                     <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-blue-500/10 to-blue-600/10 flex items-center justify-center flex-shrink-0">
                       <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500/20 to-blue-600/20 flex items-center justify-center">
@@ -134,12 +134,12 @@ export default function Contact() {
                       <p className="text-sm">United Kingdom</p>
                     </div>
                     
-                    <div className="space-y-3 pt-4 border-t border-neutral-800/50">
+                    <div className="space-y-3 pt-4">
                       <a 
                         href="tel:+441604434082" 
                         className="flex items-center gap-3 text-gray-400 hover:text-white transition-colors duration-200 group"
                       >
-                        <div className="w-8 h-8 rounded-full bg-neutral-800/50 flex items-center justify-center group-hover:bg-blue-500/20 transition-colors duration-200">
+                        <div className="w-8 h-8 rounded-full bg-neutral-800/30 flex items-center justify-center group-hover:bg-blue-500/20 transition-colors duration-200">
                           <Phone className="h-3.5 w-3.5 text-gray-500 group-hover:text-blue-400 transition-colors duration-200" />
                         </div>
                         <span className="text-sm">+44 1604 434082</span>
@@ -149,7 +149,7 @@ export default function Contact() {
                         href="mailto:info@bauhausproduction.com" 
                         className="flex items-center gap-3 text-gray-400 hover:text-white transition-colors duration-200 group"
                       >
-                        <div className="w-8 h-8 rounded-full bg-neutral-800/50 flex items-center justify-center group-hover:bg-amber-500/20 transition-colors duration-200">
+                        <div className="w-8 h-8 rounded-full bg-neutral-800/30 flex items-center justify-center group-hover:bg-amber-500/20 transition-colors duration-200">
                           <Mail className="h-3.5 w-3.5 text-gray-500 group-hover:text-amber-400 transition-colors duration-200" />
                         </div>
                         <span className="text-sm break-all">info@bauhausproduction.com</span>
@@ -161,8 +161,8 @@ export default function Contact() {
               
               {/* Nigeria Office */}
               <div className="group relative">
-                <div className="absolute -inset-0.5 bg-gradient-to-r from-green-500/10 to-amber-500/10 rounded-xl blur opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                <div className="relative bg-gradient-to-br from-neutral-900/40 to-neutral-900/20 backdrop-blur-sm border border-neutral-800/50 rounded-xl p-8 md:p-10 hover:border-green-500/20 transition-all duration-300">
+                <div className="absolute -inset-0.5 bg-gradient-to-r from-green-500/10 to-green-600/10 rounded-xl blur opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <div className="relative bg-gradient-to-br from-neutral-900/30 to-neutral-900/10 backdrop-blur-sm rounded-xl p-8 md:p-10 hover:bg-neutral-900/40 transition-all duration-300">
                   <div className="flex items-start gap-4 mb-8">
                     <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-green-500/10 to-green-600/10 flex items-center justify-center flex-shrink-0">
                       <div className="w-10 h-10 rounded-full bg-gradient-to-br from-green-500/20 to-green-600/20 flex items-center justify-center">
@@ -183,12 +183,12 @@ export default function Contact() {
                       <p className="text-sm">Nigeria</p>
                     </div>
                     
-                    <div className="space-y-3 pt-4 border-t border-neutral-800/50">
+                    <div className="space-y-3 pt-4">
                       <a 
                         href="tel:+2347038892961" 
                         className="flex items-center gap-3 text-gray-400 hover:text-white transition-colors duration-200 group"
                       >
-                        <div className="w-8 h-8 rounded-full bg-neutral-800/50 flex items-center justify-center group-hover:bg-green-500/20 transition-colors duration-200">
+                        <div className="w-8 h-8 rounded-full bg-neutral-800/30 flex items-center justify-center group-hover:bg-green-500/20 transition-colors duration-200">
                           <Phone className="h-3.5 w-3.5 text-gray-500 group-hover:text-green-400 transition-colors duration-200" />
                         </div>
                         <span className="text-sm">+234 703 889 2961</span>
@@ -198,7 +198,7 @@ export default function Contact() {
                         href="mailto:akinalaka@bauhaus-education.co.uk" 
                         className="flex items-center gap-3 text-gray-400 hover:text-white transition-colors duration-200 group"
                       >
-                        <div className="w-8 h-8 rounded-full bg-neutral-800/50 flex items-center justify-center group-hover:bg-amber-500/20 transition-colors duration-200">
+                        <div className="w-8 h-8 rounded-full bg-neutral-800/30 flex items-center justify-center group-hover:bg-amber-500/20 transition-colors duration-200">
                           <Mail className="h-3.5 w-3.5 text-gray-500 group-hover:text-amber-400 transition-colors duration-200" />
                         </div>
                         <span className="text-sm break-all">akinalaka@bauhaus-education.co.uk</span>
@@ -212,13 +212,13 @@ export default function Contact() {
 
           {/* Divider */}
           <div className="flex justify-center mb-12 md:mb-16 lg:mb-20">
-            <div className="w-24 h-0.5 bg-gradient-to-r from-transparent via-amber-500/50 to-transparent" />
+            <div className="w-24 h-0.5 bg-gradient-to-r from-transparent via-amber-500/30 to-transparent" />
           </div>
 
-          {/* Publishing Submission Section */}
+          {/* Publishing Submission Section - Borderless Design */}
           <div className="relative group">
             <div className="absolute -inset-0.5 bg-gradient-to-r from-amber-500/10 via-neutral-900/10 to-amber-500/10 rounded-2xl blur-xl group-hover:blur-2xl transition-all duration-500" />
-            <div className="relative bg-gradient-to-b from-neutral-900/30 to-neutral-900/10 backdrop-blur-sm border border-neutral-800/30 rounded-2xl p-8 md:p-12 lg:p-16 hover:border-amber-500/20 transition-all duration-300 overflow-hidden">
+            <div className="relative bg-gradient-to-b from-neutral-900/20 to-neutral-900/10 backdrop-blur-sm rounded-2xl p-8 md:p-12 lg:p-16 hover:bg-neutral-900/30 transition-all duration-300 overflow-hidden">
               {/* Background Pattern */}
               <div className="absolute inset-0 opacity-5">
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(251,191,36,0.1),transparent_50%)]" />
@@ -239,7 +239,7 @@ export default function Contact() {
                 
                 <div className="grid lg:grid-cols-2 gap-8 md:gap-10 mb-10 md:mb-12">
                   <div className="space-y-5 md:space-y-6">
-                    <div className="bg-neutral-900/30 backdrop-blur-sm rounded-xl p-6 border border-neutral-800/50">
+                    <div className="bg-neutral-900/20 backdrop-blur-sm rounded-xl p-6 hover:bg-neutral-900/30 transition-all duration-300">
                       <h3 className="text-white font-medium text-lg mb-4 flex items-center gap-3">
                         <BookOpen className="h-5 w-5 text-amber-500" />
                         Our Approach
@@ -256,7 +256,7 @@ export default function Contact() {
                   </div>
                   
                   <div className="space-y-5 md:space-y-6">
-                    <div className="bg-neutral-900/30 backdrop-blur-sm rounded-xl p-6 border border-neutral-800/50">
+                    <div className="bg-neutral-900/20 backdrop-blur-sm rounded-xl p-6 hover:bg-neutral-900/30 transition-all duration-300">
                       <h3 className="text-white font-medium text-lg mb-4 flex items-center gap-3">
                         <Send className="h-5 w-5 text-amber-500" />
                         Submission Guidelines
@@ -296,7 +296,7 @@ export default function Contact() {
           
           {/* Bottom Divider */}
           <div className="mt-16 md:mt-20 lg:mt-24">
-            <div className="w-full h-px bg-gradient-to-r from-transparent via-neutral-800 to-transparent" />
+            <div className="w-full h-px bg-gradient-to-r from-transparent via-neutral-800/30 to-transparent" />
           </div>
         </div>
       </section>
