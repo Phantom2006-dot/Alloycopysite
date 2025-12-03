@@ -1,9 +1,21 @@
 import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
+import { useEffect } from "react"; // Add this import
 
 const ThemeToggle = () => {
   const { theme, setTheme } = useTheme();
+
+  // Add this useEffect to force dark mode on initial load
+  useEffect(() => {
+    // Check if theme is saved in localStorage
+    const savedTheme = localStorage.getItem("your-theme-key") || localStorage.getItem("theme");
+    
+    // If no theme is saved (first visit) or it's light mode, force dark mode
+    if (!savedTheme || savedTheme === "light") {
+      setTheme("dark");
+    }
+  }, [setTheme]);
 
   return (
     <Button
