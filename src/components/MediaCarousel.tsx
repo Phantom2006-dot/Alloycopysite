@@ -1,5 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import useEmblaCarousel from "embla-carousel-react";
+import Autoplay from "embla-carousel-autoplay";
 
 interface MediaItem {
   id: number;
@@ -13,39 +14,62 @@ interface MediaCarouselProps {
 }
 
 const MediaCarousel = ({ items }: MediaCarouselProps) => {
-  const [emblaRef, emblaApi] = useEmblaCarousel({
-    loop: true,
-    align: "center",
-    skipSnaps: false,
-  });
+  const [emblaRef, emblaApi] = useEmblaCarousel(
+    {
+      loop: true,
+      align: "center",
+      skipSnaps: false,
+      dragFree: false,
+    },
+    [
+      Autoplay({
+        delay: 4000,
+        stopOnInteraction: false,
+        stopOnMouseEnter: true,
+        playOnInit: true,
+      }),
+    ]
+  );
   const [selectedIndex, setSelectedIndex] = useState(0);
+
+  const onSelect = useCallback(() => {
+    if (!emblaApi) return;
+    setSelectedIndex(emblaApi.selectedScrollSnap());
+  }, [emblaApi]);
 
   useEffect(() => {
     if (!emblaApi) return;
 
-    const onSelect = () => {
-      setSelectedIndex(emblaApi.selectedScrollSnap());
-    };
-
     emblaApi.on("select", onSelect);
+    emblaApi.on("reInit", onSelect);
     onSelect();
 
     return () => {
       emblaApi.off("select", onSelect);
+      emblaApi.off("reInit", onSelect);
     };
-  }, [emblaApi]);
+  }, [emblaApi, onSelect]);
+
+  const scrollTo = useCallback(
+    (index: number) => {
+      if (!emblaApi) return;
+      emblaApi.scrollTo(index);
+    },
+    [emblaApi]
+  );
 
   return (
     <div className="relative">
       <div className="overflow-hidden" ref={emblaRef}>
-        <div className="flex">
+        <div className="flex touch-pan-y">
           {items.map((item, index) => (
             <div
               key={item.id}
-              className="relative flex-[0_0_60%] md:flex-[0_0_35%] lg:flex-[0_0_25%] min-w-0 px-2 md:px-4 transition-all duration-300"
+              className="relative flex-[0_0_60%] md:flex-[0_0_35%] lg:flex-[0_0_25%] min-w-0 px-2 md:px-4"
               style={{
                 transform: index === selectedIndex ? "scale(1.05)" : "scale(0.95)",
                 opacity: index === selectedIndex ? 1 : 0.6,
+                transition: "transform 0.5s cubic-bezier(0.25, 0.1, 0.25, 1), opacity 0.5s cubic-bezier(0.25, 0.1, 0.25, 1)",
               }}
             >
               <div className="aspect-[2/3] overflow-hidden bg-secondary">
@@ -53,6 +77,7 @@ const MediaCarousel = ({ items }: MediaCarouselProps) => {
                   src={item.image}
                   alt={item.title}
                   className="h-full w-full object-cover"
+                  draggable="false"
                 />
               </div>
             </div>
@@ -60,17 +85,18 @@ const MediaCarousel = ({ items }: MediaCarouselProps) => {
         </div>
       </div>
 
-      {/* Dots */}
       <div className="flex justify-center gap-2 mt-6">
         {items.map((_, index) => (
           <button
             key={index}
-            onClick={() => emblaApi?.scrollTo(index)}
-            className={`w-2 h-2 rounded-full transition-all ${
+            onClick={() => scrollTo(index)}
+            className={`w-2 h-2 rounded-full transition-all duration-300 ${
               index === selectedIndex
-                ? "bg-foreground"
+                ? "bg-foreground scale-125"
                 : "bg-foreground/30"
             }`}
+            data-testid={`carousel-dot-${index}`}
+            aria-label={`Go to slide ${index + 1}`}
           />
         ))}
       </div>
