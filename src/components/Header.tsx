@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Menu, X } from "lucide-react";
 import { useTheme } from "next-themes";
 import ThemeToggle from "./ThemeToggle";
-import logoDark from "@/assets/logo-dark.svg";
+import logoDark from "@/assets/5.svg"; // Changed from logo-dark.svg to 5.svg
 import logoLight from "@/assets/logo-light.svg";
 
 const Header = () => {
@@ -45,12 +45,12 @@ const Header = () => {
             ))}
           </ul>
 
-          {/* Center Logo */}
+          {/* Center Logo - Made Bigger */}
           <Link to="/" className="flex flex-col items-center mx-8">
             <img 
               src={resolvedTheme === "dark" ? logoLight : logoDark} 
               alt="BAUHAUS Logo" 
-              className="h-12 w-auto"
+              className="h-16 w-auto" {/* Changed from h-12 to h-16 for bigger logo */}
             />
             <span className="text-xs tracking-[0.2em] font-medium mt-1 uppercase">
               BAUHAUS
@@ -81,7 +81,7 @@ const Header = () => {
             <img 
               src={resolvedTheme === "dark" ? logoLight : logoDark} 
               alt="BAUHAUS Logo" 
-              className="h-8 w-auto"
+              className="h-10 w-auto" {/* Changed from h-8 to h-10 for bigger mobile logo */}
             />
             <span className="text-xs tracking-[0.15em] font-medium uppercase">
               BAUHAUS
