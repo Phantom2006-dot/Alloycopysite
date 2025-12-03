@@ -50,7 +50,7 @@ const Header = () => {
             <img 
               src={resolvedTheme === "dark" ? logoLight : logoDark} 
               alt="BAUHAUS Logo" 
-              className="h-16 w-auto"
+              className="h-24 w-auto"
             />
             <span className="text-xs tracking-[0.2em] font-medium mt-1 uppercase">
               BAUHAUS
@@ -81,7 +81,7 @@ const Header = () => {
             <img 
               src={resolvedTheme === "dark" ? logoLight : logoDark} 
               alt="BAUHAUS Logo" 
-              className="h-10 w-auto"
+              className="h-16 w-auto"
             />
             <span className="text-xs tracking-[0.15em] font-medium uppercase">
               BAUHAUS
