@@ -1,0 +1,218 @@
+import { Router, Request, Response } from "express";
+import multer from "multer";
+import sharp from "sharp";
+import path from "path";
+import fs from "fs";
+import { fileURLToPath } from "url";
+import { db } from "../db";
+import { uploads } from "../../shared/schema";
+import { eq, desc, ilike, and, sql, SQL } from "drizzle-orm";
+import { authenticateToken, requireRole, AuthRequest } from "../middleware/auth";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const router = Router();
+
+const uploadsDir = path.join(__dirname, "../../uploads");
+const imagesDir = path.join(uploadsDir, "images");
+const thumbnailsDir = path.join(uploadsDir, "thumbnails");
+const documentsDir = path.join(uploadsDir, "documents");
+
+[imagesDir, thumbnailsDir, documentsDir].forEach(dir => {
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
+});
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const isImage = file.mimetype.startsWith("image/");
+    cb(null, isImage ? imagesDir : documentsDir);
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    const ext = path.extname(file.originalname);
+    cb(null, `${uniqueSuffix}${ext}`);
+  },
+});
+
+const fileFilter = (req: Request, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
+  const allowedTypes = [
+    "image/jpeg",
+    "image/png",
+    "image/gif",
+    "image/webp",
+    "application/pdf",
+    "application/msword",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  ];
+
+  if (allowedTypes.includes(file.mimetype)) {
+    cb(null, true);
+  } else {
+    cb(new Error("Invalid file type"));
+  }
+};
+
+const upload = multer({
+  storage,
+  fileFilter,
+  limits: {
+    fileSize: 10 * 1024 * 1024,
+  },
+});
+
+router.get("/", authenticateToken, async (req: AuthRequest, res: Response) => {
+  try {
+    const { page = "1", limit = "20", folder, search } = req.query;
+    const pageNum = parseInt(page as string);
+    const limitNum = parseInt(limit as string);
+    const offset = (pageNum - 1) * limitNum;
+
+    let conditions: SQL<unknown>[] = [];
+    
+    if (folder) {
+      conditions.push(eq(uploads.folder, folder as string));
+    }
+
+    if (search) {
+      conditions.push(ilike(uploads.originalName, `%${search}%`));
+    }
+
+    const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
+
+    const uploadsList = await db
+      .select()
+      .from(uploads)
+      .where(whereClause)
+      .orderBy(desc(uploads.createdAt))
+      .limit(limitNum)
+      .offset(offset);
+
+    const [{ count }] = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(uploads)
+      .where(whereClause);
+
+    res.json({
+      uploads: uploadsList,
+      pagination: {
+        page: pageNum,
+        limit: limitNum,
+        total: Number(count),
+        pages: Math.ceil(Number(count) / limitNum),
+      },
+    });
+  } catch (error) {
+    console.error("Get uploads error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+router.post("/", authenticateToken, requireRole("super_admin", "editor", "author"), upload.single("file"), async (req: AuthRequest, res: Response) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: "No file uploaded" });
+    }
+
+    const { alt, folder } = req.body;
+    const file = req.file;
+    const isImage = file.mimetype.startsWith("image/");
+
+    let thumbnailPath: string | null = null;
+
+    if (isImage && file.mimetype !== "image/gif") {
+      const thumbnailFilename = `thumb-${file.filename}`;
+      thumbnailPath = path.join("thumbnails", thumbnailFilename);
+      
+      await sharp(file.path)
+        .resize(300, 300, { fit: "cover" })
+        .toFile(path.join(thumbnailsDir, thumbnailFilename));
+    }
+
+    const relativePath = isImage ? path.join("images", file.filename) : path.join("documents", file.filename);
+
+    const [newUpload] = await db.insert(uploads).values({
+      filename: file.filename,
+      originalName: file.originalname,
+      mimeType: file.mimetype,
+      size: file.size,
+      path: relativePath,
+      thumbnailPath,
+      alt,
+      folder,
+      uploadedBy: req.user!.id,
+    }).returning();
+
+    res.status(201).json({
+      ...newUpload,
+      url: `/uploads/${relativePath}`,
+      thumbnailUrl: thumbnailPath ? `/uploads/${thumbnailPath}` : null,
+    });
+  } catch (error) {
+    console.error("Upload error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+router.delete("/:id", authenticateToken, requireRole("super_admin", "editor"), async (req: AuthRequest, res: Response) => {
+  try {
+    const { id } = req.params;
+    const uploadId = parseInt(id);
+
+    const [existingUpload] = await db.select().from(uploads).where(eq(uploads.id, uploadId));
+    if (!existingUpload) {
+      return res.status(404).json({ message: "Upload not found" });
+    }
+
+    const filePath = path.join(uploadsDir, existingUpload.path);
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
+    }
+
+    if (existingUpload.thumbnailPath) {
+      const thumbPath = path.join(uploadsDir, existingUpload.thumbnailPath);
+      if (fs.existsSync(thumbPath)) {
+        fs.unlinkSync(thumbPath);
+      }
+    }
+
+    await db.delete(uploads).where(eq(uploads.id, uploadId));
+
+    res.json({ message: "Upload deleted successfully" });
+  } catch (error) {
+    console.error("Delete upload error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+router.put("/:id", authenticateToken, requireRole("super_admin", "editor", "author"), async (req: AuthRequest, res: Response) => {
+  try {
+    const { id } = req.params;
+    const uploadId = parseInt(id);
+    const { alt, folder } = req.body;
+
+    const [existingUpload] = await db.select().from(uploads).where(eq(uploads.id, uploadId));
+    if (!existingUpload) {
+      return res.status(404).json({ message: "Upload not found" });
+    }
+
+    const updates: any = {};
+    if (alt !== undefined) updates.alt = alt;
+    if (folder !== undefined) updates.folder = folder;
+
+    const [updatedUpload] = await db.update(uploads).set(updates).where(eq(uploads.id, uploadId)).returning();
+
+    res.json({
+      ...updatedUpload,
+      url: `/uploads/${updatedUpload.path}`,
+      thumbnailUrl: updatedUpload.thumbnailPath ? `/uploads/${updatedUpload.thumbnailPath}` : null,
+    });
+  } catch (error) {
+    console.error("Update upload error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+export default router;
