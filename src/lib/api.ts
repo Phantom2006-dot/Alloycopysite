@@ -1,0 +1,185 @@
+const API_BASE = "/api";
+
+interface RequestOptions {
+  method?: string;
+  body?: any;
+  headers?: Record<string, string>;
+}
+
+async function request<T>(endpoint: string, options: RequestOptions = {}): Promise<T> {
+  const { method = "GET", body, headers = {} } = options;
+  
+  const token = localStorage.getItem("auth_token");
+  
+  const config: RequestInit = {
+    method,
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...headers,
+    },
+  };
+
+  if (body) {
+    config.body = JSON.stringify(body);
+  }
+
+  const response = await fetch(`${API_BASE}${endpoint}`, config);
+  
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ message: "Request failed" }));
+    throw new Error(error.message || "Request failed");
+  }
+
+  return response.json();
+}
+
+export const api = {
+  auth: {
+    login: (username: string, password: string) =>
+      request<{ token: string; user: any }>("/auth/login", {
+        method: "POST",
+        body: { username, password },
+      }),
+    register: (data: { username: string; email: string; password: string; name: string }) =>
+      request<{ token: string; user: any }>("/auth/register", {
+        method: "POST",
+        body: data,
+      }),
+    me: () => request<any>("/auth/me"),
+    logout: () => request<{ message: string }>("/auth/logout", { method: "POST" }),
+  },
+
+  articles: {
+    list: (params?: { page?: number; limit?: number; category?: string; search?: string; status?: string }) => {
+      const searchParams = new URLSearchParams();
+      if (params?.page) searchParams.set("page", params.page.toString());
+      if (params?.limit) searchParams.set("limit", params.limit.toString());
+      if (params?.category) searchParams.set("category", params.category);
+      if (params?.search) searchParams.set("search", params.search);
+      if (params?.status) searchParams.set("status", params.status);
+      return request<{ articles: any[]; pagination: any }>(`/articles?${searchParams}`);
+    },
+    featured: () => request<any[]>("/articles/featured"),
+    byCategory: (slug: string, page = 1) =>
+      request<{ category: any; articles: any[] }>(`/articles/category/${slug}?page=${page}`),
+    byAuthor: (id: number, page = 1) =>
+      request<{ author: any; articles: any[] }>(`/articles/author/${id}?page=${page}`),
+    getBySlug: (slug: string) => request<any>(`/articles/${slug}`),
+    create: (data: any) => request<any>("/articles", { method: "POST", body: data }),
+    update: (id: number, data: any) => request<any>(`/articles/${id}`, { method: "PUT", body: data }),
+    delete: (id: number) => request<{ message: string }>(`/articles/${id}`, { method: "DELETE" }),
+    adminList: (params?: { page?: number; limit?: number; status?: string; search?: string }) => {
+      const searchParams = new URLSearchParams();
+      if (params?.page) searchParams.set("page", params.page.toString());
+      if (params?.limit) searchParams.set("limit", params.limit.toString());
+      if (params?.status) searchParams.set("status", params.status);
+      if (params?.search) searchParams.set("search", params.search);
+      return request<{ articles: any[]; pagination: any }>(`/articles/admin/all?${searchParams}`);
+    },
+  },
+
+  categories: {
+    list: () => request<any[]>("/categories"),
+    get: (slug: string) => request<any>(`/categories/${slug}`),
+    create: (data: { name: string; description?: string }) =>
+      request<any>("/categories", { method: "POST", body: data }),
+    update: (id: number, data: { name?: string; description?: string }) =>
+      request<any>(`/categories/${id}`, { method: "PUT", body: data }),
+    delete: (id: number) => request<{ message: string }>(`/categories/${id}`, { method: "DELETE" }),
+  },
+
+  tags: {
+    list: () => request<any[]>("/tags"),
+    create: (name: string) => request<any>("/tags", { method: "POST", body: { name } }),
+    delete: (id: number) => request<{ message: string }>(`/tags/${id}`, { method: "DELETE" }),
+  },
+
+  media: {
+    list: (params?: { page?: number; limit?: number; type?: string; search?: string; featured?: boolean }) => {
+      const searchParams = new URLSearchParams();
+      if (params?.page) searchParams.set("page", params.page.toString());
+      if (params?.limit) searchParams.set("limit", params.limit.toString());
+      if (params?.type) searchParams.set("type", params.type);
+      if (params?.search) searchParams.set("search", params.search);
+      if (params?.featured) searchParams.set("featured", "true");
+      return request<{ items: any[]; pagination: any }>(`/media?${searchParams}`);
+    },
+    featured: () => request<any[]>("/media/featured"),
+    byType: (type: string, page = 1) => request<any[]>(`/media/type/${type}?page=${page}`),
+    get: (id: number) => request<any>(`/media/${id}`),
+    create: (data: any) => request<any>("/media", { method: "POST", body: data }),
+    update: (id: number, data: any) => request<any>(`/media/${id}`, { method: "PUT", body: data }),
+    delete: (id: number) => request<{ message: string }>(`/media/${id}`, { method: "DELETE" }),
+    adminList: (params?: { page?: number; limit?: number; type?: string; status?: string; search?: string }) => {
+      const searchParams = new URLSearchParams();
+      if (params?.page) searchParams.set("page", params.page.toString());
+      if (params?.limit) searchParams.set("limit", params.limit.toString());
+      if (params?.type) searchParams.set("type", params.type);
+      if (params?.status) searchParams.set("status", params.status);
+      if (params?.search) searchParams.set("search", params.search);
+      return request<{ items: any[]; pagination: any }>(`/media/admin/all?${searchParams}`);
+    },
+  },
+
+  team: {
+    list: () => request<any[]>("/team"),
+    byDepartment: (department: string) => request<any[]>(`/team/department/${department}`),
+    get: (id: number) => request<any>(`/team/${id}`),
+    create: (data: any) => request<any>("/team", { method: "POST", body: data }),
+    update: (id: number, data: any) => request<any>(`/team/${id}`, { method: "PUT", body: data }),
+    delete: (id: number) => request<{ message: string }>(`/team/${id}`, { method: "DELETE" }),
+    adminList: () => request<any[]>("/team/admin/all"),
+  },
+
+  events: {
+    list: (params?: { page?: number; limit?: number; status?: string }) => {
+      const searchParams = new URLSearchParams();
+      if (params?.page) searchParams.set("page", params.page.toString());
+      if (params?.limit) searchParams.set("limit", params.limit.toString());
+      if (params?.status) searchParams.set("status", params.status);
+      return request<{ events: any[]; pagination: any }>(`/events?${searchParams}`);
+    },
+    upcoming: () => request<any[]>("/events/upcoming"),
+    past: () => request<any[]>("/events/past"),
+    get: (slug: string) => request<any>(`/events/${slug}`),
+    create: (data: any) => request<any>("/events", { method: "POST", body: data }),
+    update: (id: number, data: any) => request<any>(`/events/${id}`, { method: "PUT", body: data }),
+    delete: (id: number) => request<{ message: string }>(`/events/${id}`, { method: "DELETE" }),
+    adminList: () => request<any[]>("/events/admin/all"),
+  },
+
+  uploads: {
+    list: (params?: { page?: number; limit?: number; folder?: string; search?: string }) => {
+      const searchParams = new URLSearchParams();
+      if (params?.page) searchParams.set("page", params.page.toString());
+      if (params?.limit) searchParams.set("limit", params.limit.toString());
+      if (params?.folder) searchParams.set("folder", params.folder);
+      if (params?.search) searchParams.set("search", params.search);
+      return request<{ uploads: any[]; pagination: any }>(`/uploads?${searchParams}`);
+    },
+    upload: async (file: File, alt?: string, folder?: string) => {
+      const formData = new FormData();
+      formData.append("file", file);
+      if (alt) formData.append("alt", alt);
+      if (folder) formData.append("folder", folder);
+
+      const token = localStorage.getItem("auth_token");
+      const response = await fetch(`${API_BASE}/uploads`, {
+        method: "POST",
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({ message: "Upload failed" }));
+        throw new Error(error.message);
+      }
+
+      return response.json();
+    },
+    update: (id: number, data: { alt?: string; folder?: string }) =>
+      request<any>(`/uploads/${id}`, { method: "PUT", body: data }),
+    delete: (id: number) => request<{ message: string }>(`/uploads/${id}`, { method: "DELETE" }),
+  },
+};
