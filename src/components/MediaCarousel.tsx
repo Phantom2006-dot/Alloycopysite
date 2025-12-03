@@ -1,6 +1,4 @@
 import { useState, useEffect, useCallback } from "react";
-import useEmblaCarousel from "embla-carousel-react";
-import Autoplay from "embla-carousel-autoplay";
 
 interface MediaItem {
   id: number;
@@ -14,74 +12,111 @@ interface MediaCarouselProps {
 }
 
 const MediaCarousel = ({ items }: MediaCarouselProps) => {
-  const [emblaRef, emblaApi] = useEmblaCarousel(
-    {
-      loop: true,
-      align: "center",
-      skipSnaps: false,
-      dragFree: false,
-    },
-    [
-      Autoplay({
-        delay: 4000,
-        stopOnInteraction: false,
-        stopOnMouseEnter: true,
-        playOnInit: true,
-      }),
-    ]
-  );
-  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
 
-  const onSelect = useCallback(() => {
-    if (!emblaApi) return;
-    setSelectedIndex(emblaApi.selectedScrollSnap());
-  }, [emblaApi]);
+  const getVisibleItems = useCallback(() => {
+    const total = items.length;
+    if (total === 0) return [];
+    
+    const indices = [];
+    for (let i = -2; i <= 2; i++) {
+      let index = (currentIndex + i + total) % total;
+      indices.push(index);
+    }
+    return indices;
+  }, [currentIndex, items.length]);
+
+  const goToNext = useCallback(() => {
+    if (isTransitioning) return;
+    
+    setIsTransitioning(true);
+    
+    setTimeout(() => {
+      setCurrentIndex((prev) => (prev + 1) % items.length);
+      setIsTransitioning(false);
+    }, 400);
+  }, [items.length, isTransitioning]);
+
+  const scrollTo = useCallback((index: number) => {
+    if (isTransitioning || index === currentIndex) return;
+    
+    setIsTransitioning(true);
+    
+    setTimeout(() => {
+      setCurrentIndex(index);
+      setIsTransitioning(false);
+    }, 400);
+  }, [currentIndex, isTransitioning]);
 
   useEffect(() => {
-    if (!emblaApi) return;
+    if (isPaused) return;
+    
+    const interval = setInterval(() => {
+      goToNext();
+    }, 4000);
 
-    emblaApi.on("select", onSelect);
-    emblaApi.on("reInit", onSelect);
-    onSelect();
+    return () => clearInterval(interval);
+  }, [goToNext, isPaused]);
 
-    return () => {
-      emblaApi.off("select", onSelect);
-      emblaApi.off("reInit", onSelect);
+  const visibleIndices = getVisibleItems();
+
+  const getSlideStyle = (position: number) => {
+    const isCenter = position === 2;
+    
+    return {
+      opacity: isCenter 
+        ? (isTransitioning ? 0 : 1) 
+        : (isCenter ? 1 : 0.6),
+      transform: isCenter ? "scale(1.05)" : "scale(0.95)",
+      transition: isCenter 
+        ? "opacity 0.4s cubic-bezier(0.25, 0.1, 0.25, 1), transform 0.4s cubic-bezier(0.25, 0.1, 0.25, 1)"
+        : "none",
     };
-  }, [emblaApi, onSelect]);
+  };
 
-  const scrollTo = useCallback(
-    (index: number) => {
-      if (!emblaApi) return;
-      emblaApi.scrollTo(index);
-    },
-    [emblaApi]
-  );
+  if (items.length === 0) return null;
 
   return (
-    <div className="relative">
-      <div className="overflow-hidden" ref={emblaRef}>
-        <div className="flex touch-pan-y">
-          {items.map((item, index) => (
-            <div
-              key={item.id}
-              className="relative flex-[0_0_60%] md:flex-[0_0_35%] lg:flex-[0_0_25%] min-w-0 px-2 md:px-4"
-              style={{
-                transform: index === selectedIndex ? "scale(1.05)" : "scale(0.95)",
-                opacity: index === selectedIndex ? 1 : 0.6,
-                transition: "transform 0.5s cubic-bezier(0.25, 0.1, 0.25, 1), opacity 0.5s cubic-bezier(0.25, 0.1, 0.25, 1)",
-              }}
-            >
-              <div className="aspect-[2/3] overflow-hidden bg-secondary">
-                <img
-                  src={item.image}
-                  alt={item.title}
-                  className="h-full w-full object-cover"
-                  draggable="false"
-                />
+    <div 
+      className="relative"
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
+    >
+      <div className="overflow-hidden">
+        <div className="flex justify-center items-center gap-2 md:gap-4">
+          {visibleIndices.map((itemIndex, position) => {
+            const item = items[itemIndex];
+            const isCenter = position === 2;
+            
+            return (
+              <div
+                key={`${position}-${itemIndex}`}
+                className={`relative flex-shrink-0 ${
+                  position === 0 || position === 4 
+                    ? "hidden lg:block w-[15%]" 
+                    : position === 1 || position === 3
+                    ? "w-[20%] md:w-[18%]"
+                    : "w-[45%] md:w-[30%] lg:w-[25%]"
+                }`}
+                style={getSlideStyle(position)}
+              >
+                <div 
+                  className={`aspect-[2/3] overflow-hidden bg-secondary ${
+                    isCenter ? "shadow-2xl" : ""
+                  }`}
+                >
+                  <img
+                    src={item.image}
+                    alt={item.title}
+                    className="h-full w-full object-cover"
+                    draggable="false"
+                  />
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 
@@ -91,7 +126,7 @@ const MediaCarousel = ({ items }: MediaCarouselProps) => {
             key={index}
             onClick={() => scrollTo(index)}
             className={`w-2 h-2 rounded-full transition-all duration-300 ${
-              index === selectedIndex
+              index === currentIndex
                 ? "bg-foreground scale-125"
                 : "bg-foreground/30"
             }`}
