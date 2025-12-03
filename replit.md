@@ -87,3 +87,41 @@ Preferred communication style: Simple, everyday language.
 - Public folder for static assets (robots.txt, logos)
 - Logo variants for light/dark themes (5.svg for dark, logo-light.svg for light)
 - Unsplash images used as placeholder content throughout
+
+## CMS (Content Management System)
+
+### Database Schema
+PostgreSQL database with Drizzle ORM:
+- **users**: Admin users with roles (super_admin, editor, author, contributor)
+- **articles**: Blog posts with categories, tags, and SEO metadata
+- **categories**: Article categories (Books, Films, Events, Publishing, News, TV, Tourism)
+- **tags**: Article tags with many-to-many relationship
+- **media_items**: Books, films, TV shows catalog
+- **team_members**: Company team members
+- **events**: Company events and screenings
+- **uploads**: Media library for uploaded files
+
+### Backend API
+Express.js backend running on port 5000:
+- JWT authentication with role-based access control
+- RESTful API endpoints for all content types
+- File upload with Sharp for image processing
+- Pagination and filtering support
+
+### Admin Panel
+Located at `/admin`:
+- **Login**: `/admin/login` (credentials: admin/admin123)
+- **Dashboard**: `/admin` - Overview with stats and quick actions
+- **Articles**: `/admin/articles` - Article management with CRUD
+- **Article Editor**: `/admin/articles/:id` - Rich text editing with SEO settings
+
+### Blog Frontend
+Public-facing blog pages:
+- **Blog List**: `/blog` - Articles with category filters and search
+- **Blog Article**: `/blog/:slug` - Full article with author info and sharing
+
+### User Roles
+- **super_admin**: Full access to all features
+- **editor**: Content management, can publish articles
+- **author**: Can create/edit own articles, cannot publish
+- **contributor**: Limited access
