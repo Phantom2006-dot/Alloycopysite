@@ -1,0 +1,222 @@
+       
+I need to build a complete CMS (Content Management System) with a blog for my BAUHAUS website - a Nigerian cultural company operating across Books, Films/TV, Publishing, and Tourism verticals.
+## CURRENT SITE STRUCTURE
+**Technology Stack:**
+- Frontend: React 18.3.1 with Vite
+- Routing: React Router DOM
+- Styling: Tailwind CSS with shadcn/ui components
+- State: TanStack React Query
+- Carousel: Embla Carousel with autoplay
+- Theme: Light/Dark mode with next-themes
+**Existing Pages:**
+- Home (/) - Hero section + media carousel
+- About (/about)
+- Books (/books) - Book catalog with carousel
+- Films (/film) - Film catalog with carousel  
+- TV (/tv) - TV shows with carousel
+- Publishing (/publishing)
+- Events (/events)
+- Team (/team)
+- Contact (/contact)
+**Design Style:** Clean, minimalist, professional - similar to alloyentertainment.com
+---
+## CMS REQUIREMENTS
+### 1. Content Types to Manage
+**A. Blog Posts / Articles**
+- Title, slug (URL-friendly)
+- Featured image with alt text
+- Rich text content (with embedded images, videos, quotes)
+- Excerpt/summary
+- Category (Books, Films, TV, Publishing, Events, Tourism, News)
+- Tags (multiple)
+- Author (with profile picture, bio, social links)
+- Publish date, scheduled publishing
+- Featured/sticky post option
+- SEO fields (meta title, meta description, OG image)
+- Reading time (auto-calculated)
+- View count tracking
+**B. Media Library Items (Books, Films, TV Shows)**
+- Title, description
+- Cover image/poster
+- Type (book/film/tv)
+- Release date/year
+- Genre/category
+- Cast/Author information
+- External links (streaming, purchase)
+- Featured status
+- Gallery images
+- Trailer/video embed
+**C. Team Members**
+- Name, role/position
+- Profile photo
+- Bio
+- Social media links
+- Department (Books, Films, Publishing, etc.)
+- Order/sorting
+**D. Events**
+- Title, description
+- Event date/time
+- Location (physical address or virtual link)
+- Featured image
+- Registration link
+- Event type (premiere, book launch, festival, etc.)
+- Status (upcoming, ongoing, past)
+**E. Pages (Static Content)**
+- About page content
+- Contact information
+- Publishing services
+- Tourism information
+---
+### 2. Admin Panel Features
+**User Roles & Permissions:**
+- Super Admin: Full access to everything
+- Editor: Create, edit, publish all content
+- Author: Create and edit own content, submit for review
+- Contributor: Create drafts only
+**Dashboard:**
+- Quick stats (total posts, views, new comments)
+- Recent activity log
+- Scheduled posts overview
+- Quick actions (new post, new media)
+**Content Management:**
+- WYSIWYG rich text editor (like TipTap or Slate)
+- Drag-and-drop image upload
+- Image cropping and optimization
+- Draft/Published/Scheduled status
+- Version history
+- Preview before publishing
+- Bulk actions (delete, publish, unpublish)
+**Media Library:**
+- Centralized media storage
+- Image optimization (auto-generate thumbnails)
+- Folder organization
+- Search and filter
+- CDN integration for fast delivery
+---
+### 3. Blog Features (Frontend)
+**Blog Listing Page (/blog)**
+- Grid layout with featured post at top
+- Category filter tabs
+- Pagination or infinite scroll
+- Search functionality
+- Recent posts sidebar
+**Single Article Page (/blog/[slug])**
+- Hero image
+- Title, author, date, reading time
+- Rich content with proper typography
+- Share buttons (Twitter, Facebook, LinkedIn, WhatsApp)
+- Related posts section
+- Author bio card
+- Previous/Next navigation
+- Table of contents for long articles
+**Category Pages (/blog/category/[category])**
+- Filtered posts by category
+- Category description
+**Author Pages (/blog/author/[author])**
+- Author profile with all their posts
+---
+### 4. API Endpoints Required
+Articles/Blog
+GET /api/articles - List all (with pagination, filters)
+GET /api/articles/:slug - Get single by slug
+GET /api/articles/featured - Get featured articles
+GET /api/articles/category/:cat - Filter by category
+GET /api/articles/author/:id - Filter by author
+POST /api/articles - Create (admin only)
+PUT /api/articles/:id - Update (admin only)
+DELETE /api/articles/:id - Delete (admin only)
+
+Media Items (Books, Films, TV)
+GET /api/media - List all media
+GET /api/media/:id - Get single
+GET /api/media/type/:type - Filter by type (book/film/tv)
+POST /api/media - Create (admin only)
+PUT /api/media/:id - Update (admin only)
+DELETE /api/media/:id - Delete (admin only)
+
+Team
+GET /api/team - List all members
+POST /api/team - Create (admin only)
+PUT /api/team/:id - Update (admin only)
+DELETE /api/team/:id - Delete (admin only)
+
+Events
+GET /api/events - List all
+GET /api/events/upcoming - Future events only
+POST /api/events - Create (admin only)
+PUT /api/events/:id - Update (admin only)
+DELETE /api/events/:id - Delete (admin only)
+
+Auth
+POST /api/auth/login - Admin login
+POST /api/auth/logout - Logout
+GET /api/auth/me - Get current user
+
+Upload
+POST /api/upload - Upload media file
+DELETE /api/upload/:id - Delete media file
+
+---
+### 5. Database Schema
+Use PostgreSQL with the following tables:
+- users (admin accounts)
+- articles (blog posts)
+- categories
+- tags
+- article_tags (many-to-many)
+- media_items (books, films, tv shows)
+- team_members
+- events
+- uploads (media library)
+- settings (site configuration)
+---
+### 6. Technical Requirements
+**Backend:**
+- Node.js with Express or similar
+- PostgreSQL database
+- JWT authentication for admin
+- File upload handling (local or cloud storage)
+- Image processing (sharp for optimization)
+- Input validation
+- Rate limiting
+- CORS configuration
+**Admin Panel Options:**
+Option A: Build custom React admin dashboard
+Option B: Use Strapi headless CMS
+Option C: Use Payload CMS (TypeScript native)
+**Frontend Integration:**
+- Use existing React Query setup for data fetching
+- Add new routes for blog pages
+- Create reusable components for article cards, etc.
+- Implement SEO with react-helmet or similar
+---
+### 7. Deployment Considerations
+- Backend API on same domain or subdomain
+- Database: Replit PostgreSQL or external (Neon, Supabase)
+- Media storage: Local or Cloudinary/S3
+- Environment variables for all secrets
+- Production build optimization
+---
+## PRIORITY ORDER
+1. Set up database and basic API structure
+2. Create admin authentication system
+3. Build article/blog CRUD operations
+4. Create admin panel for content management
+5. Add media library management
+6. Build frontend blog pages
+7. Integrate with existing pages (replace static data with API)
+8. Add SEO and performance optimizations
+9. Set up scheduled publishing
+10. Add analytics/view tracking
+---
+## DESIGN REFERENCE
+The blog should match the existing BAUHAUS site aesthetic:
+- Clean, minimal layout
+- Serif headings (Playfair Display) + Sans-serif body (Inter)
+- Plenty of whitespace
+- Professional, editorial feel
+- Smooth animations
+- Dark/light mode support
+Similar to alloyentertainment.com's blog structure where news and updates are cleanly organized by category with prominent imagery.
+---
+Please help me implement this CMS step by step, starting with the database schema and backend API, then the admin panel, and finally integrating the blog with my existing React frontend.
