@@ -63,3 +63,8 @@ externalPort = 3000
 [[ports]]
 localPort = 46035
 externalPort = 5000
+
+[userenv]
+
+[userenv.shared]
+BACKEND_MODE = "standalone"
