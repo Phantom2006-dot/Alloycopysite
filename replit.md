@@ -8,7 +8,7 @@ BAUHAUS is a Nigerian cultural company operating across multiple verticals: Book
 
 Preferred communication style: Simple, everyday language.
 
-## System Architecture
+## System Architecture...
 
 ### Frontend Architecture
 
