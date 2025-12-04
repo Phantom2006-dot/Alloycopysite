@@ -11,22 +11,28 @@ import mediaItemsRoutes from "./routes/mediaItems";
 import teamMembersRoutes from "./routes/teamMembers";
 import eventsRoutes from "./routes/events";
 import uploadsRoutes from "./routes/uploads";
-import { validateApiKey } from "./middleware/apiKey";
+import { validateApiKey, checkApiKeyConfigured } from "./middleware/apiKey";
 import { setupVite, serveStatic } from "./vite";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+const isStandaloneMode = process.env.BACKEND_MODE === "standalone";
+
+checkApiKeyConfigured();
 
 const app = express();
 const PORT = parseInt(process.env.PORT || "5000", 10);
 
 const allowedOrigins = process.env.ALLOWED_ORIGINS 
   ? process.env.ALLOWED_ORIGINS.split(",").map(origin => origin.trim())
-  : ["*"];
+  : isStandaloneMode ? [] : ["*"];
 
 app.use(cors({
   origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes("*") || allowedOrigins.includes(origin)) {
+    if (!origin && !isStandaloneMode) {
+      callback(null, true);
+    } else if (allowedOrigins.length === 0 || allowedOrigins.includes("*") || (origin && allowedOrigins.includes(origin))) {
       callback(null, true);
     } else {
       callback(new Error("Not allowed by CORS"));
@@ -48,8 +54,6 @@ app.get("/api/health", (_req: Request, res: Response) => {
     mode: process.env.BACKEND_MODE || "integrated"
   });
 });
-
-const isStandaloneMode = process.env.BACKEND_MODE === "standalone";
 
 if (isStandaloneMode) {
   app.use("/api", validateApiKey);

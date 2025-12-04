@@ -104,9 +104,40 @@ PostgreSQL database with Drizzle ORM:
 ### Backend API
 Express.js backend running on port 5000:
 - JWT authentication with role-based access control
+- API key authentication for separable backend mode
 - RESTful API endpoints for all content types
-- File upload with Sharp for image processing
+- Cloudinary integration for media storage
 - Pagination and filtering support
+
+### Separable Backend Architecture
+The backend can be hosted separately from the frontend and connected via API key:
+
+**Environment Variables:**
+- `BACKEND_MODE`: Set to "standalone" to disable frontend serving
+- `CMS_API_KEY`: Required API key for frontend-to-backend communication
+- `ALLOWED_ORIGINS`: Comma-separated list of allowed CORS origins
+
+**Running Modes:**
+1. **Integrated Mode** (default): `npm run dev` - Serves both frontend and backend
+2. **Standalone Mode**: `npm run start:standalone` - Backend only with API key required
+
+**Frontend Configuration:**
+Set these in `.env` for the frontend:
+- `VITE_API_URL`: Full URL to your backend API (e.g., https://api.example.com/api)
+- `VITE_API_KEY`: Your CMS API key
+
+### Cloudinary Media Storage
+Media uploads are stored in Cloudinary instead of local storage:
+
+**Required Secrets:**
+- `CLOUDINARY_CLOUD_NAME`: Your Cloudinary cloud name
+- `CLOUDINARY_API_KEY`: Your Cloudinary API key
+- `CLOUDINARY_API_SECRET`: Your Cloudinary API secret
+
+**Features:**
+- Automatic image optimization and thumbnails
+- CDN delivery for fast media access
+- Support for images and documents
 
 ### Admin Panel
 Located at `/admin`:
@@ -125,3 +156,15 @@ Public-facing blog pages:
 - **editor**: Content management, can publish articles
 - **author**: Can create/edit own articles, cannot publish
 - **contributor**: Limited access
+
+### API Endpoints
+All endpoints are prefixed with `/api`:
+- **Health**: `GET /api/health` - Server health check
+- **Auth**: `/api/auth/login`, `/api/auth/register`, `/api/auth/me`
+- **Articles**: `/api/articles` - Full CRUD with pagination
+- **Categories**: `/api/categories`
+- **Tags**: `/api/tags`
+- **Media Items**: `/api/media` - Books, films, TV content
+- **Team**: `/api/team` - Team members
+- **Events**: `/api/events`
+- **Uploads**: `/api/uploads` - Media library with Cloudinary
