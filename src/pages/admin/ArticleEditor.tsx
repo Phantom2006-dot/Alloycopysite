@@ -15,6 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import { ImageUpload } from "@/components/admin/ImageUpload";
 import { api } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
@@ -285,44 +286,18 @@ export default function ArticleEditor() {
               <CardHeader>
                 <CardTitle>Featured Image</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="featuredImage">Image URL</Label>
-                  <Input
-                    id="featuredImage"
-                    value={formData.featuredImage}
-                    onChange={(e) =>
-                      setFormData({ ...formData, featuredImage: e.target.value })
-                    }
-                    placeholder="https://example.com/image.jpg"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="featuredImageAlt">Alt Text</Label>
-                  <Input
-                    id="featuredImageAlt"
-                    value={formData.featuredImageAlt}
-                    onChange={(e) =>
-                      setFormData({ ...formData, featuredImageAlt: e.target.value })
-                    }
-                    placeholder="Describe the image"
-                  />
-                </div>
-
-                {formData.featuredImage && (
-                  <div className="rounded-md overflow-hidden border">
-                    <img
-                      src={formData.featuredImage}
-                      alt={formData.featuredImageAlt || "Preview"}
-                      className="w-full h-auto"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).src =
-                          "https://via.placeholder.com/400x200?text=Invalid+Image";
-                      }}
-                    />
-                  </div>
-                )}
+              <CardContent>
+                <ImageUpload
+                  value={formData.featuredImage}
+                  onChange={(url) =>
+                    setFormData({ ...formData, featuredImage: url })
+                  }
+                  altText={formData.featuredImageAlt}
+                  onAltTextChange={(alt) =>
+                    setFormData({ ...formData, featuredImageAlt: alt })
+                  }
+                  folder="articles"
+                />
               </CardContent>
             </Card>
 
