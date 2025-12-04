@@ -1,7 +1,19 @@
+import { useQuery } from "@tanstack/react-query";
 import Layout from "@/components/Layout";
 import MediaCarousel from "@/components/MediaCarousel";
+import { Card, CardContent } from "@/components/ui/card";
+import { Link } from "react-router-dom";
 
-const mediaItems = [
+interface MediaItem {
+  id: number;
+  title: string;
+  slug: string;
+  coverImage: string | null;
+  type: "book" | "film" | "tv";
+  isFeatured: boolean;
+}
+
+const fallbackItems = [
   { id: 1, title: "Nigerian Heritage", image: "https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=400&h=600&fit=crop", type: "book" as const },
   { id: 2, title: "Lagos Stories", image: "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=400&h=600&fit=crop", type: "book" as const },
   { id: 3, title: "Discover Nigeria", image: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=400&h=600&fit=crop", type: "film" as const },
@@ -11,9 +23,28 @@ const mediaItems = [
 ];
 
 const Index = () => {
+  const { data: mediaData } = useQuery<{ items: MediaItem[] }>({
+    queryKey: ["featured-media"],
+    queryFn: async () => {
+      const res = await fetch("/api/media?featured=true&limit=12");
+      if (!res.ok) throw new Error("Failed to fetch media");
+      return res.json();
+    },
+  });
+
+  const featuredItems = mediaData?.items || [];
+  
+  const carouselItems = featuredItems.length > 0 
+    ? featuredItems.map(item => ({
+        id: item.id,
+        title: item.title,
+        image: item.coverImage || "https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=400&h=600&fit=crop",
+        type: item.type,
+      }))
+    : fallbackItems;
+
   return (
     <Layout>
-      {/* Hero Section */}
       <section className="py-16 md:py-24 px-6 text-center">
         <div className="mx-auto max-w-4xl animate-fade-in">
           <h1 className="text-3xl md:text-4xl lg:text-5xl font-serif mb-6 leading-tight">
@@ -25,12 +56,13 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Media Carousel Section */}
       <section className="py-12 md:py-16">
-        <MediaCarousel items={mediaItems} />
+        <div className="px-6 mb-8">
+          <h2 className="text-xl font-serif text-center">Featured Content</h2>
+        </div>
+        <MediaCarousel items={carouselItems} />
       </section>
 
-      {/* Quote Section */}
       <section className="py-16 md:py-24 px-6">
         <div className="mx-auto max-w-4xl text-center animate-fade-in">
           <blockquote className="quote-text mb-6">
@@ -39,28 +71,39 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Services Overview */}
       <section className="pb-20 px-6">
         <div className="mx-auto max-w-5xl">
           <div className="grid md:grid-cols-3 gap-8 text-center">
-            <div className="p-6">
-              <h3 className="text-lg font-serif mb-3">Books & Publishing</h3>
-              <p className="text-sm text-muted-foreground">
-                Discover our catalog of compelling stories celebrating Nigerian culture and heritage.
-              </p>
-            </div>
-            <div className="p-6">
-              <h3 className="text-lg font-serif mb-3">Films & Documentaries</h3>
-              <p className="text-sm text-muted-foreground">
-                Visual storytelling that captures the essence of African narratives.
-              </p>
-            </div>
-            <div className="p-6">
-              <h3 className="text-lg font-serif mb-3">Tourism</h3>
-              <p className="text-sm text-muted-foreground">
-                Explore Lagos, Abuja, Akwa Ibom, and more with our comprehensive travel guides.
-              </p>
-            </div>
+            <Link to="/books" className="group">
+              <Card className="p-6 transition-shadow hover:shadow-lg">
+                <CardContent className="p-0">
+                  <h3 className="text-lg font-serif mb-3 group-hover:text-primary transition-colors">Books & Publishing</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Discover our catalog of compelling stories celebrating Nigerian culture and heritage.
+                  </p>
+                </CardContent>
+              </Card>
+            </Link>
+            <Link to="/film" className="group">
+              <Card className="p-6 transition-shadow hover:shadow-lg">
+                <CardContent className="p-0">
+                  <h3 className="text-lg font-serif mb-3 group-hover:text-primary transition-colors">Films & Documentaries</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Visual storytelling that captures the essence of African narratives.
+                  </p>
+                </CardContent>
+              </Card>
+            </Link>
+            <Link to="/events" className="group">
+              <Card className="p-6 transition-shadow hover:shadow-lg">
+                <CardContent className="p-0">
+                  <h3 className="text-lg font-serif mb-3 group-hover:text-primary transition-colors">Events & Tourism</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Explore Lagos, Abuja, Akwa Ibom, and more with our comprehensive travel guides.
+                  </p>
+                </CardContent>
+              </Card>
+            </Link>
           </div>
         </div>
       </section>

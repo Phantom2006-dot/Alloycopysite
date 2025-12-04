@@ -25,6 +25,12 @@ import AdminLogin from "./pages/admin/Login";
 import AdminDashboard from "./pages/admin/Dashboard";
 import AdminArticles from "./pages/admin/Articles";
 import ArticleEditor from "./pages/admin/ArticleEditor";
+import AdminCategories from "./pages/admin/Categories";
+import AdminMedia from "./pages/admin/Media";
+import AdminTeam from "./pages/admin/Team";
+import AdminEvents from "./pages/admin/Events";
+import AdminSettings from "./pages/admin/Settings";
+import AdminUploads from "./pages/admin/Uploads";
 
 const queryClient = new QueryClient();
 
@@ -72,6 +78,54 @@ const App = () => (
                 element={
                   <ProtectedRoute>
                     <ArticleEditor />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/categories"
+                element={
+                  <ProtectedRoute>
+                    <AdminCategories />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/media/:type"
+                element={
+                  <ProtectedRoute>
+                    <AdminMedia />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/uploads"
+                element={
+                  <ProtectedRoute>
+                    <AdminUploads />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/team"
+                element={
+                  <ProtectedRoute>
+                    <AdminTeam />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/events"
+                element={
+                  <ProtectedRoute>
+                    <AdminEvents />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin/settings"
+                element={
+                  <ProtectedRoute>
+                    <AdminSettings />
                   </ProtectedRoute>
                 }
               />
