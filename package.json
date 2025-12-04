@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "NODE_ENV=development tsx server/index.ts",
+    "dev": "NODE_ENV=development npx tsx server/index.ts",
     "dev:frontend": "vite",
     "build": "vite build",
     "build:dev": "vite build --mode development",
@@ -12,7 +12,8 @@
     "preview": "vite preview",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
-    "db:seed": "tsx server/seed.ts"
+    "db:seed": "npx tsx server/seed.ts",
+    "start:standalone": "BACKEND_MODE=standalone npx tsx server/index.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
@@ -51,9 +52,11 @@
     "@types/jsonwebtoken": "^9.0.10",
     "@types/multer": "^2.0.0",
     "@types/sharp": "^0.31.1",
+    "@types/uuid": "^10.0.0",
     "@types/ws": "^8.18.1",
     "bcryptjs": "^3.0.3",
     "class-variance-authority": "^0.7.1",
+    "cloudinary": "^2.8.0",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
     "cors": "^2.8.5",
@@ -81,6 +84,7 @@
     "tailwind-merge": "^2.6.0",
     "tailwindcss-animate": "^1.0.7",
     "tsx": "^4.21.0",
+    "uuid": "^13.0.0",
     "vaul": "^0.9.9",
     "ws": "^8.18.3",
     "zod": "^3.25.76"

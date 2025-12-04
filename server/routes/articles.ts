@@ -1,7 +1,7 @@
 import { Router, Request, Response } from "express";
 import { db } from "../db";
 import { articles, users, categories, articleTags, tags } from "../../shared/schema";
-import { eq, desc, and, ilike, sql, inArray, SQL } from "drizzle-orm";
+import { eq, desc, and, ilike, sql, SQL } from "drizzle-orm";
 import { authenticateToken, requireRole, AuthRequest } from "../middleware/auth";
 
 const router = Router();

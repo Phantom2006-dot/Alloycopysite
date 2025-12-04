@@ -11,6 +11,7 @@ import mediaItemsRoutes from "./routes/mediaItems";
 import teamMembersRoutes from "./routes/teamMembers";
 import eventsRoutes from "./routes/events";
 import uploadsRoutes from "./routes/uploads";
+import { validateApiKey } from "./middleware/apiKey";
 import { setupVite, serveStatic } from "./vite";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -19,11 +20,40 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = parseInt(process.env.PORT || "5000", 10);
 
-app.use(cors());
+const allowedOrigins = process.env.ALLOWED_ORIGINS 
+  ? process.env.ALLOWED_ORIGINS.split(",").map(origin => origin.trim())
+  : ["*"];
+
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes("*") || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization", "X-API-Key"],
+}));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
+app.get("/api/health", (_req: Request, res: Response) => {
+  res.json({ 
+    status: "ok", 
+    timestamp: new Date().toISOString(),
+    version: "1.0.0",
+    mode: process.env.BACKEND_MODE || "integrated"
+  });
+});
+
+const isStandaloneMode = process.env.BACKEND_MODE === "standalone";
+
+if (isStandaloneMode) {
+  app.use("/api", validateApiKey);
+}
 
 app.use("/api/auth", authRoutes);
 app.use("/api/articles", articlesRoutes);
@@ -44,13 +74,21 @@ app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
 (async () => {
   const server = createServer(app);
 
-  if (process.env.NODE_ENV === "development") {
-    await setupVite(app, server);
+  if (!isStandaloneMode) {
+    if (process.env.NODE_ENV === "development") {
+      await setupVite(app, server);
+    } else {
+      serveStatic(app);
+    }
   } else {
-    serveStatic(app);
+    console.log("Running in standalone backend mode - no frontend served");
   }
 
   server.listen(PORT, "0.0.0.0", () => {
     console.log(`Server running on port ${PORT}`);
+    console.log(`Mode: ${isStandaloneMode ? 'Standalone Backend' : 'Integrated (Frontend + Backend)'}`);
+    if (isStandaloneMode && process.env.CMS_API_KEY) {
+      console.log("API key authentication enabled");
+    }
   });
 })();

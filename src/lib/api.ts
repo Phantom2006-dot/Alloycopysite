@@ -1,4 +1,5 @@
-const API_BASE = "/api";
+const API_BASE = import.meta.env.VITE_API_URL || "/api";
+const API_KEY = import.meta.env.VITE_API_KEY || "";
 
 interface RequestOptions {
   method?: string;
@@ -16,6 +17,7 @@ async function request<T>(endpoint: string, options: RequestOptions = {}): Promi
     headers: {
       "Content-Type": "application/json",
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...(API_KEY ? { "X-API-Key": API_KEY } : {}),
       ...headers,
     },
   };
@@ -24,7 +26,10 @@ async function request<T>(endpoint: string, options: RequestOptions = {}): Promi
     config.body = JSON.stringify(body);
   }
 
-  const response = await fetch(`${API_BASE}${endpoint}`, config);
+  const baseUrl = API_BASE.endsWith("/api") ? API_BASE.replace(/\/api$/, "") : API_BASE;
+  const fullUrl = API_BASE.endsWith("/api") ? `${API_BASE}${endpoint}` : `${API_BASE}/api${endpoint}`;
+  
+  const response = await fetch(fullUrl, config);
   
   if (!response.ok) {
     const error = await response.json().catch(() => ({ message: "Request failed" }));
@@ -165,9 +170,15 @@ export const api = {
       if (folder) formData.append("folder", folder);
 
       const token = localStorage.getItem("auth_token");
-      const response = await fetch(`${API_BASE}/uploads`, {
+      const baseUrl = API_BASE.endsWith("/api") ? API_BASE : `${API_BASE}/api`;
+      
+      const headers: Record<string, string> = {};
+      if (token) headers.Authorization = `Bearer ${token}`;
+      if (API_KEY) headers["X-API-Key"] = API_KEY;
+
+      const response = await fetch(`${baseUrl}/uploads`, {
         method: "POST",
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        headers,
         body: formData,
       });
 
@@ -181,5 +192,9 @@ export const api = {
     update: (id: number, data: { alt?: string; folder?: string }) =>
       request<any>(`/uploads/${id}`, { method: "PUT", body: data }),
     delete: (id: number) => request<{ message: string }>(`/uploads/${id}`, { method: "DELETE" }),
+  },
+
+  health: {
+    check: () => request<{ status: string; timestamp: string; version: string; mode: string }>("/health"),
   },
 };

@@ -1,43 +1,16 @@
-import { Router, Request, Response } from "express";
+import { Router, Response } from "express";
 import multer from "multer";
-import sharp from "sharp";
-import path from "path";
-import fs from "fs";
-import { fileURLToPath } from "url";
 import { db } from "../db";
 import { uploads } from "../../shared/schema";
 import { eq, desc, ilike, and, sql, SQL } from "drizzle-orm";
 import { authenticateToken, requireRole, AuthRequest } from "../middleware/auth";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+import { uploadToCloudinary, uploadImageWithThumbnail, deleteFromCloudinary } from "../lib/cloudinary";
 
 const router = Router();
 
-const uploadsDir = path.join(__dirname, "../../uploads");
-const imagesDir = path.join(uploadsDir, "images");
-const thumbnailsDir = path.join(uploadsDir, "thumbnails");
-const documentsDir = path.join(uploadsDir, "documents");
+const storage = multer.memoryStorage();
 
-[imagesDir, thumbnailsDir, documentsDir].forEach(dir => {
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true });
-  }
-});
-
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const isImage = file.mimetype.startsWith("image/");
-    cb(null, isImage ? imagesDir : documentsDir);
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    const ext = path.extname(file.originalname);
-    cb(null, `${uniqueSuffix}${ext}`);
-  },
-});
-
-const fileFilter = (req: Request, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
+const fileFilter = (req: Express.Request, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
   const allowedTypes = [
     "image/jpeg",
     "image/png",
@@ -116,39 +89,45 @@ router.post("/", authenticateToken, requireRole("super_admin", "editor", "author
       return res.status(400).json({ message: "No file uploaded" });
     }
 
-    const { alt, folder } = req.body;
+    const { alt, folder: folderName } = req.body;
     const file = req.file;
     const isImage = file.mimetype.startsWith("image/");
 
-    let thumbnailPath: string | null = null;
+    let cloudinaryResult;
+    let thumbnailUrl: string | null = null;
+    let publicId: string;
 
     if (isImage && file.mimetype !== "image/gif") {
-      const thumbnailFilename = `thumb-${file.filename}`;
-      thumbnailPath = path.join("thumbnails", thumbnailFilename);
-      
-      await sharp(file.path)
-        .resize(300, 300, { fit: "cover" })
-        .toFile(path.join(thumbnailsDir, thumbnailFilename));
+      const result = await uploadImageWithThumbnail(file.buffer, {
+        folder: folderName ? `bauhaus-cms/${folderName}` : 'bauhaus-cms/images',
+      });
+      cloudinaryResult = result.original;
+      thumbnailUrl = result.thumbnail;
+      publicId = result.original.public_id;
+    } else {
+      cloudinaryResult = await uploadToCloudinary(file.buffer, {
+        folder: folderName ? `bauhaus-cms/${folderName}` : 'bauhaus-cms/documents',
+        resource_type: isImage ? 'image' : 'raw',
+      });
+      publicId = cloudinaryResult.public_id;
     }
 
-    const relativePath = isImage ? path.join("images", file.filename) : path.join("documents", file.filename);
-
     const [newUpload] = await db.insert(uploads).values({
-      filename: file.filename,
+      filename: publicId,
       originalName: file.originalname,
       mimeType: file.mimetype,
       size: file.size,
-      path: relativePath,
-      thumbnailPath,
+      path: cloudinaryResult.secure_url,
+      thumbnailPath: thumbnailUrl,
       alt,
-      folder,
+      folder: folderName,
       uploadedBy: req.user!.id,
     }).returning();
 
     res.status(201).json({
       ...newUpload,
-      url: `/uploads/${relativePath}`,
-      thumbnailUrl: thumbnailPath ? `/uploads/${thumbnailPath}` : null,
+      url: cloudinaryResult.secure_url,
+      thumbnailUrl,
     });
   } catch (error) {
     console.error("Upload error:", error);
@@ -166,16 +145,11 @@ router.delete("/:id", authenticateToken, requireRole("super_admin", "editor"), a
       return res.status(404).json({ message: "Upload not found" });
     }
 
-    const filePath = path.join(uploadsDir, existingUpload.path);
-    if (fs.existsSync(filePath)) {
-      fs.unlinkSync(filePath);
-    }
-
-    if (existingUpload.thumbnailPath) {
-      const thumbPath = path.join(uploadsDir, existingUpload.thumbnailPath);
-      if (fs.existsSync(thumbPath)) {
-        fs.unlinkSync(thumbPath);
-      }
+    try {
+      const isImage = existingUpload.mimeType.startsWith("image/");
+      await deleteFromCloudinary(existingUpload.filename, isImage ? 'image' : 'raw');
+    } catch (cloudinaryError) {
+      console.error("Cloudinary delete error:", cloudinaryError);
     }
 
     await db.delete(uploads).where(eq(uploads.id, uploadId));
@@ -198,7 +172,7 @@ router.put("/:id", authenticateToken, requireRole("super_admin", "editor", "auth
       return res.status(404).json({ message: "Upload not found" });
     }
 
-    const updates: any = {};
+    const updates: Record<string, any> = {};
     if (alt !== undefined) updates.alt = alt;
     if (folder !== undefined) updates.folder = folder;
 
@@ -206,8 +180,8 @@ router.put("/:id", authenticateToken, requireRole("super_admin", "editor", "auth
 
     res.json({
       ...updatedUpload,
-      url: `/uploads/${updatedUpload.path}`,
-      thumbnailUrl: updatedUpload.thumbnailPath ? `/uploads/${updatedUpload.thumbnailPath}` : null,
+      url: updatedUpload.path,
+      thumbnailUrl: updatedUpload.thumbnailPath,
     });
   } catch (error) {
     console.error("Update upload error:", error);
