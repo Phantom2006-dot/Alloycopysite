@@ -145,6 +145,20 @@ Located at `/admin`:
 - **Dashboard**: `/admin` - Overview with stats and quick actions
 - **Articles**: `/admin/articles` - Article management with CRUD
 - **Article Editor**: `/admin/articles/:id` - Rich text editing with SEO settings
+- **Categories**: `/admin/categories` - Category management for articles
+- **Media**: `/admin/media` - Books, films, and TV shows catalog management
+- **Team**: `/admin/team` - Team member profiles management
+- **Events**: `/admin/events` - Event scheduling and management
+- **Uploads**: `/admin/uploads` - Media library for file uploads
+- **Settings**: `/admin/settings` - General CMS settings
+
+### Dynamic Content Pages
+The frontend pages now fetch content from the database:
+- **Home (Index)**: Displays featured media items (books, films, TV shows)
+- **Books**: Shows book catalog from database with fallback content
+- **Film**: Shows film catalog from database with fallback content
+- **TV**: Shows TV shows from database with fallback content
+- **Events**: Shows upcoming and past events from database
 
 ### Blog Frontend
 Public-facing blog pages:
