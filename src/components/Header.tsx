@@ -36,6 +36,7 @@ const Header = () => {
   const rightLinks = [
     { name: "Publishing", path: "/publishing" },
     { name: "Events", path: "/events" },
+    { name: "Shop", path: "/shop" },
     { name: "Blog", path: "/blog" },
     { name: "Contact", path: "/contact" },
   ];

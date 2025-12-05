@@ -11,6 +11,8 @@ import mediaItemsRoutes from "./routes/mediaItems";
 import teamMembersRoutes from "./routes/teamMembers";
 import eventsRoutes from "./routes/events";
 import uploadsRoutes from "./routes/uploads";
+import productsRoutes from "./routes/products";
+import productCategoriesRoutes from "./routes/productCategories";
 import { validateApiKey, checkApiKeyConfigured } from "./middleware/apiKey";
 import { setupVite, serveStatic } from "./vite";
 
@@ -67,6 +69,8 @@ app.use("/api/media", mediaItemsRoutes);
 app.use("/api/team", teamMembersRoutes);
 app.use("/api/events", eventsRoutes);
 app.use("/api/uploads", uploadsRoutes);
+app.use("/api/products", productsRoutes);
+app.use("/api/product-categories", productCategoriesRoutes);
 
 app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
   const status = err.status || 500;

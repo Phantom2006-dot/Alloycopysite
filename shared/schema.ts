@@ -5,6 +5,7 @@ export const userRoleEnum = pgEnum('user_role', ['super_admin', 'editor', 'autho
 export const contentStatusEnum = pgEnum('content_status', ['draft', 'published', 'scheduled', 'archived']);
 export const mediaTypeEnum = pgEnum('media_type', ['book', 'film', 'tv']);
 export const eventStatusEnum = pgEnum('event_status', ['upcoming', 'ongoing', 'past']);
+export const productStatusEnum = pgEnum('product_status', ['draft', 'published', 'archived']);
 
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
@@ -139,6 +140,40 @@ export const settings = pgTable("settings", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+export const productCategories = pgTable("product_categories", {
+  id: serial("id").primaryKey(),
+  name: varchar("name", { length: 100 }).unique().notNull(),
+  slug: varchar("slug", { length: 100 }).unique().notNull(),
+  description: text("description"),
+  image: text("image"),
+  sortOrder: integer("sort_order").default(0).notNull(),
+  isActive: boolean("is_active").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const products = pgTable("products", {
+  id: serial("id").primaryKey(),
+  title: varchar("title", { length: 500 }).notNull(),
+  slug: varchar("slug", { length: 500 }).unique().notNull(),
+  description: text("description"),
+  shortDescription: text("short_description"),
+  price: integer("price").notNull(),
+  compareAtPrice: integer("compare_at_price"),
+  sku: varchar("sku", { length: 100 }),
+  categoryId: integer("category_id").references(() => productCategories.id),
+  images: text("images"),
+  featuredImage: text("featured_image"),
+  stock: integer("stock").default(0).notNull(),
+  isInStock: boolean("is_in_stock").default(true).notNull(),
+  isFeatured: boolean("is_featured").default(false).notNull(),
+  status: productStatusEnum("status").default('draft').notNull(),
+  metaTitle: varchar("meta_title", { length: 255 }),
+  metaDescription: text("meta_description"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
 export const usersRelations = relations(users, ({ many }) => ({
   articles: many(articles),
   uploads: many(uploads),
@@ -182,6 +217,17 @@ export const uploadsRelations = relations(uploads, ({ one }) => ({
   }),
 }));
 
+export const productCategoriesRelations = relations(productCategories, ({ many }) => ({
+  products: many(products),
+}));
+
+export const productsRelations = relations(products, ({ one }) => ({
+  category: one(productCategories, {
+    fields: [products.categoryId],
+    references: [productCategories.id],
+  }),
+}));
+
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
 export type Category = typeof categories.$inferSelect;
@@ -202,3 +248,7 @@ export type Upload = typeof uploads.$inferSelect;
 export type InsertUpload = typeof uploads.$inferInsert;
 export type Setting = typeof settings.$inferSelect;
 export type InsertSetting = typeof settings.$inferInsert;
+export type ProductCategory = typeof productCategories.$inferSelect;
+export type InsertProductCategory = typeof productCategories.$inferInsert;
+export type Product = typeof products.$inferSelect;
+export type InsertProduct = typeof products.$inferInsert;

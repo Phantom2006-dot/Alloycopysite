@@ -19,6 +19,8 @@ import {
   Film,
   Book,
   Tv,
+  ShoppingBag,
+  Package,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -30,6 +32,8 @@ const menuItems = [
   { icon: LayoutDashboard, label: "Dashboard", path: "/admin" },
   { icon: FileText, label: "Articles", path: "/admin/articles" },
   { icon: Tags, label: "Categories", path: "/admin/categories" },
+  { icon: ShoppingBag, label: "Products", path: "/admin/products" },
+  { icon: Package, label: "Product Categories", path: "/admin/product-categories" },
   { icon: Book, label: "Books", path: "/admin/media/books" },
   { icon: Film, label: "Films", path: "/admin/media/films" },
   { icon: Tv, label: "TV Shows", path: "/admin/media/tv" },

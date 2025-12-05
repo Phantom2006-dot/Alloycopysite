@@ -194,6 +194,45 @@ export const api = {
     delete: (id: number) => request<{ message: string }>(`/uploads/${id}`, { method: "DELETE" }),
   },
 
+  products: {
+    list: (params?: { page?: number; limit?: number; category?: string; search?: string; featured?: boolean }) => {
+      const searchParams = new URLSearchParams();
+      if (params?.page) searchParams.set("page", params.page.toString());
+      if (params?.limit) searchParams.set("limit", params.limit.toString());
+      if (params?.category) searchParams.set("category", params.category);
+      if (params?.search) searchParams.set("search", params.search);
+      if (params?.featured) searchParams.set("featured", "true");
+      return request<{ products: any[]; pagination: any }>(`/products?${searchParams}`);
+    },
+    featured: () => request<any[]>("/products/featured"),
+    byCategory: (slug: string, page = 1) =>
+      request<{ category: any; products: any[]; pagination: any }>(`/products/category/${slug}?page=${page}`),
+    get: (idOrSlug: string | number) => request<any>(`/products/${idOrSlug}`),
+    create: (data: any) => request<any>("/products", { method: "POST", body: data }),
+    update: (id: number, data: any) => request<any>(`/products/${id}`, { method: "PUT", body: data }),
+    delete: (id: number) => request<{ message: string }>(`/products/${id}`, { method: "DELETE" }),
+    adminList: (params?: { page?: number; limit?: number; status?: string; search?: string; category?: number }) => {
+      const searchParams = new URLSearchParams();
+      if (params?.page) searchParams.set("page", params.page.toString());
+      if (params?.limit) searchParams.set("limit", params.limit.toString());
+      if (params?.status) searchParams.set("status", params.status);
+      if (params?.search) searchParams.set("search", params.search);
+      if (params?.category) searchParams.set("category", params.category.toString());
+      return request<{ products: any[]; pagination: any }>(`/products/admin/all?${searchParams}`);
+    },
+  },
+
+  productCategories: {
+    list: () => request<any[]>("/product-categories"),
+    get: (slug: string) => request<any>(`/product-categories/${slug}`),
+    create: (data: { name: string; description?: string; image?: string; sortOrder?: number }) =>
+      request<any>("/product-categories", { method: "POST", body: data }),
+    update: (id: number, data: { name?: string; description?: string; image?: string; sortOrder?: number; isActive?: boolean }) =>
+      request<any>(`/product-categories/${id}`, { method: "PUT", body: data }),
+    delete: (id: number) => request<{ message: string }>(`/product-categories/${id}`, { method: "DELETE" }),
+    adminList: () => request<any[]>("/product-categories/admin/all"),
+  },
+
   health: {
     check: () => request<{ status: string; timestamp: string; version: string; mode: string }>("/health"),
   },
