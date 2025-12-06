@@ -236,4 +236,73 @@ export const api = {
   health: {
     check: () => request<{ status: string; timestamp: string; version: string; mode: string }>("/health"),
   },
+
+  payments: {
+    config: () => request<{ configured: boolean; publicKey: string | null }>("/payments/config"),
+    initialize: (data: {
+      amount: number;
+      email: string;
+      name: string;
+      phone?: string;
+      currency?: string;
+      productId?: number;
+      productTitle?: string;
+      redirectUrl?: string;
+    }) => request<{
+      status: string;
+      message: string;
+      data: {
+        public_key: string;
+        tx_ref: string;
+        amount: number;
+        currency: string;
+        payment_options: string;
+        redirect_url: string;
+        customer: {
+          email: string;
+          phone_number: string;
+          name: string;
+        };
+        customizations: {
+          title: string;
+          description: string;
+          logo: string;
+        };
+        meta: {
+          product_id: number | null;
+          source: string;
+        };
+      };
+    }>("/payments/initialize", { method: "POST", body: data }),
+    verify: (transactionId: string) => request<{
+      status: string;
+      message: string;
+      data: {
+        transactionId: number;
+        txRef?: string;
+        amount?: number;
+        currency?: string;
+        paymentType?: string;
+        customer?: any;
+        createdAt?: string;
+      };
+    }>(`/payments/verify/${transactionId}`),
+    initiateBankTransfer: (data: {
+      amount: number;
+      email: string;
+      phone?: string;
+      name?: string;
+      currency?: string;
+    }) => request<{
+      status: string;
+      message: string;
+      data?: {
+        accountNumber: string;
+        bankName: string;
+        amount: number;
+        reference: string;
+        expiresAt: string;
+      };
+    }>("/payments/charge/bank-transfer", { method: "POST", body: data }),
+  },
 };
