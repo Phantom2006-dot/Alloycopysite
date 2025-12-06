@@ -13,6 +13,7 @@ import eventsRoutes from "./routes/events";
 import uploadsRoutes from "./routes/uploads";
 import productsRoutes from "./routes/products";
 import productCategoriesRoutes from "./routes/productCategories";
+import paymentsRoutes from "./routes/payments";
 import { validateApiKey, checkApiKeyConfigured } from "./middleware/apiKey";
 import { setupVite, serveStatic } from "./vite";
 
@@ -71,6 +72,7 @@ app.use("/api/events", eventsRoutes);
 app.use("/api/uploads", uploadsRoutes);
 app.use("/api/products", productsRoutes);
 app.use("/api/product-categories", productCategoriesRoutes);
+app.use("/api/payments", paymentsRoutes);
 
 app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
   const status = err.status || 500;
