@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, timestamp, varchar, pgEnum } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, bigint, boolean, timestamp, varchar, pgEnum } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
 export const userRoleEnum = pgEnum('user_role', ['super_admin', 'editor', 'author', 'contributor']);
@@ -158,8 +158,8 @@ export const products = pgTable("products", {
   slug: varchar("slug", { length: 500 }).unique().notNull(),
   description: text("description"),
   shortDescription: text("short_description"),
-  price: integer("price").notNull(),
-  compareAtPrice: integer("compare_at_price"),
+  price: bigint("price", { mode: "number" }).notNull(),
+  compareAtPrice: bigint("compare_at_price", { mode: "number" }),
   sku: varchar("sku", { length: 100 }),
   categoryId: integer("category_id").references(() => productCategories.id),
   images: text("images"),
