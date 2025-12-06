@@ -19,25 +19,20 @@ const getFlutterwaveClient = () => {
 router.post("/initialize", async (req: Request, res: Response) => {
   try {
     const {
-      amount,
       email,
       name,
       phone,
-      currency = "NGN",
       productId,
-      productTitle,
       redirectUrl
     } = req.body;
 
-    if (!amount || !email || !name) {
+    if (!productId || !email || !name) {
       return res.status(400).json({ 
         message: "Missing required fields",
-        error: "Amount, email, and name are required" 
+        error: "Product ID, email, and name are required" 
       });
     }
 
-    const txRef = `BAUHAUS-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    
     const publicKey = process.env.FLW_PUBLIC_KEY;
     
     if (!publicKey) {
@@ -47,11 +42,35 @@ router.post("/initialize", async (req: Request, res: Response) => {
       });
     }
 
+    const productResult = await db.execute(
+      sql`SELECT id, title, price, is_in_stock FROM products WHERE id = ${productId} AND status = 'published'`
+    );
+
+    if (!productResult.rows || productResult.rows.length === 0) {
+      return res.status(404).json({
+        message: "Product not found",
+        error: "The requested product does not exist or is not available"
+      });
+    }
+
+    const product = productResult.rows[0] as { id: number; title: string; price: number; is_in_stock: boolean };
+
+    if (!product.is_in_stock) {
+      return res.status(400).json({
+        message: "Product out of stock",
+        error: "This product is currently out of stock"
+      });
+    }
+
+    const amountInMajorUnits = product.price / 100;
+
+    const txRef = `BAUHAUS-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
     const paymentData = {
       public_key: publicKey,
       tx_ref: txRef,
-      amount: parseFloat(amount),
-      currency,
+      amount: amountInMajorUnits,
+      currency: "NGN",
       payment_options: "card, banktransfer, ussd, mobilemoney",
       redirect_url: redirectUrl || `${req.protocol}://${req.get('host')}/api/payments/callback`,
       customer: {
@@ -61,11 +80,12 @@ router.post("/initialize", async (req: Request, res: Response) => {
       },
       customizations: {
         title: "BAUHAUS",
-        description: productTitle ? `Payment for ${productTitle}` : "Payment for products",
+        description: `Payment for ${product.title}`,
         logo: "https://res.cloudinary.com/di2u0n1qj/image/upload/v1/bauhaus-cms/logo.png",
       },
       meta: {
-        product_id: productId || null,
+        product_id: product.id,
+        product_title: product.title,
         source: "bauhaus-cms",
       },
     };

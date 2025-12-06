@@ -24,6 +24,10 @@ import ShopProduct from "./pages/ShopProduct";
 import BlogList from "./pages/blog/BlogList";
 import BlogArticle from "./pages/blog/BlogArticle";
 
+import PaymentSuccess from "./pages/payment/PaymentSuccess";
+import PaymentFailed from "./pages/payment/PaymentFailed";
+import PaymentCancelled from "./pages/payment/PaymentCancelled";
+
 import AdminLogin from "./pages/admin/Login";
 import AdminDashboard from "./pages/admin/Dashboard";
 import AdminArticles from "./pages/admin/Articles";
@@ -64,6 +68,10 @@ const App = () => (
               
               <Route path="/blog" element={<BlogList />} />
               <Route path="/blog/:slug" element={<BlogArticle />} />
+              
+              <Route path="/payment/success" element={<PaymentSuccess />} />
+              <Route path="/payment/failed" element={<PaymentFailed />} />
+              <Route path="/payment/cancelled" element={<PaymentCancelled />} />
 
               <Route path="/admin/login" element={<AdminLogin />} />
               <Route

@@ -6,8 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { ChevronLeft, ShoppingBag, Check, X } from "lucide-react";
+import { ChevronLeft, ShoppingBag, Check, X, CreditCard } from "lucide-react";
 import { api } from "@/lib/api";
+import CheckoutModal from "@/components/CheckoutModal";
 
 interface ProductCategory {
   id: number;
@@ -35,6 +36,7 @@ interface Product {
 export default function ShopProduct() {
   const { slug } = useParams<{ slug: string }>();
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [checkoutOpen, setCheckoutOpen] = useState(false);
 
   const { data: product, isLoading, error } = useQuery<Product>({
     queryKey: ["shopProduct", slug],
@@ -214,16 +216,42 @@ export default function ShopProduct() {
                 <p className="text-sm text-muted-foreground">SKU: {product.sku}</p>
               )}
 
-              <div className="pt-4">
-                <p className="text-sm text-muted-foreground mb-2">
-                  For inquiries about this product, please contact us.
-                </p>
-                <Link to="/contact">
-                  <Button className="w-full md:w-auto bg-amber-600 hover:bg-amber-700">
-                    Contact Us About This Product
+              <div className="pt-4 space-y-3">
+                {product.isInStock ? (
+                  <Button 
+                    onClick={() => setCheckoutOpen(true)}
+                    className="w-full md:w-auto bg-amber-600 hover:bg-amber-700"
+                    size="lg"
+                  >
+                    <CreditCard className="mr-2 h-5 w-5" />
+                    Buy Now
                   </Button>
-                </Link>
+                ) : (
+                  <Button 
+                    disabled
+                    className="w-full md:w-auto"
+                    size="lg"
+                  >
+                    Out of Stock
+                  </Button>
+                )}
+                <p className="text-sm text-muted-foreground">
+                  <Link to="/contact" className="text-amber-600 hover:underline">
+                    Contact us
+                  </Link>{" "}
+                  for inquiries about this product.
+                </p>
               </div>
+
+              <CheckoutModal
+                open={checkoutOpen}
+                onOpenChange={setCheckoutOpen}
+                product={{
+                  id: product.id,
+                  title: product.title,
+                  price: product.price,
+                }}
+              />
             </div>
           </div>
 

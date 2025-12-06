@@ -240,13 +240,10 @@ export const api = {
   payments: {
     config: () => request<{ configured: boolean; publicKey: string | null }>("/payments/config"),
     initialize: (data: {
-      amount: number;
       email: string;
       name: string;
       phone?: string;
-      currency?: string;
-      productId?: number;
-      productTitle?: string;
+      productId: number;
       redirectUrl?: string;
     }) => request<{
       status: string;
