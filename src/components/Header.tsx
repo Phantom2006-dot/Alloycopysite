@@ -3,8 +3,8 @@ import { useState, useEffect } from "react";
 import { Menu, X } from "lucide-react";
 import { useTheme } from "next-themes";
 import ThemeToggle from "./ThemeToggle";
-import logoLight from "@/assets/light.png";
-import logoDark from "@/assets/dark.png";
+import logoLight from "@/assets/logo-light.svg";
+import logoDark from "@/assets/5.svg";
 
 const Header = () => {
   const location = useLocation();
@@ -46,6 +46,10 @@ const Header = () => {
 
   const isActive = (path: string) => location.pathname === path;
 
+  // Determine which logo to use based on theme
+  const currentLogo = resolvedTheme === "dark" ? logoLight : logoDark;
+  const logoAlt = "Bauhaus Production";
+
   return (
     <>
       <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border/50">
@@ -65,11 +69,7 @@ const Header = () => {
             </ul>
 
             <Link to="/" className="flex flex-col items-center mx-8">
-              <img 
-                src={resolvedTheme === "dark" ? logoDark : logoLight} 
-                alt="Bauhaus Production" 
-                className="h-20 w-auto"
-              />
+              <img src={currentLogo} alt={logoAlt} className="h-20 w-auto" />
             </Link>
 
             <div className="flex items-center gap-6 lg:gap-10">
@@ -91,13 +91,9 @@ const Header = () => {
 
           <div className="md:hidden flex items-center justify-between">
             <Link to="/" className="flex items-center gap-2">
-              <img 
-                src={resolvedTheme === "dark" ? logoDark : logoLight} 
-                alt="Bauhaus Production" 
-                className="h-14 w-auto"
-              />
+              <img src={currentLogo} alt={logoAlt} className="h-14 w-auto" />
             </Link>
-            
+
             <div className="flex items-center gap-2">
               <ThemeToggle />
               <button
@@ -115,8 +111,8 @@ const Header = () => {
 
       <div
         className={`fixed inset-0 z-[55] bg-background transition-all duration-500 ease-in-out md:hidden ${
-          mobileMenuOpen 
-            ? "opacity-100 visible translate-x-0" 
+          mobileMenuOpen
+            ? "opacity-100 visible translate-x-0"
             : "opacity-0 invisible translate-x-full"
         }`}
       >
@@ -127,13 +123,15 @@ const Header = () => {
                 key={link.path}
                 to={link.path}
                 className={`text-2xl tracking-wide transition-all duration-300 ${
-                  isActive(link.path) 
-                    ? "text-foreground font-medium" 
+                  isActive(link.path)
+                    ? "text-foreground font-medium"
                     : "text-muted-foreground hover:text-foreground"
                 }`}
                 style={{
                   transitionDelay: mobileMenuOpen ? `${index * 50}ms` : "0ms",
-                  transform: mobileMenuOpen ? "translateY(0)" : "translateY(20px)",
+                  transform: mobileMenuOpen
+                    ? "translateY(0)"
+                    : "translateY(20px)",
                   opacity: mobileMenuOpen ? 1 : 0,
                 }}
                 onClick={() => setMobileMenuOpen(false)}
