@@ -1,5 +1,3 @@
-// [file name]: Index.tsx
-// [file content begin]
 import { useQuery } from "@tanstack/react-query";
 import Layout from "@/components/Layout";
 import MediaCarousel from "@/components/MediaCarousel";
@@ -8,6 +6,7 @@ import { Link } from "react-router-dom";
 import { api } from "@/lib/api";
 import { format } from "date-fns";
 import { Book, Film, MapPin, Calendar } from "lucide-react";
+import { useState, useEffect } from "react";
 
 interface MediaItem {
   id: number;
@@ -57,69 +56,112 @@ interface Event {
 }
 
 const Index = () => {
-  const { data: mediaData, isLoading: mediaLoading } = useQuery({
+  const [hasError, setHasError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+
+  // Check if critical components exist
+  useEffect(() => {
+    try {
+      // Test if required components are imported correctly
+      if (!Layout) {
+        throw new Error("Layout component not found");
+      }
+      if (!MediaCarousel) {
+        console.warn("MediaCarousel component not found, will use fallback");
+      }
+    } catch (error) {
+      console.error("Component initialization error:", error);
+      setHasError(true);
+      setErrorMessage(error instanceof Error ? error.message : "Component error");
+    }
+  }, []);
+
+  // Add error boundaries to each query
+  const { data: mediaData, isLoading: mediaLoading, error: mediaError } = useQuery({
     queryKey: ["featured-media"],
     queryFn: async () => {
-      const data = await api.media.list({ featured: true, limit: 12 });
-      return data.items || [];
+      try {
+        const data = await api.media.list({ featured: true, limit: 12 });
+        return data.items || [];
+      } catch (error) {
+        console.error("Error fetching media:", error);
+        return [];
+      }
     },
+    retry: 1,
   });
 
-  const { data: articlesData, isLoading: articlesLoading } = useQuery({
+  const { data: articlesData, isLoading: articlesLoading, error: articlesError } = useQuery({
     queryKey: ["featured-articles"],
     queryFn: async () => {
-      const data = await api.articles.list({ 
-        limit: 3, 
-        status: "published",
-        featured: true 
-      });
-      return data.articles || [];
+      try {
+        const data = await api.articles.list({ 
+          limit: 3, 
+          status: "published",
+          featured: true 
+        });
+        return data.articles || [];
+      } catch (error) {
+        console.error("Error fetching articles:", error);
+        return [];
+      }
     },
+    retry: 1,
   });
 
-  const { data: productsData, isLoading: productsLoading } = useQuery({
+  const { data: productsData, isLoading: productsLoading, error: productsError } = useQuery({
     queryKey: ["featured-products"],
     queryFn: async () => {
-      const data = await api.products.list({ 
-        featured: true, 
-        limit: 3,
-        status: "published"
-      });
-      return data.products || [];
+      try {
+        const data = await api.products.list({ 
+          featured: true, 
+          limit: 3,
+          status: "published"
+        });
+        return data.products || [];
+      } catch (error) {
+        console.error("Error fetching products:", error);
+        return [];
+      }
     },
+    retry: 1,
   });
 
-  const { data: eventsData, isLoading: eventsLoading } = useQuery({
+  const { data: eventsData, isLoading: eventsLoading, error: eventsError } = useQuery({
     queryKey: ["upcoming-events"],
     queryFn: async () => {
-      const data = await api.events.list({ 
-        limit: 3, 
-        status: "upcoming" 
-      });
-      return data.events || [];
+      try {
+        const data = await api.events.list({ 
+          limit: 3, 
+          status: "upcoming" 
+        });
+        return data.events || [];
+      } catch (error) {
+        console.error("Error fetching events:", error);
+        return [];
+      }
     },
+    retry: 1,
   });
+
+  // Check for any query errors
+  useEffect(() => {
+    if (mediaError || articlesError || productsError || eventsError) {
+      console.error("Query errors detected:", {
+        mediaError,
+        articlesError,
+        productsError,
+        eventsError
+      });
+      setHasError(true);
+      setErrorMessage("Failed to load some data. Please refresh the page.");
+    }
+  }, [mediaError, articlesError, productsError, eventsError]);
 
   const featuredItems = mediaData || [];
   const articles = articlesData || [];
   const products = productsData || [];
   const events = eventsData || [];
-
-  const carouselItems = featuredItems.length > 0 
-    ? featuredItems.map(item => ({
-        id: item.id,
-        title: item.title,
-        image: item.coverImage || getDefaultImage(item.type),
-        type: item.type,
-      }))
-    : getFallbackItems();
-
-  const formatPrice = (cents: number) => {
-    return new Intl.NumberFormat('en-NG', {
-      style: 'currency',
-      currency: 'NGN',
-    }).format(cents / 100);
-  };
 
   const getDefaultImage = (type: string) => {
     const images = {
@@ -141,6 +183,53 @@ const Index = () => {
     ];
   };
 
+  const carouselItems = featuredItems.length > 0 
+    ? featuredItems.map(item => ({
+        id: item.id,
+        title: item.title,
+        image: item.coverImage || getDefaultImage(item.type),
+        type: item.type,
+      }))
+    : getFallbackItems();
+
+  const formatPrice = (cents: number) => {
+    return new Intl.NumberFormat('en-NG', {
+      style: 'currency',
+      currency: 'NGN',
+    }).format(cents / 100);
+  };
+
+  // Show error page if critical error occurred
+  if (hasError) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 p-6">
+        <div className="max-w-md text-center">
+          <h1 className="text-2xl font-bold text-red-600 mb-4">Oops! Something went wrong</h1>
+          <p className="text-gray-600 mb-6">{errorMessage}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
+          >
+            Refresh Page
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Show loading state
+  const isLoading = mediaLoading || articlesLoading || productsLoading || eventsLoading;
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading BAUHAUS...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <Layout>
       <section className="py-16 md:py-24 px-6 text-center">
@@ -158,7 +247,26 @@ const Index = () => {
         <div className="px-6 mb-8">
           <h2 className="text-xl font-serif text-center">Featured Content</h2>
         </div>
-        <MediaCarousel items={carouselItems} />
+        {MediaCarousel ? (
+          <MediaCarousel items={carouselItems} />
+        ) : (
+          <div className="px-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+              {carouselItems.slice(0, 6).map((item) => (
+                <div key={item.id} className="bg-muted rounded-lg overflow-hidden aspect-[2/3]">
+                  <img 
+                    src={item.image} 
+                    alt={item.title}
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="p-2 bg-black/70 text-white text-xs truncate">
+                    {item.title}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </section>
 
       <section className="py-16 px-6">
@@ -173,9 +281,7 @@ const Index = () => {
                 Recent Articles
               </h3>
               <div className="space-y-4">
-                {articlesLoading ? (
-                  <div className="text-center py-8">Loading articles...</div>
-                ) : articles.length > 0 ? (
+                {articles.length > 0 ? (
                   articles.map((article) => (
                     <Link 
                       key={article.id} 
@@ -203,9 +309,7 @@ const Index = () => {
                 Upcoming Events
               </h3>
               <div className="space-y-4">
-                {eventsLoading ? (
-                  <div className="text-center py-8">Loading events...</div>
-                ) : events.length > 0 ? (
+                {events.length > 0 ? (
                   events.map((event) => (
                     <Link 
                       key={event.id} 
@@ -239,9 +343,7 @@ const Index = () => {
                 Featured Products
               </h3>
               <div className="space-y-4">
-                {productsLoading ? (
-                  <div className="text-center py-8">Loading products...</div>
-                ) : products.length > 0 ? (
+                {products.length > 0 ? (
                   products.map((product) => (
                     <Link 
                       key={product.id} 
@@ -332,4 +434,3 @@ const Index = () => {
 };
 
 export default Index;
-// [file content end]
