@@ -1,10 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
 import Layout from "@/components/Layout";
 import { Card, CardContent } from "@/components/ui/card";
-import { Calendar, MapPin, Video, ExternalLink } from "lucide-react";
-import { format } from "date-fns";
+import { Calendar, MapPin, Video, Book, Film, MapPin as MapPinIcon } from "lucide-react";
+import { Link } from "react-router-dom";
+import { api } from "@/lib/api";
+import { format, isPast, isFuture } from "date-fns";
+import { useState, useEffect } from "react";
 
-interface Event {
+interface EventItem {
   id: number;
   title: string;
   slug: string;
@@ -17,222 +20,344 @@ interface Event {
   featuredImage: string | null;
   registrationLink: string | null;
   eventType: string | null;
-  status: "upcoming" | "ongoing" | "past";
+  status: string;
 }
 
-const fallbackEvents = [
-  {
-    id: 1,
-    name: "Book Launch: Nigerian Heritage Collection",
-    date: "March 2025",
-    location: "Lagos, Nigeria",
-    description: "Join us for the launch of our latest book celebrating Nigerian heritage and storytelling traditions.",
-    status: "upcoming"
-  },
-  {
-    id: 2,
-    name: "BAUHAUS Film Screening",
-    date: "April 2025",
-    location: "Northampton, UK",
-    description: "Exclusive screening of our latest documentary followed by Q&A with the filmmakers.",
-    status: "upcoming"
-  },
-  {
-    id: 3,
-    name: "Author Meet & Greet",
-    date: "May 2025",
-    location: "Colorado, USA",
-    description: "Meet our published authors and learn about their creative journeys.",
-    status: "upcoming"
-  },
-];
+interface Article {
+  id: number;
+  title: string;
+  slug: string;
+  excerpt: string | null;
+  publishedAt: string | null;
+  categoryName?: string;
+  featuredImage?: string | null;
+}
 
 const Events = () => {
-  const { data: upcomingData } = useQuery<Event[]>({
-    queryKey: ["upcoming-events"],
+  const [hasError, setHasError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+
+  useEffect(() => {
+    try {
+      if (!Layout) {
+        throw new Error("Layout component not found");
+      }
+    } catch (error) {
+      console.error("Component initialization error:", error);
+      setHasError(true);
+      setErrorMessage(error instanceof Error ? error.message : "Component error");
+    }
+  }, []);
+
+  const { data: eventsData, isLoading: eventsLoading, error: eventsError } = useQuery({
+    queryKey: ["events"],
     queryFn: async () => {
-      const res = await fetch("/api/events/upcoming");
-      if (!res.ok) throw new Error("Failed to fetch events");
-      return res.json();
+      try {
+        const data = await api.events.list({ limit: 100, status: "all" });
+        return data.events || [];
+      } catch (error) {
+        console.error("Error fetching events:", error);
+        return [];
+      }
     },
+    retry: 1,
   });
 
-  const { data: pastData } = useQuery<Event[]>({
-    queryKey: ["past-events"],
+  const { data: articlesData, isLoading: articlesLoading, error: articlesError } = useQuery({
+    queryKey: ["articles", "events"],
     queryFn: async () => {
-      const res = await fetch("/api/events/past");
-      if (!res.ok) throw new Error("Failed to fetch events");
-      return res.json();
+      try {
+        const data = await api.articles.list({ 
+          category: "events", 
+          limit: 5,
+          status: "published"
+        });
+        return data.articles || [];
+      } catch (error) {
+        console.error("Error fetching articles:", error);
+        return [];
+      }
     },
+    retry: 1,
   });
 
-  const upcomingEvents = upcomingData || [];
-  const pastEvents = pastData || [];
-  const hasEvents = upcomingEvents.length > 0 || pastEvents.length > 0;
+  useEffect(() => {
+    if (eventsError || articlesError) {
+      console.error("Query errors detected:", { eventsError, articlesError });
+      setHasError(true);
+      setErrorMessage("Failed to load some data. Please refresh the page.");
+    }
+  }, [eventsError, articlesError]);
+
+  const events: EventItem[] = eventsData || [];
+  const articles: Article[] = articlesData || [];
+
+  // Filter events by status
+  const upcomingEvents = events.filter(event => 
+    isFuture(new Date(event.eventDate)) || event.status === "upcoming"
+  ).sort((a, b) => new Date(a.eventDate).getTime() - new Date(b.eventDate).getTime());
+
+  const ongoingEvents = events.filter(event => 
+    event.status === "ongoing" || 
+    (event.endDate && !isPast(new Date(event.endDate)) && !isFuture(new Date(event.eventDate)))
+  );
+
+  const pastEvents = events.filter(event => 
+    isPast(new Date(event.eventDate)) && event.status !== "upcoming"
+  ).sort((a, b) => new Date(b.eventDate).getTime() - new Date(a.eventDate).getTime());
+
+  if (hasError) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 p-6">
+        <div className="max-w-md text-center">
+          <h1 className="text-2xl font-bold text-red-600 mb-4">Oops! Something went wrong</h1>
+          <p className="text-gray-600 mb-6">{errorMessage}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
+          >
+            Refresh Page
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const isLoading = eventsLoading || articlesLoading;
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading Events...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <Layout>
-      <div className="mx-auto max-w-4xl px-6 py-12 md:py-20">
-        <h1 className="section-title text-center mb-4 animate-fade-in">EVENTS</h1>
-        <p className="text-center text-muted-foreground mb-12 animate-fade-in">
-          Join us at our upcoming events in Colorado, Northampton, and Lagos
-        </p>
+      <div className="py-12 md:py-20">
+        <h1 className="section-title text-center mb-12 animate-fade-in">EVENTS & TOURISM</h1>
 
-        <section className="mb-16">
-          <h2 className="section-title text-center mb-8">UPCOMING EVENTS</h2>
+        <section className="mx-auto max-w-4xl px-6 mb-20 text-center">
+          <p className="text-xl md:text-2xl leading-relaxed font-serif text-foreground/90 mb-8">
+            Experience Nigerian culture through our curated events and tourism experiences.
+          </p>
+          <p className="body-text max-w-2xl mx-auto">
+            From book launches and film screenings to cultural festivals and guided tours, we bring Nigerian stories to life through memorable events.
+          </p>
+        </section>
+
+        {/* Upcoming Events */}
+        <section className="mx-auto max-w-6xl px-6 mb-16">
+          <h2 className="text-xl font-serif text-center mb-12">Upcoming Events</h2>
           
-          <div className="space-y-6">
-            {upcomingEvents.length > 0 ? (
-              upcomingEvents.map((event, index) => (
-                <Card 
-                  key={event.id}
-                  className="overflow-hidden animate-slide-up"
-                  style={{ animationDelay: `${index * 0.1}s` }}
-                >
-                  {event.featuredImage && (
-                    <div className="aspect-video bg-muted">
+          {eventsLoading ? (
+            <div className="text-center py-12">Loading events...</div>
+          ) : upcomingEvents.length > 0 ? (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {upcomingEvents.map((event) => (
+                <Card key={event.id} className="overflow-hidden group hover:shadow-lg transition-shadow">
+                  <div className="aspect-video relative bg-muted">
+                    {event.featuredImage ? (
                       <img
                         src={event.featuredImage}
                         alt={event.title}
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                       />
-                    </div>
-                  )}
-                  <CardContent className="p-6">
-                    <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-                      <div className="flex-1">
-                        <h3 className="font-serif text-lg mb-2">{event.title}</h3>
-                        {event.description && (
-                          <p className="text-sm text-foreground/80 mb-3">{event.description}</p>
-                        )}
-                        <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
-                          <span className="flex items-center gap-1">
-                            <Calendar className="h-3 w-3" />
-                            {format(new Date(event.eventDate), "MMMM d, yyyy")}
-                          </span>
-                          {event.location && (
-                            <span className="flex items-center gap-1">
-                              <MapPin className="h-3 w-3" />
-                              {event.location}
-                            </span>
-                          )}
-                          {event.isVirtual && (
-                            <span className="flex items-center gap-1">
-                              <Video className="h-3 w-3" />
-                              Virtual Event
-                            </span>
-                          )}
-                        </div>
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <Calendar className="h-12 w-12 text-muted-foreground/50" />
                       </div>
+                    )}
+                    {event.eventType && (
+                      <span className="absolute top-2 left-2 bg-primary/90 text-primary-foreground px-2 py-1 text-xs rounded">
+                        {event.eventType}
+                      </span>
+                    )}
+                    {event.isVirtual && (
+                      <span className="absolute top-2 right-2 bg-blue-500 text-white px-2 py-1 text-xs rounded">
+                        Virtual
+                      </span>
+                    )}
+                  </div>
+                  <CardContent className="p-4">
+                    <h3 className="font-serif font-medium">{event.title}</h3>
+                    
+                    <div className="space-y-2 mt-3">
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Calendar className="h-4 w-4" />
+                        <span>{format(new Date(event.eventDate), 'EEE, MMM d, yyyy • h:mm a')}</span>
+                      </div>
+                      
+                      {event.location && !event.isVirtual && (
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <MapPin className="h-4 w-4" />
+                          <span>{event.location}</span>
+                        </div>
+                      )}
+                      
+                      {event.isVirtual && event.virtualLink && (
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <Video className="h-4 w-4" />
+                          <span>Virtual Event</span>
+                        </div>
+                      )}
+                    </div>
+                    
+                    {event.description && (
+                      <p className="text-xs text-muted-foreground mt-3 line-clamp-2">
+                        {event.description}
+                      </p>
+                    )}
+                    
+                    <div className="flex gap-2 mt-4">
                       {event.registrationLink && (
                         <a
                           href={event.registrationLink}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="px-4 py-2 border border-foreground/30 text-sm hover:bg-foreground hover:text-background transition-colors flex items-center gap-2"
+                          className="text-xs px-3 py-1 bg-primary text-primary-foreground rounded hover:bg-primary/90 transition-colors"
                         >
-                          Register <ExternalLink className="h-3 w-3" />
+                          Register
+                        </a>
+                      )}
+                      {event.isVirtual && event.virtualLink && (
+                        <a
+                          href={event.virtualLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+                        >
+                          Join Virtually
                         </a>
                       )}
                     </div>
                   </CardContent>
                 </Card>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <Calendar className="h-16 w-16 text-muted-foreground/50 mx-auto mb-4" />
+              <p className="text-muted-foreground">No upcoming events scheduled yet.</p>
+              <p className="text-sm text-muted-foreground mt-2">Check back soon for new event announcements!</p>
+            </div>
+          )}
+        </section>
+
+        {/* Event Categories */}
+        <section className="mx-auto max-w-4xl px-6 mb-16">
+          <h2 className="text-xl font-serif text-center mb-12">Event Categories</h2>
+          <div className="grid md:grid-cols-3 gap-6">
+            <Card className="text-center p-6 hover:shadow-lg transition-shadow">
+              <div className="w-12 h-12 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Book className="h-6 w-6" />
+              </div>
+              <h3 className="font-serif font-medium mb-2">Book Launches</h3>
+              <p className="text-sm text-muted-foreground">
+                Celebrating new Nigerian literature with author readings and signings.
+              </p>
+            </Card>
+            
+            <Card className="text-center p-6 hover:shadow-lg transition-shadow">
+              <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Film className="h-6 w-6" />
+              </div>
+              <h3 className="font-serif font-medium mb-2">Film Screenings</h3>
+              <p className="text-sm text-muted-foreground">
+                Premieres and special screenings of Nigerian films and documentaries.
+              </p>
+            </Card>
+            
+            <Card className="text-center p-6 hover:shadow-lg transition-shadow">
+              <div className="w-12 h-12 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <MapPinIcon className="h-6 w-6" />
+              </div>
+              <h3 className="font-serif font-medium mb-2">Cultural Tours</h3>
+              <p className="text-sm text-muted-foreground">
+                Guided tours exploring Nigerian heritage sites and cultural landmarks.
+              </p>
+            </Card>
+          </div>
+        </section>
+
+        {/* Event News */}
+        <section className="mx-auto max-w-2xl px-6 mb-12">
+          <h2 className="text-xl font-serif text-center mb-12">Event News & Updates</h2>
+          
+          <div className="space-y-6">
+            {articlesLoading ? (
+              <div className="text-center py-8">Loading articles...</div>
+            ) : articles.length > 0 ? (
+              articles.map((article) => (
+                <Link 
+                  key={article.id} 
+                  to={`/blog/${article.slug}`}
+                  className="block border border-foreground/20 p-6 text-center animate-slide-up hover:border-primary/50 hover:shadow-lg transition-all cursor-pointer"
+                >
+                  <div className="flex flex-col items-center">
+                    {article.featuredImage && (
+                      <div className="w-16 h-16 rounded-full overflow-hidden mb-3">
+                        <img 
+                          src={article.featuredImage} 
+                          alt={article.title}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    )}
+                    <p className="text-sm font-medium text-accent mb-2">
+                      {article.categoryName || "Event News"} 
+                      {article.publishedAt && ` • ${format(new Date(article.publishedAt), 'MMM yyyy')}`}
+                    </p>
+                    <p className="text-sm text-foreground/80 font-medium">{article.title}</p>
+                    {article.excerpt && (
+                      <p className="text-xs text-muted-foreground mt-2">
+                        {article.excerpt}
+                      </p>
+                    )}
+                  </div>
+                </Link>
               ))
             ) : (
-              fallbackEvents.map((event, index) => (
-                <article 
-                  key={event.id}
-                  className="p-6 bg-secondary/50 border border-border animate-slide-up"
-                  style={{ animationDelay: `${index * 0.1}s` }}
-                >
-                  <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-                    <div className="flex-1">
-                      <h3 className="font-serif text-lg mb-2">{event.name}</h3>
-                      <p className="text-sm text-foreground/80 mb-3">{event.description}</p>
-                      <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
-                        <span>{event.date}</span>
-                        <span>-</span>
-                        <span>{event.location}</span>
-                      </div>
-                    </div>
-                    <button className="px-4 py-2 border border-foreground/30 text-sm hover:bg-foreground hover:text-background transition-colors">
-                      Learn More
-                    </button>
-                  </div>
+              <>
+                <article className="border border-foreground/20 p-6 text-center animate-slide-up">
+                  <p className="text-sm font-medium text-accent mb-2">Event Announcement (April 2025)</p>
+                  <p className="text-sm text-foreground/80">Annual Nigerian Culture Festival Dates Announced</p>
                 </article>
-              ))
+                <article className="border border-foreground/20 p-6 text-center animate-slide-up" style={{ animationDelay: "0.1s" }}>
+                  <p className="text-sm font-medium text-accent mb-2">Tourism Update (March 2025)</p>
+                  <p className="text-sm text-foreground/80">New Heritage Tour Routes Launched in Lagos</p>
+                </article>
+              </>
             )}
           </div>
         </section>
 
+        {/* Past Events */}
         {pastEvents.length > 0 && (
-          <>
-            <div className="divider mb-16" />
-            <section className="mb-16">
-              <h2 className="section-title text-center mb-8">PAST EVENTS</h2>
-              <div className="space-y-4">
-                {pastEvents.map((event) => (
-                  <Card key={event.id} className="overflow-hidden opacity-75">
-                    <CardContent className="p-4">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <h3 className="font-serif">{event.title}</h3>
-                          <p className="text-xs text-muted-foreground">
-                            {format(new Date(event.eventDate), "MMMM d, yyyy")}
-                            {event.location && ` - ${event.location}`}
-                          </p>
-                        </div>
-                        <span className="text-xs bg-muted px-2 py-1 rounded">Completed</span>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </section>
-          </>
+          <section className="mx-auto max-w-4xl px-6">
+            <h2 className="text-xl font-serif text-center mb-12">Past Events</h2>
+            <div className="space-y-4">
+              {pastEvents.slice(0, 5).map((event) => (
+                <div key={event.id} className="border-b pb-4 last:border-0">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <h3 className="font-medium">{event.title}</h3>
+                      <p className="text-sm text-muted-foreground">
+                        {format(new Date(event.eventDate), 'MMM d, yyyy')} • {event.eventType}
+                      </p>
+                    </div>
+                    <span className="text-xs bg-muted px-2 py-1 rounded">Completed</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
         )}
 
-        <div className="divider mb-16" />
-
-        <section className="animate-slide-up" style={{ animationDelay: "0.3s" }}>
-          <h2 className="section-title text-center mb-8">OUR LOCATIONS</h2>
-          
-          <div className="grid md:grid-cols-3 gap-6 text-center">
-            <div className="p-6">
-              <h3 className="font-serif text-lg mb-2">Colorado, USA</h3>
-              <p className="text-sm text-muted-foreground">
-                Book launches, readings, and cultural events in the American West.
-              </p>
-            </div>
-            <div className="p-6">
-              <h3 className="font-serif text-lg mb-2">Northampton, UK</h3>
-              <p className="text-sm text-muted-foreground">
-                Film screenings, author events, and community gatherings at our UK headquarters.
-              </p>
-            </div>
-            <div className="p-6">
-              <h3 className="font-serif text-lg mb-2">Lagos, Nigeria</h3>
-              <p className="text-sm text-muted-foreground">
-                Major launches, cultural celebrations, and tourism showcases in our home city.
-              </p>
-            </div>
-          </div>
-        </section>
-
-        <section className="mt-16 text-center animate-slide-up" style={{ animationDelay: "0.4s" }}>
-          <div className="inline-block border border-foreground/30 px-8 py-6">
-            <h3 className="font-serif text-lg mb-2">Stay Updated</h3>
-            <p className="text-sm text-muted-foreground mb-4">
-              Subscribe to hear about upcoming events and new releases
-            </p>
-            <a
-              href="mailto:events@bauhausproduction.com"
-              className="link-gold text-sm"
-            >
-              events@bauhausproduction.com
-            </a>
-          </div>
-        </section>
+        <div className="divider" />
       </div>
     </Layout>
   );
