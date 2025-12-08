@@ -38,6 +38,18 @@ export default {
         accent: {
           DEFAULT: "hsl(var(--accent))",
           foreground: "hsl(var(--accent-foreground))",
+          yellow: "hsl(var(--accent-yellow))",
+          red: "hsl(var(--accent-red))",
+          purple: "hsl(var(--accent-purple))",
+          green: "hsl(var(--accent-green))",
+          teal: "hsl(var(--accent-teal))",
+          cyan: "hsl(var(--accent-cyan))",
+          blue: "hsl(var(--accent-blue))",
+          magenta: "hsl(var(--accent-magenta))",
+          lime: "hsl(var(--accent-lime))",
+          orange: "hsl(var(--accent-orange))",
+          pink: "hsl(var(--accent-pink))",
+          fuchsia: "hsl(var(--accent-fuchsia))",
         },
         popover: {
           DEFAULT: "hsl(var(--popover))",
@@ -47,11 +59,6 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        gold: {
-          DEFAULT: "hsl(var(--gold))",
-          hover: "hsl(var(--gold-hover))",
-        },
-        cream: "hsl(var(--cream))",
       },
       fontFamily: {
         serif: ["Playfair Display", "Georgia", "serif"],

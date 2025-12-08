@@ -95,22 +95,14 @@ const TV = () => {
   const featuredShows = shows.filter(s => s.isFeatured);
   const allShows = featuredShows.length > 0 ? featuredShows : shows;
 
-  const getDefaultImage = () => {
-    return "https://images.unsplash.com/photo-1522869635100-9f4c5e86aa37?w=400&h=600&fit=crop";
-  };
-
-  const carouselItems = allShows.length > 0 
-    ? allShows.map(item => ({
-        id: item.id,
-        title: item.title,
-        image: item.coverImage || getDefaultImage(),
-        type: item.type,
-      }))
-    : [
-        { id: 1, title: "Nigerian Tales", image: getDefaultImage(), type: "tv" as const },
-        { id: 2, title: "Lagos Living", image: "https://images.unsplash.com/photo-1574375927938-d5a98e8ffe85?w=400&h=600&fit=crop", type: "tv" as const },
-        { id: 3, title: "Culture Series", image: "https://images.unsplash.com/photo-1593359677879-a4bb92f829d1?w=400&h=600&fit=crop", type: "tv" as const },
-      ];
+  const carouselItems = allShows
+    .filter(item => item.coverImage)
+    .map(item => ({
+      id: item.id,
+      title: item.title,
+      image: item.coverImage!,
+      type: item.type,
+    }));
 
   const getExternalLinks = (linksString: string | null) => {
     if (!linksString) return [];
@@ -124,13 +116,13 @@ const TV = () => {
 
   if (hasError) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 p-6">
+      <div className="min-h-screen flex items-center justify-center bg-background p-6">
         <div className="max-w-md text-center">
-          <h1 className="text-2xl font-bold text-red-600 mb-4">Oops! Something went wrong</h1>
-          <p className="text-gray-600 mb-6">{errorMessage}</p>
+          <h1 className="text-2xl font-bold text-destructive mb-4">Oops! Something went wrong</h1>
+          <p className="text-muted-foreground mb-6">{errorMessage}</p>
           <button
             onClick={() => window.location.reload()}
-            className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
+            className="btn-primary"
           >
             Refresh Page
           </button>
@@ -142,10 +134,10 @@ const TV = () => {
   const isLoading = tvLoading || articlesLoading;
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading TV Shows...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-foreground mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading TV Shows...</p>
         </div>
       </div>
     );
@@ -156,35 +148,14 @@ const TV = () => {
       <div className="py-12 md:py-20">
         <h1 className="section-title text-center mb-12 animate-fade-in">TV SHOWS</h1>
 
-        <section className="mb-20">
-          {allShows.length > 0 && (
+        {carouselItems.length > 0 && (
+          <section className="mb-20">
             <p className="text-center text-muted-foreground mb-8">Featured Shows</p>
-          )}
-          {MediaCarousel ? (
             <MediaCarousel items={carouselItems} />
-          ) : (
-            <div className="px-6">
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                {carouselItems.slice(0, 3).map((item) => (
-                  <div key={item.id} className="bg-muted rounded-lg overflow-hidden aspect-[2/3]">
-                    <img 
-                      src={item.image} 
-                      alt={item.title}
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="p-2 bg-black/70 text-white text-xs truncate">
-                      {item.title}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </section>
+          </section>
+        )}
 
-        {tvLoading ? (
-          <div className="text-center py-12">Loading TV shows...</div>
-        ) : shows.length > 0 ? (
+        {shows.length > 0 ? (
           <section className="mx-auto max-w-6xl px-6 mb-16">
             <h2 className="text-xl font-serif text-center mb-12">All TV Shows</h2>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -192,7 +163,7 @@ const TV = () => {
                 const externalLinks = getExternalLinks(show.externalLinks);
                 
                 return (
-                  <Card key={show.id} className="overflow-hidden group">
+                  <Card key={show.id} className="overflow-hidden group card-hover border-border">
                     <div className="aspect-video relative bg-muted">
                       {show.coverImage ? (
                         <img
@@ -206,7 +177,7 @@ const TV = () => {
                         </div>
                       )}
                       {show.isFeatured && (
-                        <span className="absolute top-2 right-2 bg-primary text-primary-foreground px-2 py-1 text-xs rounded">
+                        <span className="absolute top-2 right-2 bg-foreground text-background px-2 py-1 text-xs rounded">
                           Featured
                         </span>
                       )}
@@ -239,9 +210,8 @@ const TV = () => {
                         </p>
                       )}
                       
-                      {/* External Links */}
                       {externalLinks.length > 0 && (
-                        <div className="mt-3 pt-3 border-t">
+                        <div className="mt-3 pt-3 border-t border-border">
                           <p className="text-xs font-medium mb-1">Watch on:</p>
                           <div className="flex flex-wrap gap-1">
                             {externalLinks.slice(0, 2).map((link, index) => (
@@ -250,7 +220,7 @@ const TV = () => {
                                 href={link.url || link}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-xs px-2 py-1 bg-muted rounded hover:bg-primary hover:text-primary-foreground transition-colors"
+                                className="text-xs px-2 py-1 bg-muted rounded hover:bg-foreground hover:text-background transition-colors"
                               >
                                 {link.name || "Watch"}
                               </a>
@@ -260,7 +230,7 @@ const TV = () => {
                       )}
                       
                       {show.castInfo && (
-                        <div className="mt-3 pt-3 border-t">
+                        <div className="mt-3 pt-3 border-t border-border">
                           <p className="text-xs font-medium mb-1">Cast:</p>
                           <p className="text-xs text-muted-foreground line-clamp-1">
                             {show.castInfo}
@@ -274,26 +244,24 @@ const TV = () => {
             </div>
           </section>
         ) : (
-          <section className="mx-auto max-w-2xl px-6 text-center">
+          <section className="mx-auto max-w-2xl px-6 text-center mb-16">
+            <Tv className="h-16 w-16 text-muted-foreground/50 mx-auto mb-4" />
             <p className="text-muted-foreground">
               New TV shows and series coming soon. Stay tuned for exciting content!
             </p>
           </section>
         )}
 
-        {/* TV News Section */}
-        <section className="mx-auto max-w-2xl px-6 mb-12">
-          <h2 className="text-xl font-serif text-center mb-12">TV Industry News</h2>
-          
-          <div className="space-y-6">
-            {articlesLoading ? (
-              <div className="text-center py-8">Loading news...</div>
-            ) : articles.length > 0 ? (
-              articles.map((article) => (
+        {articles.length > 0 && (
+          <section className="mx-auto max-w-2xl px-6 mb-12">
+            <h2 className="text-xl font-serif text-center mb-12">TV Industry News</h2>
+            
+            <div className="space-y-6">
+              {articles.map((article) => (
                 <Link 
                   key={article.id} 
                   to={`/blog/${article.slug}`}
-                  className="block border border-foreground/20 p-6 text-center animate-slide-up hover:border-primary/50 hover:shadow-lg transition-all cursor-pointer"
+                  className="block border border-border p-6 text-center animate-slide-up hover:border-foreground/30 hover:shadow-lg transition-all cursor-pointer"
                 >
                   <div className="flex flex-col items-center">
                     {article.featuredImage && (
@@ -305,7 +273,7 @@ const TV = () => {
                         />
                       </div>
                     )}
-                    <p className="text-sm font-medium text-accent mb-2">
+                    <p className="text-sm font-medium highlight-yellow mb-2">
                       {article.categoryName || "TV News"} 
                       {article.publishedAt && ` • ${format(new Date(article.publishedAt), 'MMM yyyy')}`}
                     </p>
@@ -317,21 +285,10 @@ const TV = () => {
                     )}
                   </div>
                 </Link>
-              ))
-            ) : (
-              <>
-                <article className="border border-foreground/20 p-6 text-center animate-slide-up">
-                  <p className="text-sm font-medium text-accent mb-2">TV Industry (February 2025)</p>
-                  <p className="text-sm text-foreground/80">New Nigerian TV Series Announced for International Distribution</p>
-                </article>
-                <article className="border border-foreground/20 p-6 text-center animate-slide-up" style={{ animationDelay: "0.1s" }}>
-                  <p className="text-sm font-medium text-accent mb-2">Streaming News (January 2025)</p>
-                  <p className="text-sm text-foreground/80">BAUHAUS TV Content Coming to Major Streaming Platforms</p>
-                </article>
-              </>
-            )}
-          </div>
-        </section>
+              ))}
+            </div>
+          </section>
+        )}
 
         <div className="divider" />
       </div>

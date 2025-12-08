@@ -92,7 +92,6 @@ const Events = () => {
   const events: EventItem[] = eventsData || [];
   const articles: Article[] = articlesData || [];
 
-  // Filter events by status
   const upcomingEvents = events.filter(event => 
     isFuture(new Date(event.eventDate)) || event.status === "upcoming"
   ).sort((a, b) => new Date(a.eventDate).getTime() - new Date(b.eventDate).getTime());
@@ -108,13 +107,13 @@ const Events = () => {
 
   if (hasError) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 p-6">
+      <div className="min-h-screen flex items-center justify-center bg-background p-6">
         <div className="max-w-md text-center">
-          <h1 className="text-2xl font-bold text-red-600 mb-4">Oops! Something went wrong</h1>
-          <p className="text-gray-600 mb-6">{errorMessage}</p>
+          <h1 className="text-2xl font-bold text-destructive mb-4">Oops! Something went wrong</h1>
+          <p className="text-muted-foreground mb-6">{errorMessage}</p>
           <button
             onClick={() => window.location.reload()}
-            className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
+            className="btn-primary"
           >
             Refresh Page
           </button>
@@ -126,10 +125,10 @@ const Events = () => {
   const isLoading = eventsLoading || articlesLoading;
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading Events...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-foreground mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading Events...</p>
         </div>
       </div>
     );
@@ -149,7 +148,6 @@ const Events = () => {
           </p>
         </section>
 
-        {/* Upcoming Events */}
         <section className="mx-auto max-w-6xl px-6 mb-16">
           <h2 className="text-xl font-serif text-center mb-12">Upcoming Events</h2>
           
@@ -158,7 +156,7 @@ const Events = () => {
           ) : upcomingEvents.length > 0 ? (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {upcomingEvents.map((event) => (
-                <Card key={event.id} className="overflow-hidden group hover:shadow-lg transition-shadow">
+                <Card key={event.id} className="overflow-hidden group card-hover border-border">
                   <div className="aspect-video relative bg-muted">
                     {event.featuredImage ? (
                       <img
@@ -172,12 +170,12 @@ const Events = () => {
                       </div>
                     )}
                     {event.eventType && (
-                      <span className="absolute top-2 left-2 bg-primary/90 text-primary-foreground px-2 py-1 text-xs rounded">
+                      <span className="absolute top-2 left-2 bg-foreground text-background px-2 py-1 text-xs rounded">
                         {event.eventType}
                       </span>
                     )}
                     {event.isVirtual && (
-                      <span className="absolute top-2 right-2 bg-blue-500 text-white px-2 py-1 text-xs rounded">
+                      <span className="absolute top-2 right-2 bg-accent-blue text-white px-2 py-1 text-xs rounded">
                         Virtual
                       </span>
                     )}
@@ -218,7 +216,7 @@ const Events = () => {
                           href={event.registrationLink}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-xs px-3 py-1 bg-primary text-primary-foreground rounded hover:bg-primary/90 transition-colors"
+                          className="btn-accent text-xs px-3 py-1"
                         >
                           Register
                         </a>
@@ -228,7 +226,7 @@ const Events = () => {
                           href={event.virtualLink}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-xs px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+                          className="text-xs px-3 py-1 bg-accent-blue text-white rounded hover:opacity-90 transition-colors"
                         >
                           Join Virtually
                         </a>
@@ -247,12 +245,11 @@ const Events = () => {
           )}
         </section>
 
-        {/* Event Categories */}
         <section className="mx-auto max-w-4xl px-6 mb-16">
           <h2 className="text-xl font-serif text-center mb-12">Event Categories</h2>
           <div className="grid md:grid-cols-3 gap-6">
-            <Card className="text-center p-6 hover:shadow-lg transition-shadow">
-              <div className="w-12 h-12 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Card className="text-center p-6 card-hover border-border">
+              <div className="w-12 h-12 bg-accent-yellow/20 text-accent-orange rounded-full flex items-center justify-center mx-auto mb-4">
                 <Book className="h-6 w-6" />
               </div>
               <h3 className="font-serif font-medium mb-2">Book Launches</h3>
@@ -261,8 +258,8 @@ const Events = () => {
               </p>
             </Card>
             
-            <Card className="text-center p-6 hover:shadow-lg transition-shadow">
-              <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Card className="text-center p-6 card-hover border-border">
+              <div className="w-12 h-12 bg-accent-blue/20 text-accent-blue rounded-full flex items-center justify-center mx-auto mb-4">
                 <Film className="h-6 w-6" />
               </div>
               <h3 className="font-serif font-medium mb-2">Film Screenings</h3>
@@ -271,8 +268,8 @@ const Events = () => {
               </p>
             </Card>
             
-            <Card className="text-center p-6 hover:shadow-lg transition-shadow">
-              <div className="w-12 h-12 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Card className="text-center p-6 card-hover border-border">
+              <div className="w-12 h-12 bg-accent-green/20 text-accent-green rounded-full flex items-center justify-center mx-auto mb-4">
                 <MapPinIcon className="h-6 w-6" />
               </div>
               <h3 className="font-serif font-medium mb-2">Cultural Tours</h3>
@@ -283,19 +280,16 @@ const Events = () => {
           </div>
         </section>
 
-        {/* Event News */}
-        <section className="mx-auto max-w-2xl px-6 mb-12">
-          <h2 className="text-xl font-serif text-center mb-12">Event News & Updates</h2>
-          
-          <div className="space-y-6">
-            {articlesLoading ? (
-              <div className="text-center py-8">Loading articles...</div>
-            ) : articles.length > 0 ? (
-              articles.map((article) => (
+        {articles.length > 0 && (
+          <section className="mx-auto max-w-2xl px-6 mb-12">
+            <h2 className="text-xl font-serif text-center mb-12">Event News & Updates</h2>
+            
+            <div className="space-y-6">
+              {articles.map((article) => (
                 <Link 
                   key={article.id} 
                   to={`/blog/${article.slug}`}
-                  className="block border border-foreground/20 p-6 text-center animate-slide-up hover:border-primary/50 hover:shadow-lg transition-all cursor-pointer"
+                  className="block border border-border p-6 text-center animate-slide-up hover:border-foreground/30 hover:shadow-lg transition-all cursor-pointer"
                 >
                   <div className="flex flex-col items-center">
                     {article.featuredImage && (
@@ -307,7 +301,7 @@ const Events = () => {
                         />
                       </div>
                     )}
-                    <p className="text-sm font-medium text-accent mb-2">
+                    <p className="text-sm font-medium highlight-yellow mb-2">
                       {article.categoryName || "Event News"} 
                       {article.publishedAt && ` • ${format(new Date(article.publishedAt), 'MMM yyyy')}`}
                     </p>
@@ -319,29 +313,17 @@ const Events = () => {
                     )}
                   </div>
                 </Link>
-              ))
-            ) : (
-              <>
-                <article className="border border-foreground/20 p-6 text-center animate-slide-up">
-                  <p className="text-sm font-medium text-accent mb-2">Event Announcement (April 2025)</p>
-                  <p className="text-sm text-foreground/80">Annual Nigerian Culture Festival Dates Announced</p>
-                </article>
-                <article className="border border-foreground/20 p-6 text-center animate-slide-up" style={{ animationDelay: "0.1s" }}>
-                  <p className="text-sm font-medium text-accent mb-2">Tourism Update (March 2025)</p>
-                  <p className="text-sm text-foreground/80">New Heritage Tour Routes Launched in Lagos</p>
-                </article>
-              </>
-            )}
-          </div>
-        </section>
+              ))}
+            </div>
+          </section>
+        )}
 
-        {/* Past Events */}
         {pastEvents.length > 0 && (
           <section className="mx-auto max-w-4xl px-6">
             <h2 className="text-xl font-serif text-center mb-12">Past Events</h2>
             <div className="space-y-4">
               {pastEvents.slice(0, 5).map((event) => (
-                <div key={event.id} className="border-b pb-4 last:border-0">
+                <div key={event.id} className="border-b border-border pb-4 last:border-0">
                   <div className="flex justify-between items-center">
                     <div>
                       <h3 className="font-medium">{event.title}</h3>
@@ -357,7 +339,7 @@ const Events = () => {
           </section>
         )}
 
-        <div className="divider" />
+        <div className="divider mt-12" />
       </div>
     </Layout>
   );

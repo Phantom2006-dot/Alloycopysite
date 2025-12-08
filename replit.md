@@ -29,10 +29,16 @@ Preferred communication style: Simple, everyday language.
 - CSS custom properties (CSS variables) for theming via `index.css`
 - Light/dark theme support using next-themes package
 - Custom design tokens including:
-  - Color system: Background, foreground, primary, secondary, accent, destructive, muted
+  - **Light Mode**: Pure white (#FFFFFF) backgrounds with black (#000000) text
+  - **Dark Mode**: Pure black (#000000) backgrounds with white (#FFFFFF) text
+  - **Accent Color Palette** (for highlights, buttons, icons, borders):
+    - Yellow: #ffd51e, Red: #ff3131, Purple: #9655f0, #9c43fa
+    - Green: #7ee868, Teal: #2fdeab, #3faf90, Cyan: #57abbe
+    - Blue: #4ea8f1, Magenta: #cc3bba, Lime: #24dc32
+    - Orange: #f15d24, Pink: #e97bff, Fuchsia: #dd07a6
   - Typography: Inter (sans-serif) and Playfair Display (serif) from Google Fonts
-  - Custom animations: fadeIn, slideIn for smooth page transitions
-- Glassmorphism effects and gradient backgrounds for modern aesthetic
+  - Custom animations: fadeIn, slideUp for smooth page transitions
+- Clean, minimalist design with subtle accent color highlights
 
 **State Management**
 - React hooks (useState, useEffect) for local component state
@@ -85,8 +91,10 @@ Preferred communication style: Simple, everyday language.
 
 **Asset Management**
 - Public folder for static assets (robots.txt, logos)
-- Logo variants for light/dark themes (5.svg for dark, logo-light.svg for light)
-- Unsplash images used as placeholder content throughout
+- Logo variants for light/dark themes:
+  - Light mode: `src/assets/light.png` (blue/black Bauhaus Production logo)
+  - Dark mode: `src/assets/dark.png` (yellow/red Bauhaus Production logo)
+- Theme-aware logo switching in Header and Footer components
 
 ## CMS (Content Management System)
 

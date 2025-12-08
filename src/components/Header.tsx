@@ -3,8 +3,8 @@ import { useState, useEffect } from "react";
 import { Menu, X } from "lucide-react";
 import { useTheme } from "next-themes";
 import ThemeToggle from "./ThemeToggle";
-import logoDark from "@/assets/5.svg";
-import logoLight from "@/assets/logo-light.svg";
+import logoLight from "@/assets/light.png";
+import logoDark from "@/assets/dark.png";
 
 const Header = () => {
   const location = useLocation();
@@ -31,6 +31,7 @@ const Header = () => {
     { name: "About", path: "/about" },
     { name: "Books", path: "/books" },
     { name: "Films", path: "/film" },
+    { name: "TV", path: "/tv" },
   ];
 
   const rightLinks = [
@@ -50,7 +51,7 @@ const Header = () => {
       <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border/50">
         <nav className="mx-auto max-w-7xl px-6 py-4">
           <div className="hidden md:flex items-center justify-between">
-            <ul className="flex items-center gap-8 lg:gap-12">
+            <ul className="flex items-center gap-6 lg:gap-10">
               {leftLinks.map((link) => (
                 <li key={link.path}>
                   <Link
@@ -65,17 +66,14 @@ const Header = () => {
 
             <Link to="/" className="flex flex-col items-center mx-8">
               <img 
-                src={resolvedTheme === "dark" ? logoLight : logoDark} 
-                alt="BAUHAUS Logo" 
-                className="h-24 w-auto"
+                src={resolvedTheme === "dark" ? logoDark : logoLight} 
+                alt="Bauhaus Production" 
+                className="h-20 w-auto"
               />
-              <span className="text-xs tracking-[0.2em] font-medium mt-1 uppercase">
-                BAUHAUS
-              </span>
             </Link>
 
-            <div className="flex items-center gap-8 lg:gap-12">
-              <ul className="flex items-center gap-8 lg:gap-12">
+            <div className="flex items-center gap-6 lg:gap-10">
+              <ul className="flex items-center gap-6 lg:gap-10">
                 {rightLinks.map((link) => (
                   <li key={link.path}>
                     <Link
@@ -94,13 +92,10 @@ const Header = () => {
           <div className="md:hidden flex items-center justify-between">
             <Link to="/" className="flex items-center gap-2">
               <img 
-                src={resolvedTheme === "dark" ? logoLight : logoDark} 
-                alt="BAUHAUS Logo" 
-                className="h-16 w-auto"
+                src={resolvedTheme === "dark" ? logoDark : logoLight} 
+                alt="Bauhaus Production" 
+                className="h-14 w-auto"
               />
-              <span className="text-xs tracking-[0.15em] font-medium uppercase">
-                BAUHAUS
-              </span>
             </Link>
             
             <div className="flex items-center gap-2">

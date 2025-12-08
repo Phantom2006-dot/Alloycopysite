@@ -20,7 +20,7 @@ const Contact = () => {
                 </p>
                 <p>
                   <strong className="text-foreground">Email:</strong>{" "}
-                  <a href="mailto:info@bauhausproduction.com" className="link-gold">
+                  <a href="mailto:info@bauhausproduction.com" className="link-accent">
                     info@bauhausproduction.com
                   </a>
                 </p>
@@ -38,7 +38,7 @@ const Contact = () => {
                 </p>
                 <p>
                   <strong className="text-foreground">Email:</strong>{" "}
-                  <a href="mailto:akinalaka@bauhaus-education.co.uk" className="link-gold">
+                  <a href="mailto:akinalaka@bauhaus-education.co.uk" className="link-accent">
                     akinalaka@bauhaus-education.co.uk
                   </a>
                 </p>
@@ -56,19 +56,19 @@ const Contact = () => {
           <div className="grid md:grid-cols-3 gap-8 text-center">
             <div>
               <h4 className="font-medium text-sm mb-2">Publishing Submissions</h4>
-              <a href="mailto:submissions@bauhausproduction.com" className="link-gold text-sm">
+              <a href="mailto:submissions@bauhausproduction.com" className="link-accent text-sm">
                 submissions@bauhausproduction.com
               </a>
             </div>
             <div>
               <h4 className="font-medium text-sm mb-2">Film & Documentary</h4>
-              <a href="mailto:film@bauhausproduction.com" className="link-gold text-sm">
+              <a href="mailto:film@bauhausproduction.com" className="link-accent text-sm">
                 film@bauhausproduction.com
               </a>
             </div>
             <div>
               <h4 className="font-medium text-sm mb-2">Tourism Inquiries</h4>
-              <a href="mailto:tourism@bauhausproduction.com" className="link-gold text-sm">
+              <a href="mailto:tourism@bauhausproduction.com" className="link-accent text-sm">
                 tourism@bauhausproduction.com
               </a>
             </div>

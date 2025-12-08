@@ -77,7 +77,7 @@ const Publishing = () => {
               <p className="text-sm mb-1">Submit your manuscript to</p>
               <a
                 href="mailto:submissions@bauhausproduction.com"
-                className="link-gold text-sm"
+                className="link-accent text-sm"
               >
                 submissions@bauhausproduction.com
               </a>

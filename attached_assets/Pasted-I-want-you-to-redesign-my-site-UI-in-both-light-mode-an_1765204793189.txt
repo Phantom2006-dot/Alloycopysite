@@ -1,0 +1,46 @@
+I want you to redesign my site UI in both light mode and dark mode.
+
+1. Make BLACK and WHITE the main foundation colors for the entire site.
+   - Light mode: mostly WHITE backgrounds with BLACK text.
+   - Dark mode: mostly BLACK or deep charcoal backgrounds with WHITE text.
+
+2. Use the following colors ONLY as accent and design elements:
+   #ffd51e, #ff3131, #9655f0, #9c43fa, #7ee868, #2fdeab, #3faf90, #57abbe, #4ea8f1, #cc3bba, #24dc32, #f15d24, #e97bff, #dd07a6
+   These should not overpower the UI — keep them subtle for highlights, buttons, icons, borders, gradients, hover effects, or section dividers.
+
+3. Create two full color palettes:
+   - Light mode palette
+   - Dark mode palette
+   Each must include:
+   - Primary background
+   - Primary text color
+   - Secondary surface color
+   - Accent color set
+   - Color tokens as CSS variables
+
+4. Add usage examples:
+   - Buttons
+   - Cards
+   - Section backgrounds
+   - Navigation bar
+   - Footer
+   - Highlighted text or CTA areas
+
+5. The site must confirm that all dynamic content under each section is working correctly.    -remove the static contents,  in sections like events
+   - Verify that dynamic data loads
+   - Confirm components update in real time
+   - Make sure mapped or fetched content displays properly
+   - Ensure light/dark mode switching also updates dynamic sections
+
+6. Center the logo in the top navigation/tab by adding tv from the tv.tsx in the page folder for both modes. 
+
+7. The logo filenames should match the theme:
+   - For light mode, the logo file must be: **light.png**
+   - For dark mode, the logo file must be: **dark.png**
+
+8. Finally, output the results in a structured format:
+   - Light mode palette + CSS variables
+   - Dark mode palette + CSS variables
+   - UI usage examples
+   - Updated layout instructions (with centered logo)
+   - Sections confirming dynamic functionality     add the username and password as admin and admin123, and set it up in the database
