@@ -24,6 +24,7 @@ import { Plus, Pencil, Trash2, Calendar, MapPin, Video } from "lucide-react";
 import { toast } from "sonner";
 import { ImageUpload } from "@/components/admin/ImageUpload";
 import { format } from "date-fns";
+import { api } from "@/lib/api"; // ADD THIS IMPORT
 
 interface Event {
   id: number;
@@ -45,6 +46,7 @@ interface Event {
 export default function Events() {
   const [isOpen, setIsOpen] = useState(false);
   const [editingEvent, setEditingEvent] = useState<Event | null>(null);
+  const [featuredImageFile, setFeaturedImageFile] = useState<File | null>(null); // ADD THIS
   const queryClient = useQueryClient();
 
   const initialFormData = {
@@ -66,9 +68,7 @@ export default function Events() {
   const { data, isLoading } = useQuery<{ events: Event[] }>({
     queryKey: ["events"],
     queryFn: async () => {
-      const res = await fetch("/api/events?status=all&limit=100");
-      if (!res.ok) throw new Error("Failed to fetch events");
-      return res.json();
+      return api.events.list({ limit: 100, status: "all" }); // USE API CLIENT
     },
   });
 
@@ -76,32 +76,33 @@ export default function Events() {
 
   const createMutation = useMutation({
     mutationFn: async (data: typeof formData) => {
-      const res = await fetch("/api/events", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
-      if (!res.ok) throw new Error("Failed to create event");
-      return res.json();
+      // USE THE API CLIENT WITH FILE SUPPORT
+      return api.events.create(
+        data,
+        featuredImageFile ? { featuredImage: featuredImageFile } : undefined,
+      );
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["events"] });
       toast.success("Event created successfully");
       setIsOpen(false);
       setFormData(initialFormData);
+      setFeaturedImageFile(null); // CLEAR FILE
     },
-    onError: () => toast.error("Failed to create event"),
+    onError: (error: any) => {
+      console.error("Create error:", error);
+      toast.error(error.message || "Failed to create event");
+    },
   });
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, data }: { id: number; data: typeof formData }) => {
-      const res = await fetch(`/api/events/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
-      if (!res.ok) throw new Error("Failed to update event");
-      return res.json();
+      // USE THE API CLIENT WITH FILE SUPPORT
+      return api.events.update(
+        id,
+        data,
+        featuredImageFile ? { featuredImage: featuredImageFile } : undefined,
+      );
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["events"] });
@@ -109,20 +110,26 @@ export default function Events() {
       setIsOpen(false);
       setEditingEvent(null);
       setFormData(initialFormData);
+      setFeaturedImageFile(null); // CLEAR FILE
     },
-    onError: () => toast.error("Failed to update event"),
+    onError: (error: any) => {
+      console.error("Update error:", error);
+      toast.error(error.message || "Failed to update event");
+    },
   });
 
   const deleteMutation = useMutation({
     mutationFn: async (id: number) => {
-      const res = await fetch(`/api/events/${id}`, { method: "DELETE" });
-      if (!res.ok) throw new Error("Failed to delete event");
+      return api.events.delete(id); // USE API CLIENT
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["events"] });
       toast.success("Event deleted successfully");
     },
-    onError: () => toast.error("Failed to delete event"),
+    onError: (error: any) => {
+      console.error("Delete error:", error);
+      toast.error(error.message || "Failed to delete event");
+    },
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -139,8 +146,12 @@ export default function Events() {
     setFormData({
       title: event.title,
       description: event.description || "",
-      eventDate: event.eventDate ? new Date(event.eventDate).toISOString().slice(0, 16) : "",
-      endDate: event.endDate ? new Date(event.endDate).toISOString().slice(0, 16) : "",
+      eventDate: event.eventDate
+        ? new Date(event.eventDate).toISOString().slice(0, 16)
+        : "",
+      endDate: event.endDate
+        ? new Date(event.endDate).toISOString().slice(0, 16)
+        : "",
       location: event.location || "",
       isVirtual: event.isVirtual,
       virtualLink: event.virtualLink || "",
@@ -149,21 +160,41 @@ export default function Events() {
       eventType: event.eventType || "",
       status: event.status,
     });
+    setFeaturedImageFile(null); // Clear any existing file
     setIsOpen(true);
   };
 
   const openCreate = () => {
     setEditingEvent(null);
     setFormData(initialFormData);
+    setFeaturedImageFile(null); // Clear any existing file
     setIsOpen(true);
+  };
+
+  // ADD THIS FUNCTION TO HANDLE FILE SELECTION
+  const handleFileSelect = (file: File) => {
+    setFeaturedImageFile(file);
+    // Clear the URL if a file is selected
+    setFormData((prev) => ({ ...prev, featuredImage: "" }));
+  };
+
+  // UPDATE ImageUpload component usage
+  const handleImageUrlChange = (url: string) => {
+    setFormData((prev) => ({ ...prev, featuredImage: url }));
+    // Clear the file if URL is entered
+    setFeaturedImageFile(null);
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "upcoming": return "bg-blue-100 text-blue-800";
-      case "ongoing": return "bg-green-100 text-green-800";
-      case "past": return "bg-gray-100 text-gray-800";
-      default: return "bg-gray-100 text-gray-800";
+      case "upcoming":
+        return "bg-blue-100 text-blue-800";
+      case "ongoing":
+        return "bg-green-100 text-green-800";
+      case "past":
+        return "bg-gray-100 text-gray-800";
+      default:
+        return "bg-gray-100 text-gray-800";
     }
   };
 
@@ -205,7 +236,9 @@ export default function Events() {
                       <Calendar className="h-12 w-12 text-muted-foreground/50" />
                     </div>
                   )}
-                  <span className={`absolute top-2 right-2 px-2 py-1 text-xs rounded ${getStatusColor(event.status)}`}>
+                  <span
+                    className={`absolute top-2 right-2 px-2 py-1 text-xs rounded ${getStatusColor(event.status)}`}
+                  >
                     {event.status}
                   </span>
                 </div>
@@ -228,7 +261,11 @@ export default function Events() {
                     </div>
                   )}
                   <div className="flex gap-2 mt-3">
-                    <Button variant="outline" size="sm" onClick={() => openEdit(event)}>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => openEdit(event)}
+                    >
                       <Pencil className="h-3 w-3 mr-1" />
                       Edit
                     </Button>
@@ -261,7 +298,9 @@ export default function Events() {
               <Input
                 id="title"
                 value={formData.title}
-                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, title: e.target.value })
+                }
                 required
               />
             </div>
@@ -271,7 +310,9 @@ export default function Events() {
               <Textarea
                 id="description"
                 value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, description: e.target.value })
+                }
                 rows={3}
               />
             </div>
@@ -280,8 +321,33 @@ export default function Events() {
               <Label>Featured Image</Label>
               <ImageUpload
                 value={formData.featuredImage}
-                onChange={(url) => setFormData({ ...formData, featuredImage: url })}
+                onChange={handleImageUrlChange} // UPDATED
+                placeholder="Enter image URL or upload a file"
+                folder="events"
               />
+              {/* ADD FILE UPLOAD INPUT FOR DIRECT FILE SELECTION */}
+              <div className="mt-2">
+                <Label htmlFor="featuredImageFile" className="text-sm">
+                  Or select file directly:
+                </Label>
+                <Input
+                  id="featuredImageFile"
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    if (e.target.files?.[0]) {
+                      handleFileSelect(e.target.files[0]);
+                    }
+                  }}
+                  className="mt-1"
+                />
+                {featuredImageFile && (
+                  <p className="text-sm text-green-600 mt-1">
+                    File selected: {featuredImageFile.name} (
+                    {(featuredImageFile.size / 1024).toFixed(1)} KB)
+                  </p>
+                )}
+              </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
@@ -291,7 +357,9 @@ export default function Events() {
                   id="eventDate"
                   type="datetime-local"
                   value={formData.eventDate}
-                  onChange={(e) => setFormData({ ...formData, eventDate: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, eventDate: e.target.value })
+                  }
                   required
                 />
               </div>
@@ -301,7 +369,9 @@ export default function Events() {
                   id="endDate"
                   type="datetime-local"
                   value={formData.endDate}
-                  onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, endDate: e.target.value })
+                  }
                 />
               </div>
             </div>
@@ -312,7 +382,9 @@ export default function Events() {
                 <Input
                   id="location"
                   value={formData.location}
-                  onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, location: e.target.value })
+                  }
                   placeholder="Venue address"
                 />
               </div>
@@ -321,7 +393,9 @@ export default function Events() {
                 <Input
                   id="eventType"
                   value={formData.eventType}
-                  onChange={(e) => setFormData({ ...formData, eventType: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, eventType: e.target.value })
+                  }
                   placeholder="e.g., Conference, Workshop"
                 />
               </div>
@@ -331,7 +405,9 @@ export default function Events() {
               <Switch
                 id="isVirtual"
                 checked={formData.isVirtual}
-                onCheckedChange={(checked) => setFormData({ ...formData, isVirtual: checked })}
+                onCheckedChange={(checked) =>
+                  setFormData({ ...formData, isVirtual: checked })
+                }
               />
               <Label htmlFor="isVirtual">Virtual Event</Label>
             </div>
@@ -342,7 +418,9 @@ export default function Events() {
                 <Input
                   id="virtualLink"
                   value={formData.virtualLink}
-                  onChange={(e) => setFormData({ ...formData, virtualLink: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, virtualLink: e.target.value })
+                  }
                   placeholder="Zoom, Teams, or other meeting link"
                 />
               </div>
@@ -353,7 +431,9 @@ export default function Events() {
               <Input
                 id="registrationLink"
                 value={formData.registrationLink}
-                onChange={(e) => setFormData({ ...formData, registrationLink: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, registrationLink: e.target.value })
+                }
                 placeholder="Eventbrite, Tickets, etc."
               />
             </div>
@@ -362,7 +442,9 @@ export default function Events() {
               <Label htmlFor="status">Status</Label>
               <Select
                 value={formData.status}
-                onValueChange={(value) => setFormData({ ...formData, status: value as any })}
+                onValueChange={(value) =>
+                  setFormData({ ...formData, status: value as any })
+                }
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -375,8 +457,16 @@ export default function Events() {
               </Select>
             </div>
 
-            <Button type="submit" className="w-full">
-              {editingEvent ? "Update" : "Create"}
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={createMutation.isPending || updateMutation.isPending}
+            >
+              {createMutation.isPending || updateMutation.isPending
+                ? "Processing..."
+                : editingEvent
+                  ? "Update"
+                  : "Create"}
             </Button>
           </form>
         </DialogContent>

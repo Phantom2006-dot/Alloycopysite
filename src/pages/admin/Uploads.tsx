@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import { Plus, Trash2, Copy, Image as ImageIcon, FileText, Check } from "lucide-react";
 import { toast } from "sonner";
+import { api } from "@/lib/api"; // ADD THIS IMPORT
 
 interface Upload {
   id: number;
@@ -35,22 +36,22 @@ export default function Uploads() {
   const { data: uploads = [], isLoading } = useQuery<Upload[]>({
     queryKey: ["uploads"],
     queryFn: async () => {
-      const res = await fetch("/api/uploads");
-      if (!res.ok) throw new Error("Failed to fetch uploads");
-      return res.json();
+      const data = await api.uploads.list({ limit: 100 }); // USE API CLIENT
+      return data.uploads || [];
     },
   });
 
   const deleteMutation = useMutation({
     mutationFn: async (id: number) => {
-      const res = await fetch(`/api/uploads/${id}`, { method: "DELETE" });
-      if (!res.ok) throw new Error("Failed to delete upload");
+      return api.uploads.delete(id); // USE API CLIENT
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["uploads"] });
       toast.success("File deleted successfully");
     },
-    onError: () => toast.error("Failed to delete file"),
+    onError: (error: any) => {
+      toast.error(error.message || "Failed to delete file");
+    },
   });
 
   const handleUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -58,22 +59,14 @@ export default function Uploads() {
     if (!file) return;
 
     setUploading(true);
-    const formData = new FormData();
-    formData.append("file", file);
 
     try {
-      const res = await fetch("/api/uploads", {
-        method: "POST",
-        body: formData,
-      });
-
-      if (!res.ok) throw new Error("Upload failed");
-
+      await api.uploads.upload(file); // USE API CLIENT
       queryClient.invalidateQueries({ queryKey: ["uploads"] });
       toast.success("File uploaded successfully");
       setIsUploadOpen(false);
-    } catch (error) {
-      toast.error("Failed to upload file");
+    } catch (error: any) {
+      toast.error(error.message || "Failed to upload file");
     } finally {
       setUploading(false);
     }
@@ -148,6 +141,7 @@ export default function Uploads() {
                       variant="secondary"
                       size="icon"
                       onClick={() => deleteMutation.mutate(upload.id)}
+                      disabled={deleteMutation.isPending}
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>

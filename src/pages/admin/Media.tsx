@@ -24,6 +24,7 @@ import { Switch } from "@/components/ui/switch";
 import { Plus, Pencil, Trash2, Book, Film, Tv } from "lucide-react";
 import { toast } from "sonner";
 import { ImageUpload } from "@/components/admin/ImageUpload";
+import { api } from "@/lib/api"; // ADD THIS IMPORT
 
 interface MediaItem {
   id: number;
@@ -60,6 +61,7 @@ export default function Media() {
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<MediaItem | null>(null);
+  const [coverImageFile, setCoverImageFile] = useState<File | null>(null);
   const queryClient = useQueryClient();
   
   const apiType = typeToApiType[type] || "book";
@@ -85,9 +87,7 @@ export default function Media() {
   const { data, isLoading } = useQuery<{ items: MediaItem[] }>({
     queryKey: ["media", apiType],
     queryFn: async () => {
-      const res = await fetch(`/api/media?type=${apiType}&limit=100`);
-      if (!res.ok) throw new Error("Failed to fetch media");
-      return res.json();
+      return api.media.list({ type: apiType, limit: 100 }); // USE API CLIENT
     },
   });
 
@@ -95,32 +95,23 @@ export default function Media() {
 
   const createMutation = useMutation({
     mutationFn: async (data: typeof formData & { type: string }) => {
-      const res = await fetch("/api/media", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
-      if (!res.ok) throw new Error("Failed to create item");
-      return res.json();
+      return api.media.create(data, coverImageFile ? { coverImage: coverImageFile } : undefined); // USE API CLIENT
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["media", apiType] });
       toast.success("Item created successfully");
       setIsOpen(false);
       setFormData(initialFormData);
+      setCoverImageFile(null);
     },
-    onError: () => toast.error("Failed to create item"),
+    onError: (error: any) => {
+      toast.error(error.message || "Failed to create item");
+    },
   });
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, data }: { id: number; data: typeof formData }) => {
-      const res = await fetch(`/api/media/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
-      if (!res.ok) throw new Error("Failed to update item");
-      return res.json();
+      return api.media.update(id, data, coverImageFile ? { coverImage: coverImageFile } : undefined); // USE API CLIENT
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["media", apiType] });
@@ -128,20 +119,24 @@ export default function Media() {
       setIsOpen(false);
       setEditingItem(null);
       setFormData(initialFormData);
+      setCoverImageFile(null);
     },
-    onError: () => toast.error("Failed to update item"),
+    onError: (error: any) => {
+      toast.error(error.message || "Failed to update item");
+    },
   });
 
   const deleteMutation = useMutation({
     mutationFn: async (id: number) => {
-      const res = await fetch(`/api/media/${id}`, { method: "DELETE" });
-      if (!res.ok) throw new Error("Failed to delete item");
+      return api.media.delete(id); // USE API CLIENT
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["media", apiType] });
       toast.success("Item deleted successfully");
     },
-    onError: () => toast.error("Failed to delete item"),
+    onError: (error: any) => {
+      toast.error(error.message || "Failed to delete item");
+    },
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -168,13 +163,25 @@ export default function Media() {
       isFeatured: item.isFeatured,
       status: item.status as any,
     });
+    setCoverImageFile(null);
     setIsOpen(true);
   };
 
   const openCreate = () => {
     setEditingItem(null);
     setFormData(initialFormData);
+    setCoverImageFile(null);
     setIsOpen(true);
+  };
+
+  const handleFileSelect = (file: File) => {
+    setCoverImageFile(file);
+    setFormData(prev => ({ ...prev, coverImage: "" }));
+  };
+
+  const handleImageUrlChange = (url: string) => {
+    setFormData(prev => ({ ...prev, coverImage: url }));
+    setCoverImageFile(null);
   };
 
   return (
@@ -241,6 +248,7 @@ export default function Media() {
                       variant="outline"
                       size="sm"
                       onClick={() => deleteMutation.mutate(item.id)}
+                      disabled={deleteMutation.isPending}
                     >
                       <Trash2 className="h-3 w-3 mr-1" />
                       Delete
@@ -285,8 +293,29 @@ export default function Media() {
               <Label>Cover Image</Label>
               <ImageUpload
                 value={formData.coverImage}
-                onChange={(url) => setFormData({ ...formData, coverImage: url })}
+                onChange={handleImageUrlChange}
+                placeholder="Enter image URL or upload a file"
+                folder="media"
               />
+              <div className="mt-2">
+                <Label htmlFor="coverImageFile" className="text-sm">Or select file directly:</Label>
+                <Input
+                  id="coverImageFile"
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    if (e.target.files?.[0]) {
+                      handleFileSelect(e.target.files[0]);
+                    }
+                  }}
+                  className="mt-1"
+                />
+                {coverImageFile && (
+                  <p className="text-sm text-green-600 mt-1">
+                    File selected: {coverImageFile.name} ({(coverImageFile.size / 1024).toFixed(1)} KB)
+                  </p>
+                )}
+              </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
@@ -379,8 +408,14 @@ export default function Media() {
               </div>
             </div>
 
-            <Button type="submit" className="w-full">
-              {editingItem ? "Update" : "Create"}
+            <Button 
+              type="submit" 
+              className="w-full"
+              disabled={createMutation.isPending || updateMutation.isPending}
+            >
+              {createMutation.isPending || updateMutation.isPending 
+                ? "Processing..." 
+                : editingItem ? "Update" : "Create"}
             </Button>
           </form>
         </DialogContent>

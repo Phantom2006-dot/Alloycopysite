@@ -1,10 +1,34 @@
+// [file name]: events.ts
+// [file content begin]
 import { Router, Request, Response } from "express";
+import multer from "multer";
 import { db } from "../db";
 import { events } from "../../shared/schema";
 import { eq, desc, and, gte, lt, sql, SQL } from "drizzle-orm";
 import { authenticateToken, requireRole, AuthRequest } from "../middleware/auth";
+import { uploadToCloudinary } from "../lib/cloudinary";
 
 const router = Router();
+
+// Configure multer for file uploads
+const storage = multer.memoryStorage();
+const fileFilter = (req: Express.Request, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
+  const allowedTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
+
+  if (allowedTypes.includes(file.mimetype)) {
+    cb(null, true);
+  } else {
+    cb(new Error("Invalid file type. Only images are allowed."));
+  }
+};
+
+const upload = multer({
+  storage,
+  fileFilter,
+  limits: {
+    fileSize: 10 * 1024 * 1024, // 10MB limit
+  },
+});
 
 function generateSlug(title: string): string {
   return title
@@ -15,6 +39,22 @@ function generateSlug(title: string): string {
     .trim();
 }
 
+// Debug route to test database connection
+router.get("/debug/test-db", async (_req: Request, res: Response) => {
+  try {
+    const result = await db.select({ count: sql<number>`count(*)` }).from(events);
+    console.log('Events database test successful:', result);
+
+    res.json({ 
+      dbConnected: true,
+      eventCount: result[0].count 
+    });
+  } catch (error) {
+    console.error('Events database test failed:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 router.get("/", async (req: Request, res: Response) => {
   try {
     const { page = "1", limit = "12", status } = req.query;
@@ -23,7 +63,7 @@ router.get("/", async (req: Request, res: Response) => {
     const offset = (pageNum - 1) * limitNum;
 
     let conditions: SQL<unknown>[] = [];
-    
+
     if (status && status !== "all") {
       conditions.push(eq(events.status, status as any));
     }
@@ -61,7 +101,7 @@ router.get("/", async (req: Request, res: Response) => {
 router.get("/upcoming", async (_req: Request, res: Response) => {
   try {
     const now = new Date();
-    
+
     const upcomingEvents = await db
       .select()
       .from(events)
@@ -79,7 +119,7 @@ router.get("/upcoming", async (_req: Request, res: Response) => {
 router.get("/past", async (_req: Request, res: Response) => {
   try {
     const now = new Date();
-    
+
     const pastEvents = await db
       .select()
       .from(events)
@@ -111,47 +151,152 @@ router.get("/:slug", async (req: Request, res: Response) => {
   }
 });
 
-router.post("/", authenticateToken, requireRole("super_admin", "editor"), async (req: AuthRequest, res: Response) => {
+router.post("/", authenticateToken, requireRole("super_admin", "editor"), upload.single("featuredImage"), async (req: AuthRequest, res: Response) => {
   try {
-    const { title, description, eventDate, endDate, location, isVirtual, virtualLink, featuredImage, registrationLink, eventType, status } = req.body;
+    console.log('=== EVENT CREATE REQUEST START ===');
+    console.log('Request body fields:', Object.keys(req.body));
+    console.log('Request body values:', req.body);
+    console.log('Has file:', !!req.file);
+
+    const { 
+      title, description, eventDate, endDate, location, 
+      isVirtual, virtualLink, registrationLink, 
+      eventType, status 
+    } = req.body;
+
+    console.log('Parsed fields:', { 
+      title, eventDate, location, eventType,
+      isVirtual: isVirtual,
+      isVirtualType: typeof isVirtual
+    });
 
     if (!title || !eventDate) {
+      console.log('Validation failed: Missing title or eventDate');
       return res.status(400).json({ message: "Title and event date are required" });
     }
 
-    const slug = generateSlug(title);
+    let featuredImageUrl = req.body.featuredImage || null;
 
-    const [newEvent] = await db.insert(events).values({
+    // Handle file upload if present
+    if (req.file) {
+      try {
+        console.log('Starting Cloudinary upload for event...');
+        const uploadResult = await uploadToCloudinary(req.file.buffer, {
+          folder: 'bauhaus-cms/events',
+          resource_type: 'image',
+        });
+        featuredImageUrl = uploadResult.secure_url;
+        console.log('Cloudinary upload successful:', featuredImageUrl);
+      } catch (uploadError) {
+        console.error("Cloudinary upload error:", uploadError);
+        return res.status(500).json({ message: "Failed to upload image", details: uploadError.message });
+      }
+    }
+
+    const slug = generateSlug(title);
+    console.log('Generated slug:', slug);
+
+    // Handle boolean conversion
+    const isVirtualBool = isVirtual === 'true' || isVirtual === true || false;
+
+    // Prepare the data for insertion
+    const insertData = {
       title,
       slug,
-      description,
+      description: description || null,
       eventDate: new Date(eventDate),
       endDate: endDate ? new Date(endDate) : null,
-      location,
-      isVirtual: isVirtual || false,
-      virtualLink,
-      featuredImage,
-      registrationLink,
-      eventType,
+      location: location || null,
+      isVirtual: isVirtualBool,
+      virtualLink: virtualLink || null,
+      featuredImage: featuredImageUrl,
+      registrationLink: registrationLink || null,
+      eventType: eventType || null,
       status: status || "upcoming",
-    }).returning();
+    };
+
+    console.log('Final insert data:', JSON.stringify(insertData, null, 2));
+
+    const [newEvent] = await db.insert(events).values(insertData).returning();
+
+    console.log('✅ Event created successfully! ID:', newEvent.id);
+    console.log('=== EVENT CREATE REQUEST END ===');
 
     res.status(201).json(newEvent);
   } catch (error) {
-    console.error("Create event error:", error);
-    res.status(500).json({ message: "Server error" });
+    console.error("❌ Create event error:");
+    console.error("Error name:", error.name);
+    console.error("Error message:", error.message);
+    console.error("Error stack:", error.stack);
+    console.error("Full error object:", error);
+
+    // Check for specific database errors
+    if (error.message?.includes('unique constraint')) {
+      return res.status(400).json({ 
+        message: "Slug already exists. Please use a different title.",
+        error: error.message 
+      });
+    }
+
+    if (error.message?.includes('violates not-null constraint')) {
+      return res.status(400).json({ 
+        message: "Missing required field", 
+        error: error.message 
+      });
+    }
+
+    if (error.message?.includes('invalid input syntax')) {
+      return res.status(400).json({ 
+        message: "Invalid date format", 
+        error: error.message 
+      });
+    }
+
+    res.status(500).json({ 
+      message: "Failed to create event", 
+      error: error.message,
+      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
   }
 });
 
-router.put("/:id", authenticateToken, requireRole("super_admin", "editor"), async (req: AuthRequest, res: Response) => {
+router.put("/:id", authenticateToken, requireRole("super_admin", "editor"), upload.single("featuredImage"), async (req: AuthRequest, res: Response) => {
   try {
+    console.log('=== EVENT UPDATE REQUEST START ===');
     const { id } = req.params;
     const eventId = parseInt(id);
-    const { title, description, eventDate, endDate, location, isVirtual, virtualLink, featuredImage, registrationLink, eventType, status } = req.body;
+    const { 
+      title, description, eventDate, endDate, location, 
+      isVirtual, virtualLink, registrationLink, 
+      eventType, status 
+    } = req.body;
+
+    console.log('Updating event ID:', eventId);
+    console.log('Request body:', req.body);
+    console.log('Has file:', !!req.file);
 
     const [existingEvent] = await db.select().from(events).where(eq(events.id, eventId));
     if (!existingEvent) {
+      console.log('Event not found:', eventId);
       return res.status(404).json({ message: "Event not found" });
+    }
+
+    let featuredImageUrl = req.body.featuredImage !== undefined ? req.body.featuredImage : existingEvent.featuredImage;
+
+    // Handle file upload if present
+    if (req.file) {
+      try {
+        console.log('Uploading new featured image...');
+        const uploadResult = await uploadToCloudinary(req.file.buffer, {
+          folder: 'bauhaus-cms/events',
+          resource_type: 'image',
+        });
+        featuredImageUrl = uploadResult.secure_url;
+        console.log('New featured image uploaded:', featuredImageUrl);
+      } catch (uploadError) {
+        console.error("Cloudinary upload error:", uploadError);
+        return res.status(500).json({ message: "Failed to upload image", details: uploadError.message });
+      }
     }
 
     const updates: any = {
@@ -166,19 +311,29 @@ router.put("/:id", authenticateToken, requireRole("super_admin", "editor"), asyn
     if (eventDate) updates.eventDate = new Date(eventDate);
     if (endDate !== undefined) updates.endDate = endDate ? new Date(endDate) : null;
     if (location !== undefined) updates.location = location;
-    if (isVirtual !== undefined) updates.isVirtual = isVirtual;
+    if (isVirtual !== undefined) updates.isVirtual = isVirtual === 'true' || isVirtual === true;
     if (virtualLink !== undefined) updates.virtualLink = virtualLink;
-    if (featuredImage !== undefined) updates.featuredImage = featuredImage;
+    if (featuredImageUrl !== undefined) updates.featuredImage = featuredImageUrl;
     if (registrationLink !== undefined) updates.registrationLink = registrationLink;
     if (eventType !== undefined) updates.eventType = eventType;
     if (status) updates.status = status;
 
+    console.log('Applying updates:', updates);
+
     const [updatedEvent] = await db.update(events).set(updates).where(eq(events.id, eventId)).returning();
+
+    console.log('✅ Event updated successfully!');
+    console.log('=== EVENT UPDATE REQUEST END ===');
 
     res.json(updatedEvent);
   } catch (error) {
-    console.error("Update event error:", error);
-    res.status(500).json({ message: "Server error" });
+    console.error("❌ Update event error:", error);
+    console.error("Full error:", error);
+    res.status(500).json({ 
+      message: "Server error", 
+      error: error.message,
+      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
   }
 });
 
@@ -216,3 +371,4 @@ router.get("/admin/all", authenticateToken, requireRole("super_admin", "editor")
 });
 
 export default router;
+// [file content end]

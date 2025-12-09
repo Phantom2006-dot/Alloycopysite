@@ -16,6 +16,7 @@ import { Switch } from "@/components/ui/switch";
 import { Plus, Pencil, Trash2, User } from "lucide-react";
 import { toast } from "sonner";
 import { ImageUpload } from "@/components/admin/ImageUpload";
+import { api } from "@/lib/api"; // ADD THIS IMPORT
 
 interface TeamMember {
   id: number;
@@ -33,6 +34,7 @@ interface TeamMember {
 export default function Team() {
   const [isOpen, setIsOpen] = useState(false);
   const [editingMember, setEditingMember] = useState<TeamMember | null>(null);
+  const [profilePhotoFile, setProfilePhotoFile] = useState<File | null>(null);
   const queryClient = useQueryClient();
 
   const initialFormData = {
@@ -51,40 +53,36 @@ export default function Team() {
   const { data: members = [], isLoading } = useQuery<TeamMember[]>({
     queryKey: ["team"],
     queryFn: async () => {
-      const res = await fetch("/api/team");
-      if (!res.ok) throw new Error("Failed to fetch team");
-      return res.json();
+      return api.team.list(); // USE API CLIENT
     },
   });
 
   const createMutation = useMutation({
     mutationFn: async (data: typeof formData) => {
-      const res = await fetch("/api/team", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
-      if (!res.ok) throw new Error("Failed to create team member");
-      return res.json();
+      return api.team.create(
+        data,
+        profilePhotoFile ? { profilePhoto: profilePhotoFile } : undefined,
+      ); // USE API CLIENT
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["team"] });
       toast.success("Team member created successfully");
       setIsOpen(false);
       setFormData(initialFormData);
+      setProfilePhotoFile(null);
     },
-    onError: () => toast.error("Failed to create team member"),
+    onError: (error: any) => {
+      toast.error(error.message || "Failed to create team member");
+    },
   });
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, data }: { id: number; data: typeof formData }) => {
-      const res = await fetch(`/api/team/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
-      if (!res.ok) throw new Error("Failed to update team member");
-      return res.json();
+      return api.team.update(
+        id,
+        data,
+        profilePhotoFile ? { profilePhoto: profilePhotoFile } : undefined,
+      ); // USE API CLIENT
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["team"] });
@@ -92,20 +90,24 @@ export default function Team() {
       setIsOpen(false);
       setEditingMember(null);
       setFormData(initialFormData);
+      setProfilePhotoFile(null);
     },
-    onError: () => toast.error("Failed to update team member"),
+    onError: (error: any) => {
+      toast.error(error.message || "Failed to update team member");
+    },
   });
 
   const deleteMutation = useMutation({
     mutationFn: async (id: number) => {
-      const res = await fetch(`/api/team/${id}`, { method: "DELETE" });
-      if (!res.ok) throw new Error("Failed to delete team member");
+      return api.team.delete(id); // USE API CLIENT
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["team"] });
       toast.success("Team member deleted successfully");
     },
-    onError: () => toast.error("Failed to delete team member"),
+    onError: (error: any) => {
+      toast.error(error.message || "Failed to delete team member");
+    },
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -129,13 +131,25 @@ export default function Team() {
       sortOrder: member.sortOrder,
       isActive: member.isActive,
     });
+    setProfilePhotoFile(null);
     setIsOpen(true);
   };
 
   const openCreate = () => {
     setEditingMember(null);
     setFormData(initialFormData);
+    setProfilePhotoFile(null);
     setIsOpen(true);
+  };
+
+  const handleFileSelect = (file: File) => {
+    setProfilePhotoFile(file);
+    setFormData((prev) => ({ ...prev, profilePhoto: "" }));
+  };
+
+  const handleImageUrlChange = (url: string) => {
+    setFormData((prev) => ({ ...prev, profilePhoto: url }));
+    setProfilePhotoFile(null);
   };
 
   return (
@@ -179,19 +193,31 @@ export default function Team() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <h3 className="font-medium truncate">{member.name}</h3>
-                      <p className="text-sm text-muted-foreground">{member.role}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {member.role}
+                      </p>
                       {member.department && (
-                        <p className="text-xs text-muted-foreground">{member.department}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {member.department}
+                        </p>
                       )}
-                      <span className={`inline-block mt-2 px-2 py-0.5 text-xs rounded ${
-                        member.isActive ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"
-                      }`}>
+                      <span
+                        className={`inline-block mt-2 px-2 py-0.5 text-xs rounded ${
+                          member.isActive
+                            ? "bg-green-100 text-green-800"
+                            : "bg-gray-100 text-gray-800"
+                        }`}
+                      >
                         {member.isActive ? "Active" : "Inactive"}
                       </span>
                     </div>
                   </div>
                   <div className="flex gap-2 mt-4">
-                    <Button variant="outline" size="sm" onClick={() => openEdit(member)}>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => openEdit(member)}
+                    >
                       <Pencil className="h-3 w-3 mr-1" />
                       Edit
                     </Button>
@@ -199,6 +225,7 @@ export default function Team() {
                       variant="outline"
                       size="sm"
                       onClick={() => deleteMutation.mutate(member.id)}
+                      disabled={deleteMutation.isPending}
                     >
                       <Trash2 className="h-3 w-3 mr-1" />
                       Delete
@@ -224,7 +251,9 @@ export default function Team() {
               <Input
                 id="name"
                 value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, name: e.target.value })
+                }
                 required
               />
             </div>
@@ -234,7 +263,9 @@ export default function Team() {
               <Input
                 id="role"
                 value={formData.role}
-                onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, role: e.target.value })
+                }
                 required
                 placeholder="e.g., CEO, Editor, Designer"
               />
@@ -245,7 +276,9 @@ export default function Team() {
               <Input
                 id="department"
                 value={formData.department}
-                onChange={(e) => setFormData({ ...formData, department: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, department: e.target.value })
+                }
                 placeholder="e.g., Publishing, Films, Marketing"
               />
             </div>
@@ -255,7 +288,9 @@ export default function Team() {
               <Textarea
                 id="bio"
                 value={formData.bio}
-                onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, bio: e.target.value })
+                }
                 rows={3}
               />
             </div>
@@ -264,8 +299,32 @@ export default function Team() {
               <Label>Profile Photo</Label>
               <ImageUpload
                 value={formData.profilePhoto}
-                onChange={(url) => setFormData({ ...formData, profilePhoto: url })}
+                onChange={handleImageUrlChange}
+                placeholder="Enter image URL or upload a file"
+                folder="team"
               />
+              <div className="mt-2">
+                <Label htmlFor="profilePhotoFile" className="text-sm">
+                  Or select file directly:
+                </Label>
+                <Input
+                  id="profilePhotoFile"
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    if (e.target.files?.[0]) {
+                      handleFileSelect(e.target.files[0]);
+                    }
+                  }}
+                  className="mt-1"
+                />
+                {profilePhotoFile && (
+                  <p className="text-sm text-green-600 mt-1">
+                    File selected: {profilePhotoFile.name} (
+                    {(profilePhotoFile.size / 1024).toFixed(1)} KB)
+                  </p>
+                )}
+              </div>
             </div>
 
             <div className="space-y-2">
@@ -273,7 +332,9 @@ export default function Team() {
               <Input
                 id="socialLinks"
                 value={formData.socialLinks}
-                onChange={(e) => setFormData({ ...formData, socialLinks: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, socialLinks: e.target.value })
+                }
                 placeholder="LinkedIn, Twitter, etc."
               />
             </div>
@@ -285,21 +346,36 @@ export default function Team() {
                   id="sortOrder"
                   type="number"
                   value={formData.sortOrder}
-                  onChange={(e) => setFormData({ ...formData, sortOrder: parseInt(e.target.value) || 0 })}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      sortOrder: parseInt(e.target.value) || 0,
+                    })
+                  }
                 />
               </div>
               <div className="flex items-center gap-2 pt-8">
                 <Switch
                   id="isActive"
                   checked={formData.isActive}
-                  onCheckedChange={(checked) => setFormData({ ...formData, isActive: checked })}
+                  onCheckedChange={(checked) =>
+                    setFormData({ ...formData, isActive: checked })
+                  }
                 />
                 <Label htmlFor="isActive">Active</Label>
               </div>
             </div>
 
-            <Button type="submit" className="w-full">
-              {editingMember ? "Update" : "Create"}
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={createMutation.isPending || updateMutation.isPending}
+            >
+              {createMutation.isPending || updateMutation.isPending
+                ? "Processing..."
+                : editingMember
+                  ? "Update"
+                  : "Create"}
             </Button>
           </form>
         </DialogContent>

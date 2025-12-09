@@ -69,7 +69,7 @@ const Header = () => {
             </ul>
 
             <Link to="/" className="flex flex-col items-center mx-8">
-              <img src={currentLogo} alt={logoAlt} className="h-20 w-auto" />
+              <img src={currentLogo} alt={logoAlt} className="h-32 w-auto" />
             </Link>
 
             <div className="flex items-center gap-6 lg:gap-10">
@@ -91,7 +91,7 @@ const Header = () => {
 
           <div className="md:hidden flex items-center justify-between">
             <Link to="/" className="flex items-center gap-2">
-              <img src={currentLogo} alt={logoAlt} className="h-14 w-auto" />
+              <img src={currentLogo} alt={logoAlt} className="h-20 w-auto" />
             </Link>
 
             <div className="flex items-center gap-2">

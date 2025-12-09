@@ -22,6 +22,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { api } from "@/lib/api"; // ADD THIS IMPORT
 
 interface Category {
   id: number;
@@ -40,21 +41,13 @@ export default function Categories() {
   const { data: categories = [], isLoading } = useQuery<Category[]>({
     queryKey: ["categories"],
     queryFn: async () => {
-      const res = await fetch("/api/categories");
-      if (!res.ok) throw new Error("Failed to fetch categories");
-      return res.json();
+      return api.categories.list(); // USE API CLIENT
     },
   });
 
   const createMutation = useMutation({
     mutationFn: async (data: { name: string; description: string }) => {
-      const res = await fetch("/api/categories", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
-      if (!res.ok) throw new Error("Failed to create category");
-      return res.json();
+      return api.categories.create(data); // USE API CLIENT
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["categories"] });
@@ -62,18 +55,20 @@ export default function Categories() {
       setIsOpen(false);
       setFormData({ name: "", description: "" });
     },
-    onError: () => toast.error("Failed to create category"),
+    onError: (error: any) => {
+      toast.error(error.message || "Failed to create category");
+    },
   });
 
   const updateMutation = useMutation({
-    mutationFn: async ({ id, data }: { id: number; data: { name: string; description: string } }) => {
-      const res = await fetch(`/api/categories/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
-      if (!res.ok) throw new Error("Failed to update category");
-      return res.json();
+    mutationFn: async ({
+      id,
+      data,
+    }: {
+      id: number;
+      data: { name: string; description: string };
+    }) => {
+      return api.categories.update(id, data); // USE API CLIENT
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["categories"] });
@@ -82,19 +77,22 @@ export default function Categories() {
       setEditingCategory(null);
       setFormData({ name: "", description: "" });
     },
-    onError: () => toast.error("Failed to update category"),
+    onError: (error: any) => {
+      toast.error(error.message || "Failed to update category");
+    },
   });
 
   const deleteMutation = useMutation({
     mutationFn: async (id: number) => {
-      const res = await fetch(`/api/categories/${id}`, { method: "DELETE" });
-      if (!res.ok) throw new Error("Failed to delete category");
+      return api.categories.delete(id); // USE API CLIENT
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["categories"] });
       toast.success("Category deleted successfully");
     },
-    onError: () => toast.error("Failed to delete category"),
+    onError: (error: any) => {
+      toast.error(error.message || "Failed to delete category");
+    },
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -108,7 +106,10 @@ export default function Categories() {
 
   const openEdit = (category: Category) => {
     setEditingCategory(category);
-    setFormData({ name: category.name, description: category.description || "" });
+    setFormData({
+      name: category.name,
+      description: category.description || "",
+    });
     setIsOpen(true);
   };
 
@@ -135,7 +136,9 @@ export default function Categories() {
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>{editingCategory ? "Edit Category" : "Add Category"}</DialogTitle>
+                <DialogTitle>
+                  {editingCategory ? "Edit Category" : "Add Category"}
+                </DialogTitle>
               </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
@@ -143,7 +146,9 @@ export default function Categories() {
                   <Input
                     id="name"
                     value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, name: e.target.value })
+                    }
                     required
                   />
                 </div>
@@ -152,12 +157,24 @@ export default function Categories() {
                   <Textarea
                     id="description"
                     value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, description: e.target.value })
+                    }
                     rows={3}
                   />
                 </div>
-                <Button type="submit" className="w-full">
-                  {editingCategory ? "Update" : "Create"}
+                <Button
+                  type="submit"
+                  className="w-full"
+                  disabled={
+                    createMutation.isPending || updateMutation.isPending
+                  }
+                >
+                  {createMutation.isPending || updateMutation.isPending
+                    ? "Processing..."
+                    : editingCategory
+                      ? "Update"
+                      : "Create"}
                 </Button>
               </form>
             </DialogContent>
@@ -187,16 +204,23 @@ export default function Categories() {
                 <TableRow key={category.id}>
                   <TableCell className="font-medium">{category.name}</TableCell>
                   <TableCell>{category.slug}</TableCell>
-                  <TableCell className="max-w-xs truncate">{category.description || "-"}</TableCell>
+                  <TableCell className="max-w-xs truncate">
+                    {category.description || "-"}
+                  </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
-                      <Button variant="ghost" size="icon" onClick={() => openEdit(category)}>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => openEdit(category)}
+                      >
                         <Pencil className="h-4 w-4" />
                       </Button>
                       <Button
                         variant="ghost"
                         size="icon"
                         onClick={() => deleteMutation.mutate(category.id)}
+                        disabled={deleteMutation.isPending}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
