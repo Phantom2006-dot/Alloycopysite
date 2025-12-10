@@ -72,7 +72,7 @@ export default function Products() {
     stock: "0",
     isInStock: true,
     isFeatured: false,
-    status: "draft" as const,
+    status: "published" as const,
   };
 
   const [formData, setFormData] = useState(initialFormData);

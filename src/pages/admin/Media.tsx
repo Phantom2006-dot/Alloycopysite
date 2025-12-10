@@ -79,7 +79,7 @@ export default function Media() {
     externalLinks: "",
     trailerUrl: "",
     isFeatured: false,
-    status: "draft" as const,
+    status: "published" as const,
   };
 
   const [formData, setFormData] = useState(initialFormData);
