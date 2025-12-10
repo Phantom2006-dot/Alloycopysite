@@ -409,7 +409,7 @@ const Index = () => {
                   products.map((product) => (
                     <Link
                       key={product.id}
-                      to={`/store/${product.slug}`}
+                      to={`/shop/product/${product.slug}`}
                       className="block border-b border-border pb-4 last:border-0 hover:opacity-80 transition-opacity"
                     >
                       <div className="flex items-start gap-3">
