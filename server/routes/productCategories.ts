@@ -1,7 +1,7 @@
 import { Router, Response } from "express";
 import { db } from "../db";
 import { productCategories, products } from "../../shared/schema";
-import { eq, desc, asc, sql } from "drizzle-orm";
+import { eq, desc, asc, sql, and } from "drizzle-orm";
 import { authenticateToken, requireRole, AuthRequest } from "../middleware/auth";
 
 const router = Router();
@@ -13,11 +13,18 @@ function generateSlug(name: string): string {
     .replace(/^-|-$/g, '');
 }
 
+// GET all product categories with published product counts
 router.get("/", async (_req, res: Response) => {
   try {
     const categories = await db.select({
       category: productCategories,
-      productCount: sql<number>`(SELECT COUNT(*) FROM products WHERE products.category_id = ${productCategories.id} AND products.status = 'published')`,
+      // FIX: Count only published products for public view
+      productCount: sql<number>`(
+        SELECT COUNT(*) 
+        FROM ${products} 
+        WHERE ${products.categoryId} = ${productCategories.id} 
+        AND ${products.status} = 'published'
+      )`,
     })
       .from(productCategories)
       .where(eq(productCategories.isActive, true))
@@ -31,15 +38,21 @@ router.get("/", async (_req, res: Response) => {
     res.json(formattedCategories);
   } catch (error) {
     console.error("Get product categories error:", error);
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ message: "Server error", error: (error as Error).message });
   }
 });
 
+// GET all product categories (admin) - count ALL products regardless of status
 router.get("/admin/all", authenticateToken, requireRole("super_admin", "editor"), async (_req: AuthRequest, res: Response) => {
   try {
     const categories = await db.select({
       category: productCategories,
-      productCount: sql<number>`(SELECT COUNT(*) FROM products WHERE products.category_id = ${productCategories.id})`,
+      // Admin counts ALL products (draft, published, archived)
+      productCount: sql<number>`(
+        SELECT COUNT(*) 
+        FROM ${products} 
+        WHERE ${products.categoryId} = ${productCategories.id}
+      )`,
     })
       .from(productCategories)
       .orderBy(asc(productCategories.sortOrder), asc(productCategories.name));
@@ -52,10 +65,11 @@ router.get("/admin/all", authenticateToken, requireRole("super_admin", "editor")
     res.json(formattedCategories);
   } catch (error) {
     console.error("Get admin product categories error:", error);
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ message: "Server error", error: (error as Error).message });
   }
 });
 
+// GET single product category by slug
 router.get("/:slug", async (req, res: Response) => {
   try {
     const { slug } = req.params;
@@ -65,13 +79,27 @@ router.get("/:slug", async (req, res: Response) => {
       return res.status(404).json({ message: "Category not found" });
     }
 
-    res.json(category);
+    // Also return product count for this category
+    const [publishedCount] = await db.select({ 
+      count: sql<number>`COUNT(*)` 
+    }).from(products).where(
+      and(
+        eq(products.categoryId, category.id),
+        eq(products.status, 'published')
+      )
+    );
+
+    res.json({
+      ...category,
+      productCount: Number(publishedCount.count),
+    });
   } catch (error) {
     console.error("Get product category error:", error);
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ message: "Server error", error: (error as Error).message });
   }
 });
 
+// POST create new product category
 router.post("/", authenticateToken, requireRole("super_admin", "editor"), async (req: AuthRequest, res: Response) => {
   try {
     const { name, description, image, sortOrder, isActive } = req.body;
@@ -98,10 +126,11 @@ router.post("/", authenticateToken, requireRole("super_admin", "editor"), async 
     res.status(201).json(newCategory);
   } catch (error) {
     console.error("Create product category error:", error);
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ message: "Server error", error: (error as Error).message });
   }
 });
 
+// PUT update product category
 router.put("/:id", authenticateToken, requireRole("super_admin", "editor"), async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
@@ -137,10 +166,11 @@ router.put("/:id", authenticateToken, requireRole("super_admin", "editor"), asyn
     res.json(updatedCategory);
   } catch (error) {
     console.error("Update product category error:", error);
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ message: "Server error", error: (error as Error).message });
   }
 });
 
+// DELETE product category
 router.delete("/:id", authenticateToken, requireRole("super_admin", "editor"), async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
@@ -161,7 +191,231 @@ router.delete("/:id", authenticateToken, requireRole("super_admin", "editor"), a
     res.json({ message: "Category deleted successfully" });
   } catch (error) {
     console.error("Delete product category error:", error);
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ message: "Server error", error: (error as Error).message });
+  }
+});
+
+// Debug endpoint to check category counts and products
+router.get("/debug/counts/:slug", async (req, res: Response) => {
+  try {
+    const { slug } = req.params;
+    
+    const [category] = await db.select()
+      .from(productCategories)
+      .where(eq(productCategories.slug, slug));
+    
+    if (!category) {
+      return res.status(404).json({ 
+        success: false,
+        message: "Category not found",
+        slug 
+      });
+    }
+
+    // Get all counts
+    const [allCount] = await db.select({ 
+      count: sql<number>`COUNT(*)` 
+    }).from(products).where(eq(products.categoryId, category.id));
+
+    const [publishedCount] = await db.select({ 
+      count: sql<number>`COUNT(*)` 
+    }).from(products).where(
+      and(
+        eq(products.categoryId, category.id),
+        eq(products.status, 'published')
+      )
+    );
+
+    const [draftCount] = await db.select({ 
+      count: sql<number>`COUNT(*)` 
+    }).from(products).where(
+      and(
+        eq(products.categoryId, category.id),
+        eq(products.status, 'draft')
+      )
+    );
+
+    const [archivedCount] = await db.select({ 
+      count: sql<number>`COUNT(*)` 
+    }).from(products).where(
+      and(
+        eq(products.categoryId, category.id),
+        eq(products.status, 'archived')
+      )
+    );
+
+    // Get actual products list with details
+    const productList = await db.select({
+      id: products.id,
+      title: products.title,
+      slug: products.slug,
+      status: products.status,
+      categoryId: products.categoryId,
+      price: products.price,
+      isInStock: products.isInStock,
+      createdAt: products.createdAt,
+    })
+      .from(products)
+      .where(eq(products.categoryId, category.id))
+      .orderBy(desc(products.createdAt));
+
+    res.json({
+      success: true,
+      category: {
+        id: category.id,
+        name: category.name,
+        slug: category.slug,
+        description: category.description,
+        isActive: category.isActive,
+      },
+      counts: {
+        total: Number(allCount.count),
+        published: Number(publishedCount.count),
+        draft: Number(draftCount.count),
+        archived: Number(archivedCount.count),
+        // This is what the public API returns
+        publicCount: Number(publishedCount.count),
+      },
+      products: productList,
+      timestamp: new Date().toISOString(),
+    });
+  } catch (error) {
+    console.error("Debug counts error:", error);
+    res.status(500).json({ 
+      success: false,
+      message: "Server error", 
+      error: (error as Error).message 
+    });
+  }
+});
+
+// Get products for a specific category
+router.get("/:slug/products", async (req, res: Response) => {
+  try {
+    const { slug } = req.params;
+    const { page = "1", limit = "12" } = req.query;
+    const pageNum = parseInt(page as string) || 1;
+    const limitNum = parseInt(limit as string) || 12;
+    const offset = (pageNum - 1) * limitNum;
+
+    // Get the category
+    const [category] = await db.select()
+      .from(productCategories)
+      .where(eq(productCategories.slug, slug));
+    
+    if (!category) {
+      return res.status(404).json({ message: "Category not found" });
+    }
+
+    // Get total count of PUBLISHED products
+    const [{ count }] = await db.select({ 
+      count: sql<number>`COUNT(${products.id})` 
+    }).from(products).where(
+      and(
+        eq(products.categoryId, category.id),
+        eq(products.status, 'published')
+      )
+    );
+
+    // Get paginated PUBLISHED products
+    const items = await db.select({
+      product: products,
+      category: productCategories,
+    })
+      .from(products)
+      .leftJoin(productCategories, eq(products.categoryId, productCategories.id))
+      .where(
+        and(
+          eq(products.categoryId, category.id),
+          eq(products.status, 'published')
+        )
+      )
+      .orderBy(desc(products.createdAt))
+      .limit(limitNum)
+      .offset(offset);
+
+    const formattedItems = items.map(item => ({
+      id: item.product.id,
+      title: item.product.title,
+      slug: item.product.slug,
+      description: item.product.description,
+      shortDescription: item.product.shortDescription,
+      price: item.product.price,
+      compareAtPrice: item.product.compareAtPrice,
+      featuredImage: item.product.featuredImage,
+      images: item.product.images,
+      isInStock: item.product.isInStock,
+      isFeatured: item.product.isFeatured,
+      status: item.product.status,
+      stock: item.product.stock,
+      sku: item.product.sku,
+      category: item.category ? {
+        id: item.category.id,
+        name: item.category.name,
+        slug: item.category.slug,
+        description: item.category.description,
+        image: item.category.image,
+      } : null,
+    }));
+
+    res.json({
+      category: {
+        id: category.id,
+        name: category.name,
+        slug: category.slug,
+        description: category.description,
+        image: category.image,
+      },
+      products: formattedItems,
+      pagination: {
+        page: pageNum,
+        limit: limitNum,
+        total: Number(count),
+        totalPages: Math.ceil(Number(count) / limitNum),
+      },
+    });
+  } catch (error) {
+    console.error("Get category products error:", error);
+    res.status(500).json({ message: "Server error", error: (error as Error).message });
+  }
+});
+
+// Bulk update product statuses in a category (admin only)
+router.post("/:id/bulk-publish", authenticateToken, requireRole("super_admin", "editor"), async (req: AuthRequest, res: Response) => {
+  try {
+    const { id } = req.params;
+    const categoryId = parseInt(id);
+
+    const [category] = await db.select()
+      .from(productCategories)
+      .where(eq(productCategories.id, categoryId));
+    
+    if (!category) {
+      return res.status(404).json({ message: "Category not found" });
+    }
+
+    // Update all draft products in this category to published
+    const result = await db.update(products)
+      .set({ 
+        status: 'published',
+        updatedAt: new Date()
+      })
+      .where(
+        and(
+          eq(products.categoryId, categoryId),
+          eq(products.status, 'draft')
+        )
+      )
+      .returning();
+
+    res.json({
+      message: `Updated ${result.length} products from draft to published`,
+      updatedCount: result.length,
+      category: category.name,
+    });
+  } catch (error) {
+    console.error("Bulk publish error:", error);
+    res.status(500).json({ message: "Server error", error: (error as Error).message });
   }
 });
 
