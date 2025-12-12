@@ -206,8 +206,43 @@ app.get("/api/debug/env", (_req: Request, res: Response) => {
   });
 });
 
-// REMOVED THE PROBLEMATIC CATCH-ALL ROUTE
-// Express will handle 404s automatically for undefined routes
+// ✅ ADDED: Root route to fix "Cannot GET /" error
+app.get("/", (_req: Request, res: Response) => {
+  console.log("🌐 Root route accessed");
+  res.json({
+    message: "Welcome to the CMS API Server",
+    status: "operational",
+    version: "1.0.0",
+    timestamp: new Date().toISOString(),
+    mode: isStandaloneMode ? "standalone" : "integrated",
+    documentation: "Visit /api/health for health check",
+    availableEndpoints: {
+      health: "/api/health",
+      debug: {
+        test: "/api/debug/test",
+        env: "/api/debug/env",
+        echo: "/api/debug/echo (POST)"
+      },
+      apiGroups: [
+        "/api/auth/*",
+        "/api/articles/*",
+        "/api/events/*",
+        "/api/products/*",
+        "/api/uploads/*",
+        "/api/media/*",
+        "/api/team/*",
+        "/api/categories/*",
+        "/api/tags/*",
+        "/api/payments/*",
+        "/api/product-categories/*"
+      ]
+    },
+    quickLinks: {
+      healthCheck: `${_req.protocol}://${_req.get('host')}/api/health`,
+      debugInfo: `${_req.protocol}://${_req.get('host')}/api/debug/test`
+    }
+  });
+});
 
 // Custom 404 handler for API routes
 app.use("/api", (_req: Request, res: Response) => {
@@ -276,6 +311,8 @@ app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     console.log(`✅ Server is running!`);
     console.log(`   Local: http://localhost:${PORT}`);
     console.log(`   Network: http://0.0.0.0:${PORT}`);
+    
+    console.log(`   🌐 Root URL: http://localhost:${PORT}/`);
 
     console.log("\n🔍 Available Debug Routes:");
     console.log(`   • Health Check: http://localhost:${PORT}/api/health`);
