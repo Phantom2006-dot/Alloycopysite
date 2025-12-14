@@ -16,26 +16,30 @@ function generateSlug(name: string): string {
 // GET all product categories with published product counts
 router.get("/", async (_req, res: Response) => {
   try {
+    // FIXED: Use Drizzle's proper SQL template with column references
     const categories = await db.select({
-      category: productCategories,
-      // FIX: Count only published products for public view
-      productCount: sql<number>`(
-        SELECT COUNT(*) 
-        FROM ${products} 
-        WHERE ${products.categoryId} = ${productCategories.id} 
-        AND ${products.status} = 'published'
-      )`,
+      id: productCategories.id,
+      name: productCategories.name,
+      slug: productCategories.slug,
+      description: productCategories.description,
+      image: productCategories.image,
+      sortOrder: productCategories.sortOrder,
+      isActive: productCategories.isActive,
+      createdAt: productCategories.createdAt,
+      updatedAt: productCategories.updatedAt,
+      // Use proper column references in SQL template
+      productCount: sql<number>`
+        (SELECT COUNT(*)::integer 
+         FROM ${products} 
+         WHERE ${products.categoryId} = ${productCategories.id} 
+         AND ${products.status} = 'published')
+      `.as('productCount')
     })
       .from(productCategories)
       .where(eq(productCategories.isActive, true))
       .orderBy(asc(productCategories.sortOrder), asc(productCategories.name));
 
-    const formattedCategories = categories.map(c => ({
-      ...c.category,
-      productCount: Number(c.productCount),
-    }));
-
-    res.json(formattedCategories);
+    res.json(categories);
   } catch (error) {
     console.error("Get product categories error:", error);
     res.status(500).json({ message: "Server error", error: (error as Error).message });
@@ -46,23 +50,26 @@ router.get("/", async (_req, res: Response) => {
 router.get("/admin/all", authenticateToken, requireRole("super_admin", "editor"), async (_req: AuthRequest, res: Response) => {
   try {
     const categories = await db.select({
-      category: productCategories,
-      // Admin counts ALL products (draft, published, archived)
-      productCount: sql<number>`(
-        SELECT COUNT(*) 
-        FROM ${products} 
-        WHERE ${products.categoryId} = ${productCategories.id}
-      )`,
+      id: productCategories.id,
+      name: productCategories.name,
+      slug: productCategories.slug,
+      description: productCategories.description,
+      image: productCategories.image,
+      sortOrder: productCategories.sortOrder,
+      isActive: productCategories.isActive,
+      createdAt: productCategories.createdAt,
+      updatedAt: productCategories.updatedAt,
+      // Admin counts ALL products
+      productCount: sql<number>`
+        (SELECT COUNT(*)::integer 
+         FROM ${products} 
+         WHERE ${products.categoryId} = ${productCategories.id})
+      `.as('productCount')
     })
       .from(productCategories)
       .orderBy(asc(productCategories.sortOrder), asc(productCategories.name));
 
-    const formattedCategories = categories.map(c => ({
-      ...c.category,
-      productCount: Number(c.productCount),
-    }));
-
-    res.json(formattedCategories);
+    res.json(categories);
   } catch (error) {
     console.error("Get admin product categories error:", error);
     res.status(500).json({ message: "Server error", error: (error as Error).message });
@@ -81,7 +88,7 @@ router.get("/:slug", async (req, res: Response) => {
 
     // Also return product count for this category
     const [publishedCount] = await db.select({ 
-      count: sql<number>`COUNT(*)` 
+      count: sql<number>`count(*)::integer` 
     }).from(products).where(
       and(
         eq(products.categoryId, category.id),
@@ -91,7 +98,7 @@ router.get("/:slug", async (req, res: Response) => {
 
     res.json({
       ...category,
-      productCount: Number(publishedCount.count),
+      productCount: publishedCount?.count || 0,
     });
   } catch (error) {
     console.error("Get product category error:", error);
@@ -181,8 +188,8 @@ router.delete("/:id", authenticateToken, requireRole("super_admin", "editor"), a
       return res.status(404).json({ message: "Category not found" });
     }
 
-    const [hasProducts] = await db.select({ count: sql<number>`count(*)` }).from(products).where(eq(products.categoryId, categoryId));
-    if (Number(hasProducts.count) > 0) {
+    const [hasProducts] = await db.select({ count: sql<number>`count(*)::integer` }).from(products).where(eq(products.categoryId, categoryId));
+    if (hasProducts.count > 0) {
       return res.status(400).json({ message: "Cannot delete category with products. Move or delete products first." });
     }
 
@@ -214,11 +221,11 @@ router.get("/debug/counts/:slug", async (req, res: Response) => {
 
     // Get all counts
     const [allCount] = await db.select({ 
-      count: sql<number>`COUNT(*)` 
+      count: sql<number>`count(*)::integer` 
     }).from(products).where(eq(products.categoryId, category.id));
 
     const [publishedCount] = await db.select({ 
-      count: sql<number>`COUNT(*)` 
+      count: sql<number>`count(*)::integer` 
     }).from(products).where(
       and(
         eq(products.categoryId, category.id),
@@ -227,7 +234,7 @@ router.get("/debug/counts/:slug", async (req, res: Response) => {
     );
 
     const [draftCount] = await db.select({ 
-      count: sql<number>`COUNT(*)` 
+      count: sql<number>`count(*)::integer` 
     }).from(products).where(
       and(
         eq(products.categoryId, category.id),
@@ -236,7 +243,7 @@ router.get("/debug/counts/:slug", async (req, res: Response) => {
     );
 
     const [archivedCount] = await db.select({ 
-      count: sql<number>`COUNT(*)` 
+      count: sql<number>`count(*)::integer` 
     }).from(products).where(
       and(
         eq(products.categoryId, category.id),
@@ -269,12 +276,11 @@ router.get("/debug/counts/:slug", async (req, res: Response) => {
         isActive: category.isActive,
       },
       counts: {
-        total: Number(allCount.count),
-        published: Number(publishedCount.count),
-        draft: Number(draftCount.count),
-        archived: Number(archivedCount.count),
-        // This is what the public API returns
-        publicCount: Number(publishedCount.count),
+        total: allCount?.count || 0,
+        published: publishedCount?.count || 0,
+        draft: draftCount?.count || 0,
+        archived: archivedCount?.count || 0,
+        publicCount: publishedCount?.count || 0,
       },
       products: productList,
       timestamp: new Date().toISOString(),
@@ -309,7 +315,7 @@ router.get("/:slug/products", async (req, res: Response) => {
 
     // Get total count of PUBLISHED products
     const [{ count }] = await db.select({ 
-      count: sql<number>`COUNT(${products.id})` 
+      count: sql<number>`count(${products.id})::integer` 
     }).from(products).where(
       and(
         eq(products.categoryId, category.id),
@@ -370,8 +376,8 @@ router.get("/:slug/products", async (req, res: Response) => {
       pagination: {
         page: pageNum,
         limit: limitNum,
-        total: Number(count),
-        totalPages: Math.ceil(Number(count) / limitNum),
+        total: count,
+        totalPages: Math.ceil(count / limitNum),
       },
     });
   } catch (error) {
