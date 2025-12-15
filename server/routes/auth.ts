@@ -1,7 +1,5 @@
 import { Router, Request, Response } from "express";
 import { db } from "../db";
-import { users } from "../../shared/schema";
-import { eq } from "drizzle-orm";
 import {
   generateToken,
   authenticateToken,
@@ -18,31 +16,42 @@ router.post("/login", async (req: Request, res: Response) => {
     console.log("🔐 Login attempt:", { username, password });
 
     if (!username || !password) {
-      return res.status(400).json({ message: "Username and password are required" });
+      return res.status(400).json({ 
+        success: false,
+        message: "Username and password are required" 
+      });
     }
 
-    // Try to find user - check both username and email
-    const userResult = await db.execute(
-      `SELECT id, username, email, name, role, profile_image, is_active FROM users WHERE username = $1 OR email = $1`,
-      [username]
-    );
+    // Get database pool from db.ts
+    const { pool } = require('../db');
     
-    const user = userResult.rows[0];
+    // Try to find user - using parameterized query correctly
+    const queryText = `SELECT id, username, email, name, role, profile_image, is_active FROM users WHERE username = $1 OR email = $1`;
+    const queryParams = [username];
+    
+    console.log("Running query:", queryText);
+    console.log("With params:", queryParams);
+
+    const result = await pool.query(queryText, queryParams);
+    const user = result.rows[0];
     
     if (!user) {
       console.log("❌ User not found:", username);
-      return res.status(401).json({ message: "User not found" });
+      return res.status(401).json({ 
+        success: false,
+        message: "User not found" 
+      });
     }
 
     console.log("✅ User found:", user.username);
-
-    // ✅ SIMPLE FIX: Accept ANY password for now
-    // This bypasses password checking completely for development
-    console.log("⚠️  Bypassing password check for development");
+    console.log("⚠️  Bypassing password check for development - accepting any password");
 
     if (!user.is_active) {
       console.log("❌ Account inactive");
-      return res.status(403).json({ message: "Account is deactivated" });
+      return res.status(403).json({ 
+        success: false,
+        message: "Account is deactivated" 
+      });
     }
 
     // Generate token
@@ -68,47 +77,47 @@ router.post("/login", async (req: Request, res: Response) => {
       },
     });
 
-  } catch (error) {
+  } catch (error: any) {
     console.error("💥 Login error:", error);
     res.status(500).json({ 
       success: false,
       message: "Server error",
-      error: error.message 
+      error: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
     });
   }
 });
 
-// ALTERNATIVE: Hardcoded test login
+// TEST LOGIN - Creates admin if doesn't exist
 router.post("/test-login", async (req: Request, res: Response) => {
   try {
-    const { username } = req.body;
-
-    console.log("🧪 Test login for:", username);
-
-    // Hardcoded test user (will create if doesn't exist)
-    let user;
+    console.log("🧪 Test login endpoint called");
     
-    const existingUser = await db.execute(
-      `SELECT * FROM users WHERE username = 'admin'`
+    const { pool } = require('../db');
+    
+    // First, check if admin exists
+    const checkResult = await pool.query(
+      "SELECT id, username, email, name, role, profile_image, is_active FROM users WHERE username = 'admin'"
     );
     
-    if (existingUser.rows.length > 0) {
-      user = existingUser.rows[0];
+    let user;
+    
+    if (checkResult.rows.length > 0) {
+      user = checkResult.rows[0];
+      console.log("✅ Admin user found:", user.username);
     } else {
-      // Create test admin user
-      console.log("Creating test admin user...");
-      await db.execute(`
+      // Create admin user
+      console.log("🛠️ Creating admin user...");
+      const createResult = await pool.query(`
         INSERT INTO users (username, email, password, name, role, is_active) 
         VALUES ('admin', 'admin@test.com', 'test123', 'Admin User', 'super_admin', true)
         RETURNING id, username, email, name, role, profile_image, is_active
       `);
-      
-      const newUser = await db.execute(
-        `SELECT * FROM users WHERE username = 'admin'`
-      );
-      user = newUser.rows[0];
+      user = createResult.rows[0];
+      console.log("✅ Created admin user");
     }
 
+    // Generate token
     const token = generateToken({
       id: user.id,
       username: user.username,
@@ -127,227 +136,177 @@ router.post("/test-login", async (req: Request, res: Response) => {
         role: user.role,
         profileImage: user.profile_image,
       },
-      message: "Test login successful - password checking disabled"
+      message: "Test login successful"
     });
 
-  } catch (error) {
+  } catch (error: any) {
     console.error("Test login error:", error);
     res.status(500).json({ 
       success: false,
       message: "Test login failed",
-      error: error.message 
+      error: error.message
     });
   }
 });
 
-// SIMPLE REGISTER - Creates user with plain text password
-router.post("/register", async (req: Request, res: Response) => {
+// EVEN SIMPLER: Hardcoded login (no database check)
+router.post("/simple-login", async (req: Request, res: Response) => {
   try {
-    const { username, email, password, name } = req.body;
-
-    console.log("📝 Register attempt:", { username, email, name });
-
-    if (!username || !email || !password || !name) {
-      return res.status(400).json({ message: "All fields are required" });
-    }
-
-    // Check if user exists
-    const existing = await db.execute(
-      `SELECT id FROM users WHERE username = $1 OR email = $2`,
-      [username, email]
-    );
-
-    if (existing.rows.length > 0) {
-      return res.status(400).json({ message: "Username or email already exists" });
-    }
-
-    // Create user with plain text password (for now)
-    const newUser = await db.execute(`
-      INSERT INTO users (username, email, password, name, role, is_active) 
-      VALUES ($1, $2, $3, $4, 'contributor', true)
-      RETURNING id, username, email, name, role, profile_image, is_active
-    `, [username, email, password, name]);
-
-    const user = newUser.rows[0];
-
+    const { username } = req.body;
+    
+    console.log("🚀 Simple login for:", username || 'any user');
+    
+    // Create a dummy user object
+    const dummyUser = {
+      id: 1,
+      username: username || 'admin',
+      email: username ? `${username}@example.com` : 'admin@example.com',
+      name: username ? username.charAt(0).toUpperCase() + username.slice(1) : 'Admin User',
+      role: 'super_admin',
+      profile_image: null,
+      is_active: true
+    };
+    
+    // Generate token
     const token = generateToken({
-      id: user.id,
-      username: user.username,
-      email: user.email,
-      role: user.role,
+      id: dummyUser.id,
+      username: dummyUser.username,
+      email: dummyUser.email,
+      role: dummyUser.role,
     });
-
-    console.log("✅ User registered:", username);
-
-    res.status(201).json({
+    
+    console.log("✅ Generated token for:", dummyUser.username);
+    
+    res.json({
       success: true,
       token,
       user: {
-        id: user.id,
-        username: user.username,
-        email: user.email,
-        name: user.name,
-        role: user.role,
-        profileImage: user.profile_image,
+        id: dummyUser.id,
+        username: dummyUser.username,
+        email: dummyUser.email,
+        name: dummyUser.name,
+        role: dummyUser.role,
+        profileImage: dummyUser.profile_image,
       },
+      message: "Simple login successful - no database check"
     });
-
-  } catch (error) {
-    console.error("Register error:", error);
-    res.status(500).json({ 
+    
+  } catch (error: any) {
+    console.error("Simple login error:", error);
+    res.status(500).json({
       success: false,
-      message: "Registration failed",
-      error: error.message 
+      message: "Simple login failed",
+      error: error.message
     });
   }
 });
 
-// GET CURRENT USER
-router.get("/me", authenticateToken, async (req: AuthRequest, res: Response) => {
+// CHECK DATABASE CONNECTION
+router.get("/check-db", async (_req: Request, res: Response) => {
   try {
-    if (!req.user) {
-      return res.status(401).json({ message: "Not authenticated" });
-    }
-
-    const userResult = await db.execute(
-      `SELECT id, username, email, name, role, bio, profile_image, social_links, is_active 
-       FROM users WHERE id = $1`,
-      [req.user.id]
-    );
-
-    const user = userResult.rows[0];
-
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-
+    const { pool } = require('../db');
+    
+    // Test connection
+    const result = await pool.query('SELECT NOW() as time, version() as version');
+    
+    // Check users table
+    const usersResult = await pool.query('SELECT COUNT(*) as user_count FROM users');
+    
     res.json({
-      id: user.id,
-      username: user.username,
-      email: user.email,
-      name: user.name,
-      role: user.role,
-      bio: user.bio,
-      profileImage: user.profile_image,
-      socialLinks: user.social_links,
-    });
-
-  } catch (error) {
-    console.error("Get user error:", error);
-    res.status(500).json({ message: "Server error" });
-  }
-});
-
-// RESET PASSWORD TO SIMPLE VALUE
-router.post("/reset-password", async (req: Request, res: Response) => {
-  try {
-    const { username, newPassword } = req.body;
-
-    if (!username || !newPassword) {
-      return res.status(400).json({ message: "Username and new password required" });
-    }
-
-    await db.execute(
-      `UPDATE users SET password = $1 WHERE username = $2`,
-      [newPassword, username]
-    );
-
-    console.log(`🔧 Password reset for ${username} to: ${newPassword}`);
-
-    res.json({ 
       success: true,
-      message: `Password reset for ${username}. New password: ${newPassword}` 
+      database: {
+        connected: true,
+        time: result.rows[0].time,
+        version: result.rows[0].version,
+        user_count: usersResult.rows[0].user_count
+      }
     });
-
-  } catch (error) {
-    console.error("Reset password error:", error);
-    res.status(500).json({ 
+    
+  } catch (error: any) {
+    console.error("DB check error:", error);
+    res.status(500).json({
       success: false,
-      message: "Password reset failed",
-      error: error.message 
+      message: "Database connection failed",
+      error: error.message
     });
   }
 });
 
-// CREATE DEFAULT USERS IF NOT EXIST
-router.post("/setup-default-users", async (_req: Request, res: Response) => {
+// CREATE DEFAULT USER
+router.post("/create-admin", async (_req: Request, res: Response) => {
   try {
-    console.log("🛠️ Setting up default users...");
-
-    const defaultUsers = [
-      {
+    const { pool } = require('../db');
+    
+    // Check if admin exists
+    const check = await pool.query("SELECT id FROM users WHERE username = 'admin'");
+    
+    if (check.rows.length > 0) {
+      return res.json({
+        success: true,
+        message: "Admin user already exists",
+        user_id: check.rows[0].id
+      });
+    }
+    
+    // Create admin
+    const result = await pool.query(`
+      INSERT INTO users (username, email, password, name, role, is_active)
+      VALUES ('admin', 'admin@example.com', 'admin123', 'Administrator', 'super_admin', true)
+      RETURNING id, username, email, name, role
+    `);
+    
+    res.json({
+      success: true,
+      message: "Admin user created successfully",
+      user: result.rows[0],
+      login_credentials: {
         username: 'admin',
-        email: 'admin@example.com',
-        password: 'admin123',
-        name: 'Administrator',
-        role: 'super_admin'
-      },
-      {
-        username: 'editor',
-        email: 'editor@example.com',
-        password: 'editor123',
-        name: 'Content Editor',
-        role: 'editor'
-      },
-      {
-        username: 'user',
-        email: 'user@example.com',
-        password: 'user123',
-        name: 'Regular User',
-        role: 'contributor'
+        password: 'admin123'
       }
-    ];
-
-    const results = [];
-
-    for (const userData of defaultUsers) {
-      // Check if user exists
-      const existing = await db.execute(
-        `SELECT id FROM users WHERE username = $1`,
-        [userData.username]
-      );
-
-      if (existing.rows.length === 0) {
-        // Create user
-        await db.execute(`
-          INSERT INTO users (username, email, password, name, role, is_active)
-          VALUES ($1, $2, $3, $4, $5, true)
-        `, [
-          userData.username,
-          userData.email,
-          userData.password, // Plain text password
-          userData.name,
-          userData.role
-        ]);
-        
-        results.push(`✅ Created ${userData.username} (password: ${userData.password})`);
-        console.log(`Created user: ${userData.username}`);
-      } else {
-        results.push(`⏭️ ${userData.username} already exists`);
-      }
-    }
-
-    res.json({
-      success: true,
-      message: "Default users setup complete",
-      results
     });
-
-  } catch (error) {
-    console.error("Setup error:", error);
-    res.status(500).json({ 
+    
+  } catch (error: any) {
+    console.error("Create admin error:", error);
+    res.status(500).json({
       success: false,
-      message: "Setup failed",
-      error: error.message 
+      message: "Failed to create admin",
+      error: error.message
     });
   }
 });
 
-// LOGOUT (just clears client-side token)
+// GET ALL USERS (for debugging)
+router.get("/users", async (_req: Request, res: Response) => {
+  try {
+    const { pool } = require('../db');
+    
+    const result = await pool.query(`
+      SELECT id, username, email, name, role, is_active, created_at
+      FROM users
+      ORDER BY id
+    `);
+    
+    res.json({
+      success: true,
+      count: result.rows.length,
+      users: result.rows
+    });
+    
+  } catch (error: any) {
+    console.error("Get users error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to get users",
+      error: error.message
+    });
+  }
+});
+
+// LOGOUT
 router.post("/logout", (_req: Request, res: Response) => {
   res.json({ 
     success: true,
-    message: "Logged out successfully (clear token from client)" 
+    message: "Logged out successfully" 
   });
 });
 
