@@ -33,8 +33,8 @@ router.post("/login", async (req: Request, res: Response) => {
     }
 
     // Check if the password is already bcrypt hashed (starts with $2b$)
-    const isBcryptHash = user.password.startsWith("$2b$");
-
+   // To this (accepts both $2a$ and $2b$):
+const isBcryptHash = user.password.startsWith("$2");
     let passwordValid;
 
     if (isBcryptHash) {
