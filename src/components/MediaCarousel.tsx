@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { ChevronLeft, ChevronRight, Pause, Play } from "lucide-react";
 
 interface MediaItem {
   id: number;
@@ -15,6 +16,10 @@ const MediaCarousel = ({ items }: MediaCarouselProps) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
+  const [direction, setDirection] = useState<"left" | "right">("right");
+  const touchStartX = useRef(0);
+  const touchEndX = useRef(0);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const getVisibleItems = useCallback(() => {
     const total = items.length;
@@ -29,8 +34,9 @@ const MediaCarousel = ({ items }: MediaCarouselProps) => {
   }, [currentIndex, items.length]);
 
   const goToNext = useCallback(() => {
-    if (isTransitioning) return;
+    if (isTransitioning || items.length === 0) return;
     
+    setDirection("right");
     setIsTransitioning(true);
     
     setTimeout(() => {
@@ -39,26 +45,77 @@ const MediaCarousel = ({ items }: MediaCarouselProps) => {
     }, 400);
   }, [items.length, isTransitioning]);
 
-  const scrollTo = useCallback((index: number) => {
-    if (isTransitioning || index === currentIndex) return;
+  const goToPrev = useCallback(() => {
+    if (isTransitioning || items.length === 0) return;
     
+    setDirection("left");
+    setIsTransitioning(true);
+    
+    setTimeout(() => {
+      setCurrentIndex((prev) => (prev - 1 + items.length) % items.length);
+      setIsTransitioning(false);
+    }, 400);
+  }, [items.length, isTransitioning]);
+
+  const scrollTo = useCallback((index: number) => {
+    if (isTransitioning || index === currentIndex || items.length === 0) return;
+    
+    setDirection(index > currentIndex ? "right" : "left");
     setIsTransitioning(true);
     
     setTimeout(() => {
       setCurrentIndex(index);
       setIsTransitioning(false);
     }, 400);
-  }, [currentIndex, isTransitioning]);
+  }, [currentIndex, items.length, isTransitioning]);
 
+  const toggleAutoScroll = () => {
+    setIsPaused(!isPaused);
+  };
+
+  // Auto-scroll functionality
   useEffect(() => {
-    if (isPaused) return;
+    if (isPaused || items.length === 0) return;
     
     const interval = setInterval(() => {
-      goToNext();
+      if (direction === "right") {
+        goToNext();
+      } else {
+        goToPrev();
+      }
     }, 4000);
 
     return () => clearInterval(interval);
-  }, [goToNext, isPaused]);
+  }, [goToNext, goToPrev, isPaused, direction, items.length]);
+
+  // Touch/swipe functionality
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    touchEndX.current = e.touches[0].clientX;
+  };
+
+  const handleTouchEnd = () => {
+    if (!touchStartX.current || !touchEndX.current) return;
+    
+    const diff = touchStartX.current - touchEndX.current;
+    const swipeThreshold = 50;
+    
+    if (Math.abs(diff) > swipeThreshold) {
+      if (diff > 0) {
+        // Swipe left - go to next
+        goToNext();
+      } else {
+        // Swipe right - go to previous
+        goToPrev();
+      }
+    }
+    
+    touchStartX.current = 0;
+    touchEndX.current = 0;
+  };
 
   const visibleIndices = getVisibleItems();
 
@@ -80,11 +137,37 @@ const MediaCarousel = ({ items }: MediaCarouselProps) => {
 
   return (
     <div 
-      className="relative"
+      className="relative py-4"
+      ref={containerRef}
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
     >
-      <div className="overflow-hidden">
+      {/* Navigation Arrows */}
+      <div className="absolute inset-y-0 left-0 right-0 flex items-center justify-between pointer-events-none z-10">
+        <button
+          onClick={goToPrev}
+          className="pointer-events-auto bg-background/80 hover:bg-background p-2 rounded-full shadow-lg transition-all hover:scale-110 ml-2 md:ml-4"
+          aria-label="Previous slide"
+          disabled={isTransitioning}
+        >
+          <ChevronLeft className="w-5 h-5 md:w-6 md:h-6" />
+        </button>
+        
+        <button
+          onClick={goToNext}
+          className="pointer-events-auto bg-background/80 hover:bg-background p-2 rounded-full shadow-lg transition-all hover:scale-110 mr-2 md:mr-4"
+          aria-label="Next slide"
+          disabled={isTransitioning}
+        >
+          <ChevronRight className="w-5 h-5 md:w-6 md:h-6" />
+        </button>
+      </div>
+
+      {/* Carousel Content */}
+      <div className="overflow-hidden px-8 md:px-12">
         <div className="flex justify-center items-center gap-2 md:gap-4">
           {visibleIndices.map((itemIndex, position) => {
             const item = items[itemIndex];
@@ -93,7 +176,7 @@ const MediaCarousel = ({ items }: MediaCarouselProps) => {
             return (
               <div
                 key={`${position}-${itemIndex}`}
-                className={`relative flex-shrink-0 ${
+                className={`relative flex-shrink-0 cursor-pointer ${
                   position === 0 || position === 4 
                     ? "hidden lg:block w-[15%]" 
                     : position === 1 || position === 3
@@ -101,10 +184,18 @@ const MediaCarousel = ({ items }: MediaCarouselProps) => {
                     : "w-[45%] md:w-[30%] lg:w-[25%]"
                 }`}
                 style={getSlideStyle(position)}
+                onClick={() => {
+                  if (!isCenter) {
+                    const diff = position - 2;
+                    scrollTo((currentIndex + diff + items.length) % items.length);
+                  }
+                }}
               >
                 <div 
-                  className={`aspect-[2/3] overflow-hidden bg-secondary ${
-                    isCenter ? "shadow-2xl" : ""
+                  className={`aspect-[2/3] overflow-hidden bg-secondary transition-all duration-300 ${
+                    isCenter 
+                      ? "shadow-2xl ring-2 ring-primary/20" 
+                      : "hover:scale-105 hover:shadow-lg hover:opacity-80"
                   }`}
                 >
                   <img
@@ -113,6 +204,20 @@ const MediaCarousel = ({ items }: MediaCarouselProps) => {
                     className="h-full w-full object-cover"
                     draggable="false"
                   />
+                  
+                  {/* Type indicator */}
+                  <div className="absolute top-2 left-2 bg-background/90 text-foreground text-xs px-2 py-1 rounded-md">
+                    {item.type.toUpperCase()}
+                  </div>
+                  
+                  {/* Center item title */}
+                  {isCenter && (
+                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
+                      <h3 className="text-white text-sm md:text-base font-semibold line-clamp-1">
+                        {item.title}
+                      </h3>
+                    </div>
+                  )}
                 </div>
               </div>
             );
@@ -120,20 +225,80 @@ const MediaCarousel = ({ items }: MediaCarouselProps) => {
         </div>
       </div>
 
-      <div className="flex justify-center gap-2 mt-6">
-        {items.map((_, index) => (
+      {/* Controls */}
+      <div className="flex flex-col items-center gap-4 mt-8">
+        {/* Dots Navigation */}
+        <div className="flex justify-center gap-2">
+          {items.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => scrollTo(index)}
+              className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                index === currentIndex
+                  ? "bg-primary scale-125"
+                  : "bg-foreground/30 hover:bg-foreground/50"
+              }`}
+              data-testid={`carousel-dot-${index}`}
+              aria-label={`Go to slide ${index + 1}`}
+              aria-current={index === currentIndex}
+            />
+          ))}
+        </div>
+
+        {/* Auto-scroll toggle and direction controls */}
+        <div className="flex items-center gap-4">
           <button
-            key={index}
-            onClick={() => scrollTo(index)}
-            className={`w-2 h-2 rounded-full transition-all duration-300 ${
-              index === currentIndex
-                ? "bg-foreground scale-125"
-                : "bg-foreground/30"
-            }`}
-            data-testid={`carousel-dot-${index}`}
-            aria-label={`Go to slide ${index + 1}`}
-          />
-        ))}
+            onClick={toggleAutoScroll}
+            className="flex items-center gap-2 bg-foreground/10 hover:bg-foreground/20 px-3 py-2 rounded-lg transition-colors"
+            aria-label={isPaused ? "Play auto-scroll" : "Pause auto-scroll"}
+          >
+            {isPaused ? (
+              <>
+                <Play className="w-4 h-4" />
+                <span className="text-sm">Play</span>
+              </>
+            ) : (
+              <>
+                <Pause className="w-4 h-4" />
+                <span className="text-sm">Pause</span>
+              </>
+            )}
+          </button>
+
+          {/* Direction toggle */}
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-foreground/70">Direction:</span>
+            <div className="flex bg-foreground/10 rounded-lg p-1">
+              <button
+                onClick={() => setDirection("left")}
+                className={`px-3 py-1 rounded transition-all ${
+                  direction === "left" 
+                    ? "bg-primary text-primary-foreground" 
+                    : "hover:bg-foreground/20"
+                }`}
+                aria-label="Scroll left"
+              >
+                ←
+              </button>
+              <button
+                onClick={() => setDirection("right")}
+                className={`px-3 py-1 rounded transition-all ${
+                  direction === "right" 
+                    ? "bg-primary text-primary-foreground" 
+                    : "hover:bg-foreground/20"
+                }`}
+                aria-label="Scroll right"
+              >
+                →
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Current position indicator */}
+        <div className="text-sm text-foreground/60">
+          {currentIndex + 1} / {items.length}
+        </div>
       </div>
     </div>
   );
