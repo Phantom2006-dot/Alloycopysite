@@ -1,7 +1,6 @@
-
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, ChevronDown } from "lucide-react";
+import { Menu, X, ChevronDown, ChevronRight } from "lucide-react";
 import { useTheme } from "next-themes";
 import ThemeToggle from "./ThemeToggle";
 import logoLight from "@/assets/logo-light.svg";
@@ -46,26 +45,26 @@ const DropdownNavItem = ({ item, isActive }: { item: typeof navItems[number], is
     >
       <Link
         to={item.path}
-        className={`nav-link flex items-center gap-1 py-2 ${
-          isActive(item.path) ? "text-foreground font-medium" : "hover:text-foreground"
+        className={`nav-link flex items-center gap-1 py-2 text-lg ${
+          isActive(item.path) ? "text-foreground font-semibold" : "hover:text-foreground"
         }`}
       >
         {item.name}
-        <ChevronDown className="w-4 h-4 transition-transform duration-200 group-hover:rotate-180" />
+        <ChevronDown className="w-5 h-5 transition-transform duration-200 group-hover:rotate-180" />
       </Link>
       {item.dropdown && (
         <div
-          className={`absolute left-0 mt-0 w-48 bg-background border border-border rounded-md shadow-lg transition-all duration-300 ease-in-out ${
+          className={`absolute left-0 mt-0 w-56 bg-background border border-border rounded-lg shadow-xl transition-all duration-300 ease-in-out ${
             isOpen ? "opacity-100 visible translate-y-0" : "opacity-0 invisible translate-y-2"
           }`}
         >
-          <ul className="py-2">
+          <ul className="py-3">
             {item.dropdown.map((subItem) => (
               <li key={subItem.path}>
                 <Link
                   to={subItem.path}
-                  className={`block px-4 py-2 text-sm ${
-                    isActive(subItem.path) ? "text-primary font-medium" : "text-foreground hover:bg-muted"
+                  className={`block px-5 py-3 text-base ${
+                    isActive(subItem.path) ? "text-primary font-semibold bg-primary/10" : "text-foreground hover:bg-muted"
                   }`}
                 >
                   {subItem.name}
@@ -83,6 +82,7 @@ const DropdownNavItem = ({ item, isActive }: { item: typeof navItems[number], is
 const Header = () => {
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [openMobileDropdowns, setOpenMobileDropdowns] = useState<string[]>([]);
   const { resolvedTheme } = useTheme();
 
   useEffect(() => {
@@ -98,9 +98,18 @@ const Header = () => {
 
   useEffect(() => {
     setMobileMenuOpen(false);
+    setOpenMobileDropdowns([]);
   }, [location.pathname]);
 
   const isActive = (path: string) => location.pathname === path;
+
+  const toggleMobileDropdown = (itemName: string) => {
+    setOpenMobileDropdowns(prev =>
+      prev.includes(itemName)
+        ? prev.filter(name => name !== itemName)
+        : [...prev, itemName]
+    );
+  };
 
   // Determine which logo to use based on theme
   const currentLogo = resolvedTheme === "dark" ? logoLight : logoDark;
@@ -118,7 +127,7 @@ const Header = () => {
 
             {/* Desktop Navigation - Simplified */}
             <div className="hidden md:flex items-center gap-10">
-              <ul className="flex items-center gap-6 lg:gap-8">
+              <ul className="flex items-center gap-8 lg:gap-10">
                 {navItems.map((item) => {
                   if (item.dropdown) {
                     return (
@@ -133,8 +142,8 @@ const Header = () => {
                     <li key={item.path}>
                       <Link
                         to={item.path}
-                        className={`nav-link ${
-                          isActive(item.path) ? "text-foreground font-medium" : "hover:text-foreground"
+                        className={`nav-link text-lg ${
+                          isActive(item.path) ? "text-foreground font-semibold" : "hover:text-foreground"
                         }`}
                       >
                         {item.name}
@@ -147,7 +156,7 @@ const Header = () => {
             </div>
 
             {/* Mobile Menu Button and Theme Toggle */}
-            <div className="md:hidden flex items-center gap-2">
+            <div className="md:hidden flex items-center gap-4">
               <ThemeToggle />
               <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -155,7 +164,7 @@ const Header = () => {
                 data-testid="button-mobile-menu"
                 aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
               >
-                {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+                {mobileMenuOpen ? <X size={28} /> : <Menu size={28} />}
               </button>
             </div>
           </div>
@@ -170,56 +179,99 @@ const Header = () => {
             : "opacity-0 invisible translate-x-full"
         }`}
       >
-        <div className="flex flex-col items-center justify-center h-full pt-20">
-          <nav className="flex flex-col items-center gap-8">
-            {navItems.map((item, index) => (
-              <div key={item.name} className="flex flex-col items-center">
-                <Link
-                  to={item.path}
-                  className={`text-2xl tracking-wide transition-all duration-300 ${
-                    isActive(item.path)
-                      ? "text-foreground font-medium"
-                      : "text-muted-foreground hover:text-foreground"
-                  }`}
-                  style={{
-                    transitionDelay: mobileMenuOpen ? `${index * 50}ms` : "0ms",
-                    transform: mobileMenuOpen
-                      ? "translateY(0)"
-                      : "translateY(20px)",
-                    opacity: mobileMenuOpen ? 1 : 0,
-                  }}
-                  onClick={() => setMobileMenuOpen(false)}
-                  data-testid={`link-mobile-${item.name.toLowerCase()}`}
-                >
-                  {item.name}
-                </Link>
-                {item.dropdown && (
-                  <div className="flex flex-col items-center mt-4 space-y-2">
-                    {item.dropdown.map((subItem, subIndex) => (
-                      <Link
-                        key={subItem.path}
-                        to={subItem.path}
-                        className={`text-lg transition-all duration-300 ${
-                          isActive(subItem.path)
-                            ? "text-primary font-medium"
+        <div className="flex flex-col items-center justify-start h-full pt-24 overflow-y-auto pb-8">
+          <nav className="flex flex-col items-center w-full max-w-md px-6">
+            {navItems.map((item, index) => {
+              const isDropdownOpen = openMobileDropdowns.includes(item.name);
+              
+              return (
+                <div key={item.name} className="w-full mb-4">
+                  {item.dropdown ? (
+                    <>
+                      {/* Dropdown Header */}
+                      <button
+                        onClick={() => toggleMobileDropdown(item.name)}
+                        className={`flex items-center justify-between w-full py-4 text-2xl tracking-wide transition-all duration-300 ${
+                          isActive(item.path) || isDropdownOpen
+                            ? "text-foreground font-semibold"
                             : "text-muted-foreground hover:text-foreground"
                         }`}
                         style={{
-                          transitionDelay: mobileMenuOpen ? `${(index * 50) + (subIndex * 20)}ms` : "0ms",
+                          transitionDelay: mobileMenuOpen ? `${index * 50}ms` : "0ms",
                           transform: mobileMenuOpen
                             ? "translateY(0)"
                             : "translateY(20px)",
                           opacity: mobileMenuOpen ? 1 : 0,
                         }}
-                        onClick={() => setMobileMenuOpen(false)}
+                        data-testid={`button-mobile-${item.name.toLowerCase()}`}
                       >
-                        {subItem.name}
-                      </Link>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))}
+                        <span>{item.name}</span>
+                        <ChevronRight 
+                          className={`w-6 h-6 transition-transform duration-300 ${
+                            isDropdownOpen ? "rotate-90" : ""
+                          }`}
+                        />
+                      </button>
+                      
+                      {/* Dropdown Content */}
+                      <div
+                        className={`overflow-hidden transition-all duration-400 ease-in-out ${
+                          isDropdownOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
+                        }`}
+                      >
+                        <div className="pl-4 border-l-2 border-muted ml-2 mt-2 mb-4">
+                          {item.dropdown.map((subItem, subIndex) => (
+                            <Link
+                              key={subItem.path}
+                              to={subItem.path}
+                              className={`block py-3 text-xl transition-all duration-300 ${
+                                isActive(subItem.path)
+                                  ? "text-primary font-semibold"
+                                  : "text-muted-foreground hover:text-foreground"
+                              }`}
+                              style={{
+                                transitionDelay: mobileMenuOpen ? `${(index * 50) + ((subIndex + 1) * 30)}ms` : "0ms",
+                                transform: mobileMenuOpen && isDropdownOpen
+                                  ? "translateX(0)"
+                                  : "translateX(-20px)",
+                                opacity: mobileMenuOpen && isDropdownOpen ? 1 : 0,
+                              }}
+                              onClick={() => {
+                                setMobileMenuOpen(false);
+                                setOpenMobileDropdowns([]);
+                              }}
+                            >
+                              {subItem.name}
+                            </Link>
+                          ))}
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    /* Regular Link */
+                    <Link
+                      to={item.path}
+                      className={`block w-full py-4 text-2xl tracking-wide text-center transition-all duration-300 ${
+                        isActive(item.path)
+                          ? "text-foreground font-semibold"
+                          : "text-muted-foreground hover:text-foreground"
+                      }`}
+                      style={{
+                        transitionDelay: mobileMenuOpen ? `${index * 50}ms` : "0ms",
+                        transform: mobileMenuOpen
+                          ? "translateY(0)"
+                          : "translateY(20px)",
+                        opacity: mobileMenuOpen ? 1 : 0,
+                      }}
+                      onClick={() => setMobileMenuOpen(false)}
+                      data-testid={`link-mobile-${item.name.toLowerCase()}`}
+                    >
+                      {item.name}
+                    </Link>
+                  )}
+                </div>
+              );
+            })}
           </nav>
         </div>
       </div>
