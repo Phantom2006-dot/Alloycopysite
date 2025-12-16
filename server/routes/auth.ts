@@ -1,5 +1,3 @@
-// [file name]: auth.ts
-// [file content begin]
 import { Router, Request, Response } from "express";
 import bcrypt from "bcryptjs";
 import { db } from "../db";
@@ -32,16 +30,24 @@ router.post("/login", async (req: Request, res: Response) => {
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
-    // Check if the password is already bcrypt hashed (starts with $2b$)
-    const isBcryptHash = user.password.startsWith("$2a$");
+    let passwordValid = false;
 
-    let passwordValid;
+    // A bcrypt hash is typically 60 characters long.
+    // If the stored password is long enough to be a hash, we attempt bcrypt comparison.
+    if (user.password.length >= 60) {
+      try {
+        // Attempt bcrypt comparison first, as this is the secure method
+        passwordValid = await bcrypt.compare(password, user.password);
+      } catch (e) {
+        // If bcrypt.compare fails (e.g., due to an invalid hash format),
+        // we fall through to the plain-text comparison logic below.
+        console.warn(`Bcrypt comparison failed for user ${username}. Falling back to plain-text check.`, e);
+      }
+    }
 
-    if (isBcryptHash) {
-      // Compare with bcrypt for hashed passwords
-      passwordValid = await bcrypt.compare(password, user.password);
-    } else {
-      // Compare plain text for non-hashed passwords (for manually updated passwords)
+    // Fallback for non-hashed or invalidly hashed passwords (for migration/manual updates)
+    if (!passwordValid) {
+      // Compare plain text
       passwordValid = password === user.password;
 
       // OPTIONAL: Auto-upgrade to bcrypt hash on successful login
@@ -269,4 +275,3 @@ router.post("/logout", (_req: Request, res: Response) => {
 });
 
 export default router;
-// [file content end]
