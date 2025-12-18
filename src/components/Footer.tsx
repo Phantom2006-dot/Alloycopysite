@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { useTheme } from "next-themes";
-import logoLight from "@/assets/logo-light.svg";
-import logoDark from "@/assets/5.svg";
+import logoLight from "@/assets/light.png";
+import logoDark from "@/assets/dark.png";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -15,7 +15,7 @@ const Footer = () => {
             // Inverted to match the Header: dark theme uses light logo, light theme uses dark logo
             src={resolvedTheme === "dark" ? logoLight : logoDark}
             alt="Bauhaus Production"
-            className="h-16 w-auto opacity-80"
+            className="h-20 w-auto opacity-80"
           />
         </div>
 
