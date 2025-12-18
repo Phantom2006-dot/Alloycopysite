@@ -144,9 +144,9 @@ export default function ProductCategories() {
             No categories yet. Create categories like "Books", "Fashion", "Electronics" to organize your products.
           </div>
         ) : (
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div className="flex gap-4 overflow-x-auto pb-4 md:grid md:grid-cols-2 lg:grid-cols-3">
             {categories.map((item) => (
-              <Card key={item.id} className="overflow-hidden">
+              <Card key={item.id} className="min-w-[280px] overflow-hidden md:min-w-0">
                 <div className="aspect-video relative bg-muted">
                   {item.image ? (
                     <img
