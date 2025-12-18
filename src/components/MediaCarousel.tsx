@@ -266,7 +266,7 @@ const MediaCarousel = ({ items }: MediaCarouselProps) => {
           </button>
 
           {/* Direction toggle */}
-          <div className="flex items-center gap-2">
+          {/* <div className="flex items-center gap-2">
             <span className="text-sm text-foreground/70">Direction:</span>
             <div className="flex bg-foreground/10 rounded-lg p-1">
               <button
@@ -292,7 +292,7 @@ const MediaCarousel = ({ items }: MediaCarouselProps) => {
                 →
               </button>
             </div>
-          </div>
+          </div> */}
         </div>
 
         {/* Current position indicator */}
