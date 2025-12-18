@@ -247,7 +247,7 @@ const MediaCarousel = ({ items }: MediaCarouselProps) => {
 
         {/* Auto-scroll toggle and direction controls */}
         <div className="flex items-center gap-4">
-          <button
+          {/* <button
             onClick={toggleAutoScroll}
             className="flex items-center gap-2 bg-foreground/10 hover:bg-foreground/20 px-3 py-2 rounded-lg transition-colors"
             aria-label={isPaused ? "Play auto-scroll" : "Pause auto-scroll"}
@@ -263,7 +263,7 @@ const MediaCarousel = ({ items }: MediaCarouselProps) => {
                 <span className="text-sm">Pause</span>
               </>
             )}
-          </button>
+          </button> */}
 
           {/* Direction toggle */}
           {/* <div className="flex items-center gap-2">
