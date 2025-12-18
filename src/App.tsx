@@ -15,6 +15,7 @@ import Books from "./pages/Books";
 import TV from "./pages/TV";
 import Film from "./pages/Film";
 import Publishing from "./pages/Publishing";
+import Foundation from "./pages/Foundation";
 import Events from "./pages/Events";
 import NotFound from "./pages/NotFound";
 import Shop from "./pages/Shop";
@@ -60,6 +61,7 @@ const App = () => (
               <Route path="/tv" element={<TV />} />
               <Route path="/film" element={<Film />} />
               <Route path="/publishing" element={<Publishing />} />
+              <Route path="/foundation" element={<Foundation />} />
               <Route path="/events" element={<Events />} />
               
               <Route path="/shop" element={<Shop />} />
