@@ -123,7 +123,7 @@ const Header = () => {
           <div className="flex items-center justify-between">
             {/* Logo - Always on the left */}
             <Link to="/" className="flex items-center">
-              <img src={currentLogo} alt={logoAlt} className="h-20 w-auto" />
+              <img src={currentLogo} alt={logoAlt} className="h-24 w-auto" />
             </Link>
 
             {/* Desktop Navigation - Simplified */}
