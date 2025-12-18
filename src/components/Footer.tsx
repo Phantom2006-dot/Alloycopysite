@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { useTheme } from "next-themes";
-import logoLight from "@/assets/light.png";
-import logoDark from "@/assets/dark.png";
+import logoLight from "@/assets/dark.png";
+import logoDark from "@/assets/light.png";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
