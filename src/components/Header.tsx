@@ -3,8 +3,8 @@ import { Link, useLocation } from "react-router-dom";
 import { Menu, X, ChevronDown, ChevronRight } from "lucide-react";
 import { useTheme } from "next-themes";
 import ThemeToggle from "./ThemeToggle";
-import logoLight from "@/assets/logo-light.svg";
-import logoDark from "@/assets/5.svg";
+import logoLight from "@/assets/light.jpg";
+import logoDark from "@/assets/dark.jpg";
 
 // --- New Navigation Data Structure ---
 const navItems = [
