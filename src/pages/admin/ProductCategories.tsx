@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Plus, Pencil, Trash2, FolderOpen } from "lucide-react";
 import { toast } from "sonner";
 import { ImageUpload } from "@/components/admin/ImageUpload";
@@ -206,7 +207,8 @@ export default function ProductCategories() {
               {editingItem ? "Edit Category" : "Add Category"}
             </DialogTitle>
           </DialogHeader>
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <ScrollArea className="max-h-[70vh] pr-4">
+            <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="name">Category Name *</Label>
               <Input
@@ -262,6 +264,7 @@ export default function ProductCategories() {
               {editingItem ? "Update Category" : "Create Category"}
             </Button>
           </form>
+          </ScrollArea>
         </DialogContent>
       </Dialog>
     </AdminLayout>
