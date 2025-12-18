@@ -1,4 +1,3 @@
-import { useQuery } from "@tanstack/react-query";
 import Layout from "@/components/Layout";
 import MediaCarousel from "@/components/MediaCarousel";
 import { Card, CardContent } from "@/components/ui/card";
@@ -7,6 +6,13 @@ import { Link } from "react-router-dom";
 import { api } from "@/lib/api";
 import { format } from "date-fns";
 import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 
 interface MediaItem {
   id: number;
@@ -35,6 +41,59 @@ interface Article {
 const Film = () => {
   const [hasError, setHasError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+
+  const filmFaqs = [
+    {
+      question: "What types of films does Bauhaus produce?",
+      answer:
+        "We produce a diverse range of films including documentaries, feature films, short films, and digital content that celebrate Nigerian culture, heritage, and contemporary stories. Our work focuses on authentic African narratives.",
+    },
+    {
+      question: "How can I submit my film project?",
+      answer:
+        "We welcome submissions from filmmakers and producers. Please send a project synopsis, director's statement, and sample footage (if available) to films@bauhausproduction.com. We review submissions on a rolling basis.",
+    },
+    {
+      question: "Do you offer film production services?",
+      answer:
+        "Yes! We offer comprehensive film production services including pre-production planning, cinematography, post-production, sound design, and distribution. Contact us to discuss your project needs.",
+    },
+    {
+      question: "What is your distribution process?",
+      answer:
+        "We distribute films through multiple channels including film festivals, streaming platforms, theatrical releases, and broadcast networks. We work to maximize reach and ensure your film reaches the right audience.",
+    },
+    {
+      question: "Do you work with international filmmakers?",
+      answer:
+        "Absolutely! We collaborate with filmmakers from around the world. We're particularly interested in projects that connect with African audiences or tell African diaspora stories.",
+    },
+    {
+      question: "What is the timeline for film production?",
+      answer:
+        "Timelines vary depending on the scope and complexity of the project. A typical feature film production takes 12-24 months from pre-production to final delivery. We'll provide a detailed timeline during project planning.",
+    },
+    {
+      question: "Do you provide funding for film projects?",
+      answer:
+        "We work with filmmakers through various models including co-production, distribution deals, and partnerships. Funding options depend on the project. Contact us to discuss possibilities for your specific project.",
+    },
+    {
+      question: "Can I watch your films online?",
+      answer:
+        "Many of our films are available through our streaming partners and platforms. Check our Films & Documentaries section for featured titles, or contact us for information about specific films.",
+    },
+    {
+      question: "How do you ensure quality in your productions?",
+      answer:
+        "We maintain high production standards through experienced crew, professional equipment, rigorous quality control processes, and collaboration with industry experts. We're committed to delivering world-class content.",
+    },
+    {
+      question: "What is your vision for African cinema?",
+      answer:
+        "We believe African stories deserve to be told by African voices and shared with the world. Our mission is to create platforms for authentic African narratives, support emerging filmmakers, and contribute to a vibrant, sustainable African film industry.",
+    },
+  ];
 
   useEffect(() => {
     try {
@@ -110,7 +169,7 @@ const Film = () => {
   };
 
   // Create fallback items if no featured items exist
-  const getFallbackItems = () => {
+  const getFallbackItems = ( ) => {
     return [
       {
         id: 1,
@@ -135,7 +194,7 @@ const Film = () => {
       {
         id: 4,
         title: "African Heritage",
-        image: getDefaultImage(),
+        image: getDefaultImage( ),
         type: "film" as const,
       },
       {
@@ -158,7 +217,7 @@ const Film = () => {
   // Create carousel items with proper images
   const carouselItems =
     films.length > 0
-      ? films.map((item) => ({
+      ? films.map((item ) => ({
           id: item.id,
           title: item.title,
           image: item.coverImage || getDefaultImage(),
@@ -349,7 +408,32 @@ const Film = () => {
           </section>
         )}
 
-        <div className="divider" />
+        <div className="divider mb-16" />
+
+        {/* Film FAQs */}
+        <section className="mx-auto max-w-4xl px-6 mb-12 animate-slide-up">
+          <h2 className="section-title text-center mb-12">FILM FAQs</h2>
+          <div className="max-w-3xl mx-auto">
+            <Accordion type="single" collapsible className="w-full">
+              {filmFaqs.map((faq, index) => (
+                <AccordionItem
+                  key={index}
+                  value={`item-${index}`}
+                  className="border-border"
+                >
+                  <AccordionTrigger className="text-left hover:text-primary transition-colors">
+                    <span className="font-serif font-semibold">
+                      {faq.question}
+                    </span>
+                  </AccordionTrigger>
+                  <AccordionContent className="text-foreground/80">
+                    {faq.answer}
+                  </AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
+          </div>
+        </section>
       </div>
     </Layout>
   );
