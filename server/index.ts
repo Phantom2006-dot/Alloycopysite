@@ -181,7 +181,7 @@ app.get("/api/health", (_req: Request, res: Response) => {
 const apiRoutesToExclude = ["/api/payments/callback"];
 
 const conditionalValidateApiKey = (req: Request, res: Response, next: NextFunction) => {
-  if (apiRoutesToExclude.includes(req.originalUrl)) {
+  if (apiRoutesToExclude.includes(req.path)) {
     return next();
   }
   return validateApiKey(req, res, next);
