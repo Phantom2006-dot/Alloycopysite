@@ -1,14 +1,24 @@
 import { useSearchParams, Link } from "react-router-dom";
+import { useEffect } from "react";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { CheckCircle, ShoppingBag, Home } from "lucide-react";
+import { toast } from "sonner";
 
 export default function PaymentSuccess() {
   const [searchParams] = useSearchParams();
   const txRef = searchParams.get("tx_ref");
   const amount = searchParams.get("amount");
   const currency = searchParams.get("currency");
+
+  // Display success message on load
+  useEffect(() => {
+    toast.success("Payment Successful!", {
+      description: "Thank you for your purchase. Your order has been confirmed.",
+      duration: 5000,
+    });
+  }, []);
 
   const formatAmount = (value: string | null, curr: string | null) => {
     if (!value) return "";
