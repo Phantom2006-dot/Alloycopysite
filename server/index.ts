@@ -17,6 +17,7 @@ import productsRoutes from "./routes/products";
 import productCategoriesRoutes from "./routes/productCategories";
 import paymentsRoutes from "./routes/payments";
 import { validateApiKey, checkApiKeyConfigured } from "./middleware/apiKey";
+import { Request, Response, NextFunction } from "express";
 import { setupVite, serveStatic } from "./vite";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -177,8 +178,17 @@ app.get("/api/health", (_req: Request, res: Response) => {
   });
 });
 
+const apiRoutesToExclude = ["/api/payments/callback"];
+
+const conditionalValidateApiKey = (req: Request, res: Response, next: NextFunction) => {
+  if (apiRoutesToExclude.includes(req.originalUrl)) {
+    return next();
+  }
+  return validateApiKey(req, res, next);
+};
+
 if (isStandaloneMode) {
-  app.use("/api", validateApiKey);
+  app.use("/api", conditionalValidateApiKey);
 }
 
 app.use("/api/auth", authRoutes);
