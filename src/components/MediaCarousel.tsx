@@ -1,18 +1,32 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { ChevronLeft, ChevronRight, Pause, Play } from "lucide-react";
 
 interface MediaItem {
   id: number;
   title: string;
-  image: string;
+  src: string;
   type: "book" | "film" | "tv";
+  mediaType: "image" | "video";
 }
 
-interface MediaCarouselProps {
-  items: MediaItem[];
-}
+const STATIC_ITEMS: MediaItem[] = [
+  { id: 1, title: "Image 1", src: "/IMAG1550.jpg", type: "book", mediaType: "image" },
+  { id: 2, title: "Image 2", src: "/IMAG1552.jpg", type: "film", mediaType: "image" },
+  { id: 3, title: "Image 3", src: "/IMAG1553.jpg", type: "tv", mediaType: "image" },
+  { id: 4, title: "Image 4", src: "/IMAG1750.jpg", type: "book", mediaType: "image" },
+  { id: 5, title: "Image 5", src: "/IMG_20191018_003712.jpg", type: "film", mediaType: "image" },
+  { id: 6, title: "Image 6", src: "/IMG_20191018_004624.jpg", type: "tv", mediaType: "image" },
+  { id: 7, title: "Video 1", src: "/TS-NIG-PLASTICBAN-ADJ-2606204.mp4", type: "film", mediaType: "video" },
+  { id: 8, title: "Image 7", src: "/WhatsApp Image 2025-12-23 at 10.20.17 AM (1).jpeg", type: "book", mediaType: "image" },
+  { id: 9, title: "Image 8", src: "/WhatsApp Image 2025-12-23 at 10.20.17 AM.jpeg", type: "film", mediaType: "image" },
+  { id: 10, title: "Image 9", src: "/WhatsApp Image 2025-12-23 at 10.20.18 AM (1).jpeg", type: "tv", mediaType: "image" },
+  { id: 11, title: "Image 10", src: "/WhatsApp Image 2025-12-23 at 10.20.18 AM (2).jpeg", type: "book", mediaType: "image" },
+  { id: 12, title: "Image 11", src: "/WhatsApp Image 2025-12-23 at 10.20.18 AM (3).jpeg", type: "film", mediaType: "image" },
+  { id: 13, title: "Image 12", src: "/WhatsApp Image 2025-12-23 at 10.20.18 AM.jpeg", type: "tv", mediaType: "image" },
+];
 
-const MediaCarousel = ({ items }: MediaCarouselProps) => {
+const MediaCarousel = () => {
+  const items = STATIC_ITEMS;
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
@@ -198,12 +212,25 @@ const MediaCarousel = ({ items }: MediaCarouselProps) => {
                       : "hover:scale-105 hover:shadow-lg hover:opacity-80"
                   }`}
                 >
-                  <img
-                    src={item.image}
-                    alt={item.title}
-                    className="h-full w-full object-cover"
-                    draggable="false"
-                  />
+                  {item.mediaType === "image" ? (
+                    <img
+                      src={item.src}
+                      alt={item.title}
+                      className="h-full w-full object-cover"
+                      draggable="false"
+                    />
+                  ) : (
+                    <video
+                      src={item.src}
+                      title={item.title}
+                      className="h-full w-full object-cover"
+                      draggable="false"
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
+                    />
+                  )}
                   
                   {/* Type indicator */}
                   <div className="absolute top-2 left-2 bg-background/90 text-foreground text-xs px-2 py-1 rounded-md">
