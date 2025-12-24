@@ -30,6 +30,9 @@ checkApiKeyConfigured();
 const app = express();
 const PORT = parseInt(process.env.PORT || "5000", 10);
 
+// Trust proxy headers for Fly.io and other reverse proxies
+app.set('trust proxy', 1);
+
 const allowedOrigins = process.env.ALLOWED_ORIGINS
   ? process.env.ALLOWED_ORIGINS.split(",").map((origin) => origin.trim())
   : isStandaloneMode

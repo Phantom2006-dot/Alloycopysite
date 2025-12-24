@@ -66,13 +66,20 @@ router.post("/initialize", async (req: Request, res: Response) => {
 
     const txRef = `BAUHAUS-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
+    // Handle protocol detection for Fly.io (behind load balancer)
+    const protocol = req.headers['x-forwarded-proto'] || req.protocol || 'https';
+    const host = req.get('host') || 'localhost:5000';
+    const baseUrl = `${protocol}://${host}`;
+    
+    const callbackUrl = redirectUrl || `${baseUrl}/api/payments/callback`;
+
     const paymentData = {
       public_key: publicKey,
       tx_ref: txRef,
       amount: amountInMajorUnits,
       currency: "NGN",
       payment_options: "card, banktransfer, ussd, mobilemoney",
-      redirect_url: redirectUrl || `${req.protocol}://${req.get('host')}/api/payments/callback`,
+      redirect_url: callbackUrl,
       customer: {
         email,
         phone_number: phone || "",
