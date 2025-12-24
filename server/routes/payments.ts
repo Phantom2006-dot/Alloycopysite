@@ -158,7 +158,7 @@ router.get("/callback", async (req: Request, res: Response) => {
         status: "successful",
       });
       
-      return res.redirect(`/payment/success?${redirectParams.toString()}`);
+      return res.redirect(`/shop?payment=success&${redirectParams.toString()}`);
     } 
     // FAILURE: If any status other than "successful", show failure page
     else {
@@ -172,7 +172,7 @@ router.get("/callback", async (req: Request, res: Response) => {
         reason: failureReason,
       });
       
-      return res.redirect(`/payment/failed?${redirectParams.toString()}`);
+      return res.redirect(`/shop?payment=failed&${redirectParams.toString()}`);
     }
   } catch (error: any) {
     console.error("✗ Payment callback ERROR:", error);
