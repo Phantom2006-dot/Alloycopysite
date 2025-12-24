@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "NODE_ENV=development npx tsx server/index.ts",
+    "dev": "NODE_ENV=development tsx server/index.ts",
     "dev:frontend": "vite",
     "build": "vite build",
     "build:dev": "vite build --mode development",
@@ -12,8 +12,8 @@
     "preview": "vite preview",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
-    "db:seed": "npx tsx server/seed.ts",
-    "start:standalone": "BACKEND_MODE=standalone npx tsx server/index.ts"
+    "db:seed": "tsx server/seed.ts",
+    "start:standalone": "BACKEND_MODE=standalone tsx server/index.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
