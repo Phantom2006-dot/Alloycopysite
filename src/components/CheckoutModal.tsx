@@ -122,9 +122,15 @@ export default function CheckoutModal({ open, onOpenChange, product }: CheckoutM
           callback: (data: any) => {
             console.log("Payment callback:", data);
             if (data.status === "successful" || data.status === "completed") {
-              window.location.href = `/payment/success?tx_ref=${data.tx_ref}&amount=${data.amount}&currency=${data.currency}`;
+              toast.success("Payment successful! Thank you for your purchase.");
+              onOpenChange(false);
+              // Optional: Refresh data or redirect to a valid page like /shop
+              setTimeout(() => {
+                window.location.href = "/shop";
+              }, 2000);
             } else {
-              window.location.href = `/payment/failed?tx_ref=${data.tx_ref}&status=${data.status}`;
+              toast.error("Payment failed. Please try again.");
+              setIsLoading(false);
             }
           },
           onclose: () => {
