@@ -130,9 +130,20 @@ router.get("/callback", async (req: Request, res: Response) => {
       response.data.status === "successful" &&
       response.data.tx_ref === tx_ref
     ) {
-      return res.redirect(
-        `/payment/success?tx_ref=${tx_ref}&amount=${response.data.amount}&currency=${response.data.currency}`
-      );
+      // Get product details from meta information if available
+      const productId = response.data.meta?.product_id;
+      const productTitle = response.data.meta?.product_title || "Your Purchase";
+      
+      const redirectParams = new URLSearchParams({
+        tx_ref: tx_ref as string,
+        amount: response.data.amount.toString(),
+        currency: response.data.currency,
+        product_id: productId?.toString() || "",
+        product_title: productTitle,
+        payment_type: response.data.payment_type || "card",
+      });
+      
+      return res.redirect(`/payment/success?${redirectParams.toString()}`);
     } else {
       return res.redirect(`/payment/failed?tx_ref=${tx_ref}&status=${response.data.status}`);
     }
