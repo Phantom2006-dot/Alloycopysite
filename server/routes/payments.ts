@@ -115,22 +115,36 @@ router.get("/callback", async (req: Request, res: Response) => {
   try {
     const { transaction_id, tx_ref, status } = req.query;
 
+    console.log("=== Payment Callback Received ===");
+    console.log("Status:", status);
+    console.log("Transaction ID:", transaction_id);
+    console.log("TX Ref:", tx_ref);
+
+    // Handle user cancellation
     if (status === "cancelled") {
+      console.log("Payment cancelled by user");
       return res.redirect(`/payment/cancelled?tx_ref=${tx_ref}`);
     }
 
+    // Check if transaction_id exists
     if (!transaction_id) {
-      return res.redirect(`/payment/failed?error=missing_transaction_id`);
+      console.error("Missing transaction_id");
+      return res.redirect(`/payment/failed?error=missing_transaction_id&reason=No+transaction+ID+provided`);
     }
 
+    // Verify with Flutterwave
     const flw = getFlutterwaveClient();
     const response = await flw.Transaction.verify({ id: transaction_id as string });
 
-    if (
-      response.data.status === "successful" &&
-      response.data.tx_ref === tx_ref
-    ) {
-      // Get product details from meta information if available
+    console.log("=== Flutterwave Verification Response ===");
+    console.log("Flutterwave Status:", response.data.status);
+    console.log("TX Ref Match:", response.data.tx_ref === tx_ref);
+    console.log("Full Response:", JSON.stringify(response.data, null, 2));
+
+    // SUCCESS: Only redirect to success if Flutterwave explicitly confirms "successful"
+    if (response.data.status === "successful" && response.data.tx_ref === tx_ref) {
+      console.log("✓ Payment SUCCESSFUL - Redirecting to success page");
+      
       const productId = response.data.meta?.product_id;
       const productTitle = response.data.meta?.product_title || "Your Purchase";
       
@@ -141,17 +155,48 @@ router.get("/callback", async (req: Request, res: Response) => {
         product_id: productId?.toString() || "",
         product_title: productTitle,
         payment_type: response.data.payment_type || "card",
+        status: "successful",
       });
       
       return res.redirect(`/payment/success?${redirectParams.toString()}`);
-    } else {
-      return res.redirect(`/payment/failed?tx_ref=${tx_ref}&status=${response.data.status}`);
+    } 
+    // FAILURE: If any status other than "successful", show failure page
+    else {
+      console.log(`✗ Payment FAILED - Status: ${response.data.status}`);
+      
+      const failureReason = getFailureReason(response.data.status);
+      
+      const redirectParams = new URLSearchParams({
+        tx_ref: tx_ref as string,
+        status: response.data.status || "unknown",
+        reason: failureReason,
+      });
+      
+      return res.redirect(`/payment/failed?${redirectParams.toString()}`);
     }
   } catch (error: any) {
-    console.error("Payment callback error:", error);
-    return res.redirect(`/payment/failed?error=${encodeURIComponent(error.message)}`);
+    console.error("✗ Payment callback ERROR:", error);
+    const redirectParams = new URLSearchParams({
+      error: encodeURIComponent(error.message),
+      reason: "System+error+occurred",
+    });
+    return res.redirect(`/payment/failed?${redirectParams.toString()}`);
   }
 });
+
+// Helper function to get human-readable failure reasons
+function getFailureReason(status: string): string {
+  const reasons: Record<string, string> = {
+    "failed": "Payment was declined. Please check your card details and try again.",
+    "pending": "Payment is still being processed. Please wait or contact support.",
+    "cancelled": "Payment was cancelled.",
+    "declined": "Your payment was declined. Please try a different payment method.",
+    "error": "An error occurred during payment. Please try again.",
+    "unknown": "Payment status could not be determined. Please contact support.",
+  };
+  
+  return reasons[status] || `Payment failed with status: ${status}`;
+}
 
 router.get("/verify/:transactionId", async (req: Request, res: Response) => {
   try {
