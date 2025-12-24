@@ -181,10 +181,20 @@ app.get("/api/health", (_req: Request, res: Response) => {
   });
 });
 
-const apiRoutesToExclude = ["/api/payments/callback"];
+const apiRoutesToExclude = ["/api/payments/callback", "/payments/callback", "/api/health", "/health"];
 
 const conditionalValidateApiKey = (req: Request, res: Response, next: NextFunction) => {
-  if (apiRoutesToExclude.includes(req.path)) {
+  const path = req.path;
+  const originalUrl = req.originalUrl;
+  
+  const isExcluded = apiRoutesToExclude.some(route => 
+    path === route || 
+    path.startsWith(route + "?") ||
+    originalUrl === route ||
+    originalUrl.startsWith(route + "?")
+  );
+
+  if (isExcluded) {
     return next();
   }
   return validateApiKey(req, res, next);
