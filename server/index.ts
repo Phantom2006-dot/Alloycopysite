@@ -216,44 +216,6 @@ app.get("/api/debug/env", (_req: Request, res: Response) => {
   });
 });
 
-// ✅ ADDED: Root route to fix "Cannot GET /" error
-app.get("/", (_req: Request, res: Response) => {
-  console.log("🌐 Root route accessed");
-  res.json({
-    message: "Welcome to the CMS API Server",
-    status: "operational",
-    version: "1.0.0",
-    timestamp: new Date().toISOString(),
-    mode: isStandaloneMode ? "standalone" : "integrated",
-    documentation: "Visit /api/health for health check",
-    availableEndpoints: {
-      health: "/api/health",
-      debug: {
-        test: "/api/debug/test",
-        env: "/api/debug/env",
-        echo: "/api/debug/echo (POST)"
-      },
-      apiGroups: [
-        "/api/auth/*",
-        "/api/articles/*",
-        "/api/events/*",
-        "/api/products/*",
-        "/api/uploads/*",
-        "/api/media/*",
-        "/api/team/*",
-        "/api/categories/*",
-        "/api/tags/*",
-        "/api/payments/*",
-        "/api/product-categories/*"
-      ]
-    },
-    quickLinks: {
-      healthCheck: `${_req.protocol}://${_req.get('host')}/api/health`,
-      debugInfo: `${_req.protocol}://${_req.get('host')}/api/debug/test`
-    }
-  });
-});
-
 // Custom 404 handler for API routes
 app.use("/api", (_req: Request, res: Response) => {
   res.status(404).json({
