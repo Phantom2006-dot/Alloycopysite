@@ -120,16 +120,33 @@ router.get("/callback", async (req: Request, res: Response) => {
     console.log("Transaction ID:", transaction_id);
     console.log("TX Ref:", tx_ref);
 
+    // Return a simple HTML page that closes itself or shows a message
+    const closeWindowHtml = (message: string, status: string) => `
+      <html>
+        <body style="font-family: sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; background: #f9fafb;">
+          <div style="text-align: center; padding: 2rem; background: white; border-radius: 0.5rem; shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);">
+            <h1 style="color: ${status === 'success' ? '#059669' : '#dc2626'}; margin-bottom: 1rem;">${message}</h1>
+            <p style="color: #4b5563;">You can close this window now.</p>
+            <script>
+              setTimeout(() => {
+                window.close();
+              }, 3000);
+            </script>
+          </div>
+        </body>
+      </html>
+    `;
+
     // Handle user cancellation
     if (status === "cancelled") {
       console.log("Payment cancelled by user");
-      return res.redirect(`/payment/cancelled?tx_ref=${tx_ref}`);
+      return res.send(closeWindowHtml("Payment Cancelled", "cancelled"));
     }
 
     // Check if transaction_id exists
     if (!transaction_id) {
       console.error("Missing transaction_id");
-      return res.redirect(`/payment/failed?error=missing_transaction_id&reason=No+transaction+ID+provided`);
+      return res.status(400).send(closeWindowHtml("Missing Transaction ID", "error"));
     }
 
     // Verify with Flutterwave
@@ -137,50 +154,17 @@ router.get("/callback", async (req: Request, res: Response) => {
     const response = await flw.Transaction.verify({ id: transaction_id as string });
 
     console.log("=== Flutterwave Verification Response ===");
-    console.log("Flutterwave Status:", response.data.status);
-    console.log("TX Ref Match:", response.data.tx_ref === tx_ref);
-    console.log("Full Response:", JSON.stringify(response.data, null, 2));
-
-    // SUCCESS: Only redirect to success if Flutterwave explicitly confirms "successful"
+    
     if (response.data.status === "successful" && response.data.tx_ref === tx_ref) {
-      console.log("✓ Payment SUCCESSFUL - Redirecting to success page");
-      
-      const productId = response.data.meta?.product_id;
-      const productTitle = response.data.meta?.product_title || "Your Purchase";
-      
-      const redirectParams = new URLSearchParams({
-        tx_ref: tx_ref as string,
-        amount: response.data.amount.toString(),
-        currency: response.data.currency,
-        product_id: productId?.toString() || "",
-        product_title: productTitle,
-        payment_type: response.data.payment_type || "card",
-        status: "successful",
-      });
-      
-      return res.redirect(`/shop?payment=success&${redirectParams.toString()}`);
-    } 
-    // FAILURE: If any status other than "successful", show failure page
-    else {
+      console.log("✓ Payment SUCCESSFUL");
+      return res.send(closeWindowHtml("Payment Successful!", "success"));
+    } else {
       console.log(`✗ Payment FAILED - Status: ${response.data.status}`);
-      
-      const failureReason = getFailureReason(response.data.status);
-      
-      const redirectParams = new URLSearchParams({
-        tx_ref: tx_ref as string,
-        status: response.data.status || "unknown",
-        reason: failureReason,
-      });
-      
-      return res.redirect(`/shop?payment=failed&${redirectParams.toString()}`);
+      return res.send(closeWindowHtml("Payment Failed", "failed"));
     }
   } catch (error: any) {
     console.error("✗ Payment callback ERROR:", error);
-    const redirectParams = new URLSearchParams({
-      error: encodeURIComponent(error.message),
-      reason: "System+error+occurred",
-    });
-    return res.redirect(`/payment/failed?${redirectParams.toString()}`);
+    return res.status(500).send(closeWindowHtml("An error occurred", "error"));
   }
 });
 
