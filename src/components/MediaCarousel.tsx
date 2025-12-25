@@ -74,8 +74,8 @@ const STATIC_ITEMS: MediaItem[] = [
 ];
 
 const MediaCarousel = ({ type: filterType }: { type?: "book" | "film" | "tv" }) => {
-  const items = filterType === "film" 
-    ? STATIC_ITEMS.filter(item => item.type === "film" && item.src.includes("MV5B"))
+  const items = filterType === "film" || filterType === "tv"
+    ? STATIC_ITEMS.filter(item => (item.type === "film" || item.type === "tv") && item.src.includes("MV5B"))
     : filterType 
       ? STATIC_ITEMS.filter(item => item.type === filterType) 
       : STATIC_ITEMS;
