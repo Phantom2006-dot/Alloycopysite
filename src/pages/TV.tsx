@@ -225,7 +225,7 @@ const TV = () => {
 
           {/* Always render MediaCarousel with items */}
           {MediaCarousel ? (
-            <MediaCarousel type="tv" />
+            <MediaCarousel type="tv" forceStatic={true} />
           ) : (
             // Fallback if MediaCarousel component is not available
             <div className="px-6">
