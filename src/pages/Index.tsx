@@ -228,6 +228,8 @@ const Index = () => {
   };
 
   // Create carousel items with proper images
+  // The MediaCarousel component now manages its own static items.
+  // We will keep the API logic for other sections of the page.
   const carouselItems =
     featuredItems.length > 0
       ? featuredItems.map((item) => ({
@@ -298,9 +300,9 @@ const Index = () => {
         </div>
 
         {/* Always render MediaCarousel with items */}
-        {MediaCarousel ? (
-          <MediaCarousel items={carouselItems} />
-        ) : (
+          {MediaCarousel ? (
+            <MediaCarousel />
+          ) : (
           // Fallback if MediaCarousel component is not available
           <div className="px-6">
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
