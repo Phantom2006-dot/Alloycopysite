@@ -10,19 +10,18 @@ interface MediaItem {
 }
 
 const STATIC_ITEMS: MediaItem[] = [
-  { id: 1, title: "Image 1", src: "/IMAG1550.jpg", type: "book", mediaType: "image" },
-  { id: 2, title: "Image 2", src: "/IMAG1552.jpg", type: "film", mediaType: "image" },
-  { id: 3, title: "Image 3", src: "/IMAG1553.jpg", type: "tv", mediaType: "image" },
-  { id: 4, title: "Image 4", src: "/IMAG1750.jpg", type: "book", mediaType: "image" },
-  { id: 5, title: "Image 5", src: "/IMG_20191018_003712.jpg", type: "film", mediaType: "image" },
-  { id: 6, title: "Image 6", src: "/IMG_20191018_004624.jpg", type: "tv", mediaType: "image" },
-  { id: 7, title: "Video 1", src: "/TS-NIG-PLASTICBAN-ADJ-2606204.mp4", type: "film", mediaType: "video" },
-  { id: 8, title: "Image 7", src: "/WhatsApp Image 2025-12-23 at 10.20.17 AM (1).jpeg", type: "book", mediaType: "image" },
-  { id: 9, title: "Image 8", src: "/WhatsApp Image 2025-12-23 at 10.20.17 AM.jpeg", type: "film", mediaType: "image" },
-  { id: 10, title: "Image 9", src: "/WhatsApp Image 2025-12-23 at 10.20.18 AM (1).jpeg", type: "tv", mediaType: "image" },
-  { id: 11, title: "Image 10", src: "/WhatsApp Image 2025-12-23 at 10.20.18 AM (2).jpeg", type: "book", mediaType: "image" },
-  { id: 12, title: "Image 11", src: "/WhatsApp Image 2025-12-23 at 10.20.18 AM (3).jpeg", type: "film", mediaType: "image" },
-  { id: 13, title: "Image 12", src: "/WhatsApp Image 2025-12-23 at 10.20.18 AM.jpeg", type: "tv", mediaType: "image" },
+  { id: 1, title: "Image 1", src: "/IMAG1550_1766638018683.jpg", type: "book", mediaType: "image" },
+  { id: 2, title: "Image 2", src: "/IMAG1552_1766638018684.jpg", type: "film", mediaType: "image" },
+  { id: 3, title: "Image 3", src: "/IMAG1553_1766638018685.jpg", type: "tv", mediaType: "image" },
+  { id: 4, title: "Image 4", src: "/IMAG1750_1766638018686.jpg", type: "book", mediaType: "image" },
+  { id: 5, title: "Image 5", src: "/IMG_20191018_003712_1766638018687.jpg", type: "film", mediaType: "image" },
+  { id: 6, title: "Image 6", src: "/IMG_20191018_004624_1766638018688.jpg", type: "tv", mediaType: "image" },
+  { id: 7, title: "Image 7", src: "/WhatsApp_Image_2025-12-23_at_10.20.17_AM_(1)_1766638018689.jpeg", type: "book", mediaType: "image" },
+  { id: 8, title: "Image 8", src: "/WhatsApp_Image_2025-12-23_at_10.20.17_AM_1766638018690.jpeg", type: "film", mediaType: "image" },
+  { id: 9, title: "Image 9", src: "/WhatsApp_Image_2025-12-23_at_10.20.18_AM_(1)_1766638018691.jpeg", type: "tv", mediaType: "image" },
+  { id: 10, title: "Image 10", src: "/WhatsApp_Image_2025-12-23_at_10.20.18_AM_(2)_1766638018693.jpeg", type: "book", mediaType: "image" },
+  { id: 11, title: "Image 11", src: "/WhatsApp_Image_2025-12-23_at_10.20.18_AM_(3)_1766638018694.jpeg", type: "film", mediaType: "image" },
+  { id: 12, title: "Image 12", src: "/WhatsApp_Image_2025-12-23_at_10.20.18_AM_1766638018695.jpeg", type: "tv", mediaType: "image" },
 ];
 
 const MediaCarousel = () => {
