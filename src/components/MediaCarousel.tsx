@@ -64,7 +64,6 @@ const STATIC_ITEMS: MediaItem[] = [
   { id: 2, title: "Image 2", src: "/attached_assets/MV5BMDJhMmU2MTktM2U1OC00MDhlLWI2MGQtMzlhOGZkOTdjYjE2XkEyXkFqcG_1766663310636.jpg", type: "film", mediaType: "image" },
   { id: 3, title: "Image 3", src: "/attached_assets/MV5BOGU1MmMwMGYtNmE2Yi00MzY5LTk4YzAtYjI4NjI2YjhkNTNhXkEyXkFqcG_1766663310686.jpg", type: "film", mediaType: "image" },
   { id: 4, title: "Image 4", src: "/attached_assets/MV5BOWY5YTc1NDQtZTBhZS00YmI4LWI0ZmMtOGJiNjdkMjQ1NjA0XkEyXkFqcG_1766663310723.jpg", type: "film", mediaType: "image" },
-  { id: 5, title: "Image 5", src: "/attached_assets/video_1766663310548.mp4", type: "film", mediaType: "video" },
   { id: 6, title: "Image 6", src: "/IMAG1553_1766638018685.jpg", type: "tv", mediaType: "image" },
   { id: 7, title: "Image 7", src: "/IMAG1750_1766638018686.jpg", type: "book", mediaType: "image" },
   { id: 8, title: "Image 8", src: "/IMG_20191018_003712_1766638018687.jpg", type: "film", mediaType: "image" },
@@ -75,7 +74,11 @@ const STATIC_ITEMS: MediaItem[] = [
 ];
 
 const MediaCarousel = ({ type: filterType }: { type?: "book" | "film" | "tv" }) => {
-  const items = filterType ? STATIC_ITEMS.filter(item => item.type === filterType) : STATIC_ITEMS;
+  const items = filterType === "film" 
+    ? STATIC_ITEMS.filter(item => item.type === "film" && item.src.includes("MV5B"))
+    : filterType 
+      ? STATIC_ITEMS.filter(item => item.type === filterType) 
+      : STATIC_ITEMS;
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
