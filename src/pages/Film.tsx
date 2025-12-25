@@ -217,13 +217,13 @@ const Film = () => {
   // Create carousel items with proper images
   const carouselItems =
     films.length > 0
-      ? films.map((item ) => ({
+      ? films.map((item) => ({
           id: item.id,
           title: item.title,
           image: item.coverImage || getDefaultImage(),
           type: item.type,
         }))
-      : getFallbackItems();
+      : []; // Removed fallback items as we want to control them via filter in MediaCarousel
 
   if (hasError) {
     return (
@@ -271,7 +271,7 @@ const Film = () => {
 
           {/* Always render MediaCarousel with items */}
           {MediaCarousel ? (
-            <MediaCarousel items={carouselItems} />
+            <MediaCarousel type="film" />
           ) : (
             // Fallback if MediaCarousel component is not available
             <div className="px-6">
