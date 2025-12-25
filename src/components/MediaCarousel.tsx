@@ -70,9 +70,13 @@ const STATIC_ITEMS: MediaItem[] = [
 ];
 
 const MediaCarousel = ({ type: filterType }: { type?: "book" | "film" | "tv" }) => {
-  const items = filterType 
-    ? STATIC_ITEMS.filter(item => item.type === filterType) 
-    : STATIC_ITEMS;
+  const newFilmTvItems = STATIC_ITEMS.filter(item => item.src.includes("image ("));
+  
+  const items = filterType === "film" || filterType === "tv"
+    ? newFilmTvItems
+    : filterType 
+      ? STATIC_ITEMS.filter(item => item.type === filterType) 
+      : STATIC_ITEMS;
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
