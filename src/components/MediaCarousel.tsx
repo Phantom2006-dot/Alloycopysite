@@ -64,13 +64,13 @@ const STATIC_ITEMS: MediaItem[] = [
   { id: 2, title: "Image 2", src: "/attached_assets/MV5BMDJhMmU2MTktM2U1OC00MDhlLWI2MGQtMzlhOGZkOTdjYjE2XkEyXkFqcG_1766663310636.jpg", type: "film", mediaType: "image" },
   { id: 3, title: "Image 3", src: "/attached_assets/MV5BOGU1MmMwMGYtNmE2Yi00MzY5LTk4YzAtYjI4NjI2YjhkNTNhXkEyXkFqcG_1766663310686.jpg", type: "film", mediaType: "image" },
   { id: 4, title: "Image 4", src: "/attached_assets/MV5BOWY5YTc1NDQtZTBhZS00YmI4LWI0ZmMtOGJiNjdkMjQ1NjA0XkEyXkFqcG_1766663310723.jpg", type: "film", mediaType: "image" },
-  { id: 6, title: "Image 6", src: "/IMAG1553_1766638018685.jpg", type: "tv", mediaType: "image" },
-  { id: 7, title: "Image 7", src: "/IMAG1750_1766638018686.jpg", type: "book", mediaType: "image" },
-  { id: 8, title: "Image 8", src: "/IMG_20191018_003712_1766638018687.jpg", type: "film", mediaType: "image" },
-  { id: 9, title: "Image 9", src: "/IMG_20191018_004624_1766638018688.jpg", type: "tv", mediaType: "image" },
-  { id: 10, title: "Image 10", src: "/WhatsApp_Image_2025-12-23_at_10.20.17_AM_(1)_1766638018689.jpeg", type: "book", mediaType: "image" },
-  { id: 11, title: "Image 11", src: "/WhatsApp_Image_2025-12-23_at_10.20.17_AM_1766638018690.jpeg", type: "film", mediaType: "image" },
-  { id: 12, title: "Image 12", src: "/WhatsApp_Image_2025-12-23_at_10.20.18_AM_(1)_1766638018691.jpeg", type: "tv", mediaType: "image" },
+  { id: 6, title: "Image 6", src: "/attached_assets/IMAG1553_1766638018685.jpg", type: "tv", mediaType: "image" },
+  { id: 7, title: "Image 7", src: "/attached_assets/IMAG1750_1766638018686.jpg", type: "book", mediaType: "image" },
+  { id: 8, title: "Image 8", src: "/attached_assets/IMG_20191018_003712_1766638018687.jpg", type: "film", mediaType: "image" },
+  { id: 9, title: "Image 9", src: "/attached_assets/IMG_20191018_004624_1766638018688.jpg", type: "tv", mediaType: "image" },
+  { id: 10, title: "Image 10", src: "/attached_assets/WhatsApp_Image_2025-12-23_at_10.20.17_AM_(1)_1766638018689.jpeg", type: "book", mediaType: "image" },
+  { id: 11, title: "Image 11", src: "/attached_assets/WhatsApp_Image_2025-12-23_at_10.20.17_AM_1766638018690.jpeg", type: "film", mediaType: "image" },
+  { id: 12, title: "Image 12", src: "/attached_assets/WhatsApp_Image_2025-12-23_at_10.20.18_AM_(1)_1766638018691.jpeg", type: "tv", mediaType: "image" },
 ];
 
 const MediaCarousel = ({ type: filterType }: { type?: "book" | "film" | "tv" }) => {

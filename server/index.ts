@@ -204,6 +204,10 @@ if (isStandaloneMode) {
   app.use("/api", conditionalValidateApiKey);
 }
 
+// Static file serving for uploads and attached_assets
+app.use("/uploads", express.static(path.resolve(__dirname, "../uploads")));
+app.use("/attached_assets", express.static(path.resolve(__dirname, "../attached_assets")));
+
 app.use("/api/auth", authRoutes);
 app.use("/api/articles", articlesRoutes);
 app.use("/api/categories", categoriesRoutes);
