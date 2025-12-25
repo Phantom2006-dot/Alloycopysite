@@ -9,19 +9,69 @@ interface MediaItem {
   mediaType: "image" | "video";
 }
 
+const VideoSlide = ({ src, title, isActive }: { src: string; title: string; isActive: boolean }) => {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+
+  useEffect(() => {
+    if (isActive) {
+      videoRef.current?.play().catch(() => {});
+      setIsPlaying(true);
+    } else {
+      videoRef.current?.pause();
+      setIsPlaying(false);
+    }
+  }, [isActive]);
+
+  const togglePlay = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (videoRef.current) {
+      if (isPlaying) {
+        videoRef.current.pause();
+      } else {
+        videoRef.current.play();
+      }
+      setIsPlaying(!isPlaying);
+    }
+  };
+
+  return (
+    <div className="relative h-full w-full group">
+      <video
+        ref={videoRef}
+        src={src}
+        title={title}
+        className="h-full w-full object-cover"
+        draggable="false"
+        loop
+        muted
+        playsInline
+      />
+      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/20">
+        <button
+          onClick={togglePlay}
+          className="p-3 rounded-full bg-white/20 backdrop-blur-sm hover:bg-white/40 transition-colors"
+        >
+          {isPlaying ? <Pause className="w-8 h-8 text-white" /> : <Play className="w-8 h-8 text-white" />}
+        </button>
+      </div>
+    </div>
+  );
+};
+
 const STATIC_ITEMS: MediaItem[] = [
-  { id: 1, title: "Image 1", src: "/IMAG1550_1766638018683.jpg", type: "book", mediaType: "image" },
-  { id: 2, title: "Image 2", src: "/IMAG1552_1766638018684.jpg", type: "film", mediaType: "image" },
-  { id: 3, title: "Image 3", src: "/IMAG1553_1766638018685.jpg", type: "tv", mediaType: "image" },
-  { id: 4, title: "Image 4", src: "/IMAG1750_1766638018686.jpg", type: "book", mediaType: "image" },
-  { id: 5, title: "Image 5", src: "/IMG_20191018_003712_1766638018687.jpg", type: "film", mediaType: "image" },
-  { id: 6, title: "Image 6", src: "/IMG_20191018_004624_1766638018688.jpg", type: "tv", mediaType: "image" },
-  { id: 7, title: "Image 7", src: "/WhatsApp_Image_2025-12-23_at_10.20.17_AM_(1)_1766638018689.jpeg", type: "book", mediaType: "image" },
-  { id: 8, title: "Image 8", src: "/WhatsApp_Image_2025-12-23_at_10.20.17_AM_1766638018690.jpeg", type: "film", mediaType: "image" },
-  { id: 9, title: "Image 9", src: "/WhatsApp_Image_2025-12-23_at_10.20.18_AM_(1)_1766638018691.jpeg", type: "tv", mediaType: "image" },
-  { id: 10, title: "Image 10", src: "/WhatsApp_Image_2025-12-23_at_10.20.18_AM_(2)_1766638018693.jpeg", type: "book", mediaType: "image" },
-  { id: 11, title: "Image 11", src: "/WhatsApp_Image_2025-12-23_at_10.20.18_AM_(3)_1766638018694.jpeg", type: "film", mediaType: "image" },
-  { id: 12, title: "Image 12", src: "/WhatsApp_Image_2025-12-23_at_10.20.18_AM_1766638018695.jpeg", type: "tv", mediaType: "image" },
+  { id: 1, title: "Image 1", src: "/attached_assets/MV5BMDE0Y2Y3NDctNjE0NS00ODU2LWIzNGYtYjdmODhiNGJmMjI4XkEyXkFqcG_1766663310548.jpg", type: "film", mediaType: "image" },
+  { id: 2, title: "Image 2", src: "/attached_assets/MV5BMDJhMmU2MTktM2U1OC00MDhlLWI2MGQtMzlhOGZkOTdjYjE2XkEyXkFqcG_1766663310636.jpg", type: "film", mediaType: "image" },
+  { id: 3, title: "Image 3", src: "/attached_assets/MV5BOGU1MmMwMGYtNmE2Yi00MzY5LTk4YzAtYjI4NjI2YjhkNTNhXkEyXkFqcG_1766663310686.jpg", type: "film", mediaType: "image" },
+  { id: 4, title: "Image 4", src: "/attached_assets/MV5BOWY5YTc1NDQtZTBhZS00YmI4LWI0ZmMtOGJiNjdkMjQ1NjA0XkEyXkFqcG_1766663310723.jpg", type: "film", mediaType: "image" },
+  { id: 5, title: "Image 5", src: "/attached_assets/video_1766663310548.mp4", type: "film", mediaType: "video" },
+  { id: 6, title: "Image 6", src: "/IMAG1553_1766638018685.jpg", type: "tv", mediaType: "image" },
+  { id: 7, title: "Image 7", src: "/IMAG1750_1766638018686.jpg", type: "book", mediaType: "image" },
+  { id: 8, title: "Image 8", src: "/IMG_20191018_003712_1766638018687.jpg", type: "film", mediaType: "image" },
+  { id: 9, title: "Image 9", src: "/IMG_20191018_004624_1766638018688.jpg", type: "tv", mediaType: "image" },
+  { id: 10, title: "Image 10", src: "/WhatsApp_Image_2025-12-23_at_10.20.17_AM_(1)_1766638018689.jpeg", type: "book", mediaType: "image" },
+  { id: 11, title: "Image 11", src: "/WhatsApp_Image_2025-12-23_at_10.20.17_AM_1766638018690.jpeg", type: "film", mediaType: "image" },
+  { id: 12, title: "Image 12", src: "/WhatsApp_Image_2025-12-23_at_10.20.18_AM_(1)_1766638018691.jpeg", type: "tv", mediaType: "image" },
 ];
 
 const MediaCarousel = () => {
@@ -205,7 +255,7 @@ const MediaCarousel = () => {
                 }}
               >
                 <div 
-                  className={`aspect-[2/3] overflow-hidden bg-secondary transition-all duration-300 ${
+                  className={`relative aspect-[2/3] overflow-hidden bg-secondary transition-all duration-300 ${
                     isCenter 
                       ? "shadow-2xl ring-2 ring-primary/20" 
                       : "hover:scale-105 hover:shadow-lg hover:opacity-80"
@@ -219,15 +269,10 @@ const MediaCarousel = () => {
                       draggable="false"
                     />
                   ) : (
-                    <video
-                      src={item.src}
-                      title={item.title}
-                      className="h-full w-full object-cover"
-                      draggable="false"
-                      autoPlay
-                      loop
-                      muted
-                      playsInline
+                    <VideoSlide 
+                      src={item.src} 
+                      title={item.title} 
+                      isActive={isCenter && !isTransitioning} 
                     />
                   )}
                 </div>
