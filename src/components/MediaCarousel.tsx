@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { ChevronLeft, ChevronRight, Pause, Play } from "lucide-react";
 
 interface MediaItem {
@@ -59,24 +59,39 @@ const VideoSlide = ({ src, title, isActive }: { src: string; title: string; isAc
   );
 };
 
+// --- RECONSTRUCTED STATIC_ITEMS ARRAY ---
 const STATIC_ITEMS: MediaItem[] = [
-  { id: 1, title: "New Film 1", src: "/image (1).jpg", type: "film", mediaType: "image" },
-  { id: 2, title: "New TV 1", src: "/image (2).jpg", type: "tv", mediaType: "image" },
-  { id: 3, title: "New Film 2", src: "/image (3).jpg", type: "film", mediaType: "image" },
-  { id: 4, title: "New TV 2", src: "/image (4).jpg", type: "tv", mediaType: "image" },
-  // Keeping some existing items for other sections (Books)
-  { id: 7, title: "Image 7", src: "/IMAG1750_1766638018686.jpg", type: "book", mediaType: "image" },
-  { id: 10, title: "Image 10", src: "/WhatsApp_Image_2025-12-23_at_10.20.17_AM_(1)_1766638018689.jpeg", type: "book", mediaType: "image" },
-];
+  // User's 4 New Images (must be first for easy identification)
+  { id: 1, title: "User Film 1", src: "/image (1).jpg", type: "film", mediaType: "image" },
+  { id: 2, title: "User TV 1", src: "/image (2).jpg", type: "tv", mediaType: "image" },
+  { id: 3, title: "User Film 2", src: "/image (3).jpg", type: "film", mediaType: "image" },
+  { id: 4, title: "User TV 2", src: "/image (4).jpg", type: "tv", mediaType: "image" },
 
-const MediaCarousel = ({ type: filterType }: { type?: "book" | "film" | "tv" }) => {
+  // Restored Original Images (from file system, assigned arbitrary types for variety)
+  { id: 5, title: "Original Film 1", src: "/MV5BMDE0Y2Y3NDctNjE0NS00ODU2LWIzNGYtYjdmODhiNGJmMjI4XkEyXkFqcG_1766663310548.jpg", type: "film", mediaType: "image" },
+  { id: 6, title: "Original TV 1", src: "/MV5BOWY5YTc1NDQtZTBhZS00YmI4LWI0ZmMtOGJiNjdkMjQ1NjA0XkEyXkFqcGc@._V1_.jpg", type: "tv", mediaType: "image" },
+  { id: 7, title: "Original Book 1", src: "/IMAG1750_1766638018686.jpg", type: "book", mediaType: "image" },
+  { id: 8, title: "Original Book 2", src: "/WhatsApp_Image_2025-12-23_at_10.20.17_AM_(1)_1766638018689.jpeg", type: "book", mediaType: "image" },
+  { id: 9, title: "Original Film 2", src: "/IMAG1550_1766638018683.jpg", type: "film", mediaType: "image" },
+  { id: 10, title: "Original TV 2", src: "/IMAG1552_1766638018684.jpg", type: "tv", mediaType: "image" },
+  { id: 11, title: "Original Book 3", src: "/IMG_20191018_003712_1766638018687.jpg", type: "book", mediaType: "image" },
+  { id: 12, title: "Original Film 3", src: "/IMG_20191018_004624_1766638018688.jpg", type: "film", mediaType: "image" },
+  // Total of 12 items now, which should be a good number for the Home page
+];
+// --- END RECONSTRUCTED STATIC_ITEMS ARRAY ---
+
+
+const MediaCarousel = ({ type: filterType, forceStatic }: { type?: "book" | "film" | "tv", forceStatic?: boolean }) => {
+  // Identify the 4 user images by their unique file name pattern
   const newFilmTvItems = STATIC_ITEMS.filter(item => item.src.includes("image ("));
   
-  const items = filterType === "film" || filterType === "tv"
-    ? newFilmTvItems
+  // FINAL FILTERING LOGIC:
+  const items = forceStatic && (filterType === "film" || filterType === "tv")
+    ? newFilmTvItems // If forceStatic is true AND it's Film/TV, use ONLY the 4 new images
     : filterType 
-      ? STATIC_ITEMS.filter(item => item.type === filterType) 
-      : STATIC_ITEMS;
+      ? STATIC_ITEMS.filter(item => item.type === filterType) // If filterType is set (e.g., 'book'), filter by type
+      : STATIC_ITEMS; // If no filterType (Home page), use ALL items
+
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
@@ -301,56 +316,6 @@ const MediaCarousel = ({ type: filterType }: { type?: "book" | "film" | "tv" }) 
               aria-current={index === currentIndex}
             />
           ))}
-        </div>
-
-        {/* Auto-scroll toggle and direction controls */}
-        <div className="flex items-center gap-4">
-          {/* <button
-            onClick={toggleAutoScroll}
-            className="flex items-center gap-2 bg-foreground/10 hover:bg-foreground/20 px-3 py-2 rounded-lg transition-colors"
-            aria-label={isPaused ? "Play auto-scroll" : "Pause auto-scroll"}
-          >
-            {isPaused ? (
-              <>
-                <Play className="w-4 h-4" />
-                <span className="text-sm">Play</span>
-              </>
-            ) : (
-              <>
-                <Pause className="w-4 h-4" />
-                <span className="text-sm">Pause</span>
-              </>
-            )}
-          </button> */}
-
-          {/* Direction toggle */}
-          {/* <div className="flex items-center gap-2">
-            <span className="text-sm text-foreground/70">Direction:</span>
-            <div className="flex bg-foreground/10 rounded-lg p-1">
-              <button
-                onClick={() => setDirection("left")}
-                className={`px-3 py-1 rounded transition-all ${
-                  direction === "left" 
-                    ? "bg-primary text-primary-foreground" 
-                    : "hover:bg-foreground/20"
-                }`}
-                aria-label="Scroll left"
-              >
-                ←
-              </button>
-              <button
-                onClick={() => setDirection("right")}
-                className={`px-3 py-1 rounded transition-all ${
-                  direction === "right" 
-                    ? "bg-primary text-primary-foreground" 
-                    : "hover:bg-foreground/20"
-                }`}
-                aria-label="Scroll right"
-              >
-                →
-              </button>
-            </div>
-          </div> */}
         </div>
 
         {/* Current position indicator */}
