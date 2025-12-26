@@ -68,7 +68,7 @@ const STATIC_ITEMS: MediaItem[] = [
   { id: 4, title: "User TV 2", src: "/image (4).jpg", type: "tv", mediaType: "image" },
 
   // Restored Original Images (from file system, assigned arbitrary types for variety)
-  { id: 5, title: "Original Film 1", src: "/MV5BMDE0Y2Y3NDctNjE0NS00ODU2LWIzNGYtYjdmODhiNGJmMjI4XkEyXkFqcG_1766663310548.jpg", type: "film", mediaType: "image" },
+  // { id: 5, title: "Original Film 1", src: "/MV5BMDE0Y2Y3NDctNjE0NS00ODU2LWIzNGYtYjdmODhiNGJmMjI4XkEyXkFqcG_1766663310548.jpg", type: "film", mediaType: "image" },
   { id: 6, title: "Original TV 1", src: "/MV5BOWY5YTc1NDQtZTBhZS00YmI4LWI0ZmMtOGJiNjdkMjQ1NjA0XkEyXkFqcGc@._V1_.jpg", type: "tv", mediaType: "image" },
   { id: 7, title: "Original Book 1", src: "/IMAG1750_1766638018686.jpg", type: "book", mediaType: "image" },
   { id: 8, title: "Original Book 2", src: "/WhatsApp_Image_2025-12-23_at_10.20.17_AM_(1)_1766638018689.jpeg", type: "book", mediaType: "image" },
