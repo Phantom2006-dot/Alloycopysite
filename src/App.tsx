@@ -16,6 +16,7 @@ import TV from "./pages/TV";
 import Film from "./pages/Film";
 import Publishing from "./pages/Publishing";
 import Foundation from "./pages/Foundation";
+import Training from "./pages/Training";
 import Events from "./pages/Events";
 import NotFound from "./pages/NotFound";
 import Shop from "./pages/Shop";
@@ -62,6 +63,7 @@ const App = () => (
               <Route path="/film" element={<Film />} />
               <Route path="/publishing" element={<Publishing />} />
               <Route path="/foundation" element={<Foundation />} />
+              <Route path="/training" element={<Training />} />
               <Route path="/events" element={<Events />} />
               
               <Route path="/shop" element={<Shop />} />
@@ -175,3 +177,5 @@ const App = () => (
 );
 
 export default App;
+
+
