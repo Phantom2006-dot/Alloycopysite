@@ -63,9 +63,9 @@ const VideoSlide = ({ src, title, isActive }: { src: string; title: string; isAc
 const STATIC_ITEMS: MediaItem[] = [
   // User's 4 New Images - These will be FILM only
   { id: 1, title: "User Film 1", src: "/image (1).jpg", type: "film", mediaType: "image" },
-  { id: 2, title: "User TV 1", src: "/image (2).jpg", type: "tv", mediaType: "image" },
-  { id: 3, title: "User Film 2", src: "/image (3).jpg", type: "film", mediaType: "image" },
-  { id: 4, title: "User TV 2", src: "/image (4).jpg", type: "tv", mediaType: "image" },
+  { id: 2, title: "User Film 2", src: "/image (2).jpg", type: "film", mediaType: "image" },
+  { id: 3, title: "User Film 3", src: "/image (3).jpg", type: "film", mediaType: "image" },
+  { id: 4, title: "User Film 4", src: "/image (4).jpg", type: "film", mediaType: "image" },
 
   // Restored Original Images
   { id: 6, title: "Original TV 1", src: "/MV5BOWY5YTc1NDQtZTBhZS00YmI4LWI0ZmMtOGJiNjdkMjQ1NjA0XkEyXkFqcGc@._V1_.jpg", type: "tv", mediaType: "image" },
