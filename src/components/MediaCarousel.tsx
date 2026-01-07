@@ -61,11 +61,11 @@ const VideoSlide = ({ src, title, isActive }: { src: string; title: string; isAc
 
 // --- RECONSTRUCTED STATIC_ITEMS ARRAY ---
 const STATIC_ITEMS: MediaItem[] = [
-  // User's 4 New Images - These will be FILM only
+  // User's 4 New Images - These will ALL show in FILM section
   { id: 1, title: "User Film 1", src: "/image (1).jpg", type: "film", mediaType: "image" },
-  { id: 2, title: "User Film 2", src: "/image (2).jpg", type: "film", mediaType: "image" },
-  { id: 3, title: "User Film 3", src: "/image (3).jpg", type: "film", mediaType: "image" },
-  { id: 4, title: "User Film 4", src: "/image (4).jpg", type: "film", mediaType: "image" },
+  { id: 2, title: "User TV 1", src: "/image (2).jpg", type: "tv", mediaType: "image" },
+  { id: 3, title: "User Film 2", src: "/image (3).jpg", type: "film", mediaType: "image" },
+  { id: 4, title: "User TV 2", src: "/image (4).jpg", type: "tv", mediaType: "image" },
 
   // Restored Original Images
   { id: 6, title: "Original TV 1", src: "/MV5BOWY5YTc1NDQtZTBhZS00YmI4LWI0ZmMtOGJiNjdkMjQ1NjA0XkEyXkFqcGc@._V1_.jpg", type: "tv", mediaType: "image" },
@@ -113,11 +113,11 @@ const MediaCarousel = ({ type: filterType, forceStatic }: { type?: "book" | "fil
     ];
   };
 
-  // UPDATED FILTERING LOGIC:
+  // UPDATED FILTERING LOGIC: All 4 images (1-4) in film section
   const items = filterType 
     ? filterType === "film" 
-      // For film section: only show images 1, 3 (films from images 1-4)
-      ? STATIC_ITEMS.filter(item => item.type === "film" && [1, 3].includes(item.id as number))
+      // For film section: show ALL images 1-4 (regardless of their type in the array)
+      ? STATIC_ITEMS.filter(item => [1, 2, 3, 4].includes(item.id as number))
       // For other sections (book/tv): filter normally but exclude images 1-4
       : STATIC_ITEMS.filter(item => item.type === filterType && ![1, 2, 3, 4].includes(item.id as number))
     : getHomeItems(); // If no filterType (Home page), use custom ordered items
