@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { ChevronLeft, ChevronRight, Pause, Play } from "lucide-react";
 
 interface MediaItem {
-  id: number;
+  id: number | string;
   title: string;
   src: string;
   type: "book" | "film" | "tv";
@@ -61,34 +61,62 @@ const VideoSlide = ({ src, title, isActive }: { src: string; title: string; isAc
 
 // --- RECONSTRUCTED STATIC_ITEMS ARRAY ---
 const STATIC_ITEMS: MediaItem[] = [
-  // User's 4 New Images (must be first for easy identification)
-  { id: 8, title: "User Film 1", src: "/image (1).jpg", type: "film", mediaType: "image" },
-  { id: 9, title: "User TV 1", src: "/image (2).jpg", type: "tv", mediaType: "image" },
-  { id: 10, title: "User Film 2", src: "/image (3).jpg", type: "film", mediaType: "image" },
-  { id: 11, title: "User TV 2", src: "/image (4).jpg", type: "tv", mediaType: "image" },
+  // User's 4 New Images
+  { id: 1, title: "User Film 1", src: "/image (1).jpg", type: "film", mediaType: "image" },
+  { id: 2, title: "User TV 1", src: "/image (2).jpg", type: "tv", mediaType: "image" },
+  { id: 3, title: "User Film 2", src: "/image (3).jpg", type: "film", mediaType: "image" },
+  { id: 4, title: "User TV 2", src: "/image (4).jpg", type: "tv", mediaType: "image" },
 
-  // Restored Original Images (from file system, assigned arbitrary types for variety)
-  { id: 7, title: "Original TV 1", src: "/MV5BOWY5YTc1NDQtZTBhZS00YmI4LWI0ZmMtOGJiNjdkMjQ1NjA0XkEyXkFqcGc@._V1_.jpg", type: "tv", mediaType: "image" },
-  { id: 4, title: "Original Book 1", src: "/IMAG1750_1766638018686.jpg", type: "book", mediaType: "image" },
-  { id: 2, title: "Original Book 2", src: "/WhatsApp_Image_2025-12-23_at_10.20.17_AM_(1)_1766638018689.jpeg", type: "book", mediaType: "image" },
-  { id: 1, title: "Original Film 2", src: "/IMAG1550_1766638018683.jpg", type: "film", mediaType: "image" },
-  { id: 3, title: "Original TV 2", src: "/IMAG1552_1766638018684.jpg", type: "tv", mediaType: "image" },
-  { id: 5, title: "Original Book 3", src: "/IMG_20191018_003712_1766638018687.jpg", type: "book", mediaType: "image" },
-  { id: 6, title: "Original Film 3", src: "/IMG_20191018_004624_1766638018688.jpg", type: "film", mediaType: "image" },
+  // Restored Original Images
+  { id: 6, title: "Original TV 1", src: "/MV5BOWY5YTc1NDQtZTBhZS00YmI4LWI0ZmMtOGJiNjdkMjQ1NjA0XkEyXkFqcGc@._V1_.jpg", type: "tv", mediaType: "image" },
+  { id: 7, title: "Original Book 1", src: "/IMAG1750_1766638018686.jpg", type: "book", mediaType: "image" },
+  { id: 8, title: "Original Book 2", src: "/WhatsApp_Image_2025-12-23_at_10.20.17_AM_(1)_1766638018689.jpeg", type: "book", mediaType: "image" },
+  { id: 9, title: "Original Film 2", src: "/IMAG1550_1766638018683.jpg", type: "film", mediaType: "image" },
+  { id: 10, title: "Original TV 2", src: "/IMAG1552_1766638018684.jpg", type: "tv", mediaType: "image" },
+  { id: 11, title: "Original Book 3", src: "/IMG_20191018_003712_1766638018687.jpg", type: "book", mediaType: "image" },
+  { id: 12, title: "Original Film 3", src: "/IMG_20191018_004624_1766638018688.jpg", type: "film", mediaType: "image" },
+];
+
+// New Images from the latest zip
+const NEW_ZIP_IMAGES: MediaItem[] = [
+  { id: "wa0011", title: "New Image 11", src: "/new_images/IMG-20260106-WA0011.jpg", type: "film", mediaType: "image" },
+  { id: "wa0012", title: "New Image 12", src: "/new_images/IMG-20260106-WA0012.jpg", type: "film", mediaType: "image" },
+  { id: "wa0013", title: "New Image 13", src: "/new_images/IMG-20260106-WA0013.jpg", type: "film", mediaType: "image" },
+  { id: "wa0015", title: "New Image 15", src: "/new_images/IMG-20260106-WA0015.jpg", type: "film", mediaType: "image" },
+  { id: "wa0016", title: "New Image 16", src: "/new_images/IMG-20260106-WA0016.jpg", type: "film", mediaType: "image" },
 ];
 // --- END RECONSTRUCTED STATIC_ITEMS ARRAY ---
 
 
 const MediaCarousel = ({ type: filterType, forceStatic }: { type?: "book" | "film" | "tv", forceStatic?: boolean }) => {
-  // Identify the 4 user images by their unique file name pattern
-  const newFilmTvItems = STATIC_ITEMS.filter(item => item.src.includes("image ("));
   
+  // Custom ordering logic for Home Page (when filterType is undefined)
+  const getHomeItems = () => {
+    const img8 = STATIC_ITEMS.find(i => i.id === 8);
+    const img9 = STATIC_ITEMS.find(i => i.id === 9);
+    const img10 = STATIC_ITEMS.find(i => i.id === 10);
+    const img11 = STATIC_ITEMS.find(i => i.id === 11);
+    const img7 = STATIC_ITEMS.find(i => i.id === 7);
+    const img1to4 = STATIC_ITEMS.filter(i => [1, 2, 3, 4].includes(i.id as number));
+    const otherOriginals = STATIC_ITEMS.filter(i => ![1, 2, 3, 4, 7, 8, 9, 10, 11].includes(i.id as number));
+
+    // Order: NEW_ZIP_IMAGES -> 8 -> 9 -> 10 -> 11 -> 7 -> 1 to 4 -> others
+    return [
+      ...NEW_ZIP_IMAGES,
+      ...(img8 ? [img8] : []),
+      ...(img9 ? [img9] : []),
+      ...(img10 ? [img10] : []),
+      ...(img11 ? [img11] : []),
+      ...(img7 ? [img7] : []),
+      ...img1to4,
+      ...otherOriginals
+    ];
+  };
+
   // FINAL FILTERING LOGIC:
-  const items = forceStatic && (filterType === "film" || filterType === "tv")
-    ? newFilmTvItems // If forceStatic is true AND it's Film/TV, use ONLY the 4 new images
-    : filterType 
-      ? STATIC_ITEMS.filter(item => item.type === filterType) // If filterType is set (e.g., 'book'), filter by type
-      : STATIC_ITEMS; // If no filterType (Home page), use ALL items
+  const items = filterType 
+    ? STATIC_ITEMS.filter(item => item.type === filterType) // If filterType is set (e.g., 'book'), filter by type
+    : getHomeItems(); // If no filterType (Home page), use custom ordered items
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
