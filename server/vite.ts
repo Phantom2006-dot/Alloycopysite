@@ -1,3 +1,4 @@
+import express from "express";
 import type { Express } from "express";
 import type { Server } from "http";
 import { createServer as createViteServer, createLogger } from "vite";
@@ -68,7 +69,7 @@ export function serveStatic(app: Express) {
   }
 
   app.use(
-    require("express").static(distPath, {
+    express.static(distPath, {
       setHeaders: (res: any) => {
         res.setHeader("Cache-Control", "no-cache");
       },

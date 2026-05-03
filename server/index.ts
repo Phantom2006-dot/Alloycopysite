@@ -1,5 +1,3 @@
-// [file name]: index.ts
-// [file content begin]
 import express, { type Request, Response, NextFunction } from "express";
 import cors from "cors";
 import { createServer } from "http";
@@ -17,7 +15,6 @@ import productsRoutes from "./routes/products";
 import productCategoriesRoutes from "./routes/productCategories";
 import paymentsRoutes from "./routes/payments";
 import { validateApiKey, checkApiKeyConfigured } from "./middleware/apiKey";
-import { Request, Response, NextFunction } from "express";
 import { setupVite, serveStatic } from "./vite";
 
 const __filename = fileURLToPath(import.meta.url);
